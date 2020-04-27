@@ -7,7 +7,7 @@ extern crate quote;
 use self::proc_macro::TokenStream;
 
 use quote::{quote, quote_spanned, TokenStreamExt, ToTokens};
-use quote::__private::{TokenTree, Spacing, Span, Punct, Literal, Ident};
+use quote::__private::{TokenTree, Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result};
 use syn::{braced, parenthesized, token, Attribute, parse_macro_input, Expr, Token, Type, Visibility, Ident as SynIdent};
 
@@ -34,15 +34,16 @@ impl ToTokens for RdxlCrumb {
     fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
         match self {
            RdxlCrumb::S(s,ss) => {
-              /*
               tokens.append(Ident::new("stream", ss.clone()));
               tokens.append(Punct::new('.', Spacing::Alone));
               tokens.append(Ident::new("push_str", ss.clone()));
-              tokens.append(Punct::new('(', Spacing::Alone));
-              tokens.append(Literal::string(&s));
-              tokens.append(Punct::new(')', Spacing::Alone));
+
+              let mut ts = quote::__private::TokenStream::new();
+              ts.append(Literal::string(&s));
+              let gr = Group::new(Delimiter::Parenthesis, ts);
+              tokens.append(gr);
+
               tokens.append(Punct::new(';', Spacing::Alone));
-              */
            }
         }
     }
@@ -76,7 +77,7 @@ pub fn rdxl(input: TokenStream) -> TokenStream {
     // Build the output, possibly using quasi-quotation
     let expanded = quote! {
         {
-            let stream = String::new();
+            let mut stream = String::new();
             #rdxls
             stream
         }
