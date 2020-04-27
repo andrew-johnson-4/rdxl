@@ -14,6 +14,11 @@ enum RdxlCrumb {
    S(String, Span)
 }
 impl RdxlCrumb {
+    fn span(&self) -> Span {
+        match self {
+            RdxlCrumb::S(_,sp) => { sp.clone() }
+        }
+    }
     fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
         let mut cs = vec!();
         while input.peek(SynIdent) {
@@ -53,7 +58,25 @@ struct Rdxl {
 }
 impl ToTokens for Rdxl {
     fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
+        let mut prev: Option<Span> = None;
         for c in self.crumbs.iter() {
+            let ss = c.span();
+            if let Some(sp) = prev {
+            if sp.end() != ss.start() {
+
+              tokens.append(Ident::new("stream", ss.clone()));
+              tokens.append(Punct::new('.', Spacing::Alone));
+              tokens.append(Ident::new("push_str", ss.clone()));
+
+              let mut ts = quote::__private::TokenStream::new();
+              ts.append(Literal::string(" "));
+              let gr = Group::new(Delimiter::Parenthesis, ts);
+              tokens.append(gr);
+
+              tokens.append(Punct::new(';', Spacing::Alone));
+                
+            }}
+            prev = Some(ss.clone());
             c.to_tokens(tokens);
         }
     }
