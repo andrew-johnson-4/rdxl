@@ -1,15 +1,14 @@
 #![recursion_limit = "128"]
-#![feature(proc_macro)]
 #![feature(type_ascription)]
 #![crate_type = "proc-macro"]
 extern crate proc_macro;
 extern crate quote;
 use self::proc_macro::TokenStream;
 
-use quote::{quote, quote_spanned, TokenStreamExt, ToTokens};
-use quote::__private::{TokenTree, Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
+use quote::{quote, TokenStreamExt, ToTokens};
+use quote::__private::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result};
-use syn::{braced, parenthesized, token, Attribute, parse_macro_input, Expr, Token, Type, Visibility, Ident as SynIdent};
+use syn::{parse_macro_input, Ident as SynIdent};
 
 enum RdxlCrumb {
    S(String, Span)
@@ -54,7 +53,7 @@ struct Rdxl {
 }
 impl ToTokens for Rdxl {
     fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
-        for (i, c) in self.crumbs.iter().enumerate() {
+        for c in self.crumbs.iter() {
             c.to_tokens(tokens);
         }
     }
