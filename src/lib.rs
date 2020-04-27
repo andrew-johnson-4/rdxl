@@ -7,18 +7,42 @@ extern crate quote;
 use self::proc_macro::TokenStream;
 
 use quote::{quote, quote_spanned, TokenStreamExt, ToTokens};
-use quote::__private::{TokenTree, Spacing, Span, Punct};
+use quote::__private::{TokenTree, Spacing, Span, Punct, Literal, Ident};
 use syn::parse::{Parse, ParseStream, Result};
-use syn::{parse_macro_input, Expr, Ident, Token, Type, Visibility};
+use syn::{braced, parenthesized, token, Attribute, parse_macro_input, Expr, Token, Type, Visibility, Ident as SynIdent};
 
 enum RdxlCrumb {
    S(String, Span)
+}
+impl RdxlCrumb {
+    fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
+        let mut cs = vec!();
+        while input.peek(SynIdent) {
+           let c: RdxlCrumb = input.parse()?;
+           cs.push(c);
+        }
+        Ok(cs)
+    }
+}
+impl Parse for RdxlCrumb {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let id: Ident = input.parse()?;
+        Ok(RdxlCrumb::S(id.to_string(), id.span().clone()))
+    }
 }
 impl ToTokens for RdxlCrumb {
     fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
         match self {
            RdxlCrumb::S(s,ss) => {
-              ()
+              /*
+              tokens.append(Ident::new("stream", ss.clone()));
+              tokens.append(Punct::new('.', Spacing::Alone));
+              tokens.append(Ident::new("push_str", ss.clone()));
+              tokens.append(Punct::new('(', Spacing::Alone));
+              tokens.append(Literal::string(&s));
+              tokens.append(Punct::new(')', Spacing::Alone));
+              tokens.append(Punct::new(';', Spacing::Alone));
+              */
            }
         }
     }
@@ -37,10 +61,8 @@ impl ToTokens for Rdxl {
 
 impl Parse for Rdxl {
     fn parse(input: ParseStream) -> Result<Self> {
-        let mut crumbs = vec!();
-        while let Some(c) = input.parse()?: Option<Ident> {
-           crumbs.push( RdxlCrumb::S(c.to_string(), c.span()) );
-        }
+        let crumbs: Vec<RdxlCrumb> = input.call(RdxlCrumb::parse_outer)?;
+
         Ok(Rdxl {
             crumbs: crumbs
         })
@@ -49,13 +71,13 @@ impl Parse for Rdxl {
 
 #[proc_macro]
 pub fn rdxl(input: TokenStream) -> TokenStream {
-    let rdxl = parse_macro_input!(input as Rdxl);
+    let rdxls = parse_macro_input!(input as Rdxl);
 
     // Build the output, possibly using quasi-quotation
     let expanded = quote! {
         {
             let stream = String::new();
-            #rdxl
+            #rdxls
             stream
         }
     };

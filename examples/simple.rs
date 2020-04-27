@@ -2,7 +2,6 @@
 #[macro_use] extern crate rdxl;
 
 fn main(){
-   println!("{}", rdxl!(Hello World) );
    println!("{}", rdxl!(World) );
-
+   println!("{}", rdxl!(Hello World) );
 }
