@@ -1,7 +1,18 @@
 [package]
 name = "rdxl"
-version = "0.1.0"
+version = "0.1.1"
 authors = ["Andrew <andrew@subarctic.org>"]
 license = "MIT"
 description = "Rusty Domain Extensible Language"
 edition = "2018"
+
+[lib]
+proc-macro = true
+
+[dependencies]
+syn = "1.0"
+quote = "1.0"
+
+[[bin]]
+name = "example_simple"
+path = "examples/simple.rs"
