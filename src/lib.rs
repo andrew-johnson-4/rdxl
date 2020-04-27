@@ -12,12 +12,12 @@ use syn::parse::{Parse, ParseStream, Result};
 use syn::{parse_macro_input, Expr, Ident, Token, Type, Visibility};
 
 enum RdxlCrumb {
-   S(String)
+   S(String, Span)
 }
 impl ToTokens for RdxlCrumb {
     fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
         match self {
-           RdxlCrumb::S(s) => {
+           RdxlCrumb::S(s,ss) => {
               ()
            }
         }
@@ -39,7 +39,7 @@ impl Parse for Rdxl {
     fn parse(input: ParseStream) -> Result<Self> {
         let mut crumbs = vec!();
         while let Some(c) = input.parse()?: Option<Ident> {
-           crumbs.push( RdxlCrumb::S(c.to_string()) );
+           crumbs.push( RdxlCrumb::S(c.to_string(), c.span()) );
         }
         Ok(Rdxl {
             crumbs: crumbs
