@@ -20,21 +20,39 @@ impl Parse for RdxlTag {
     fn parse(input: ParseStream) -> Result<Self> {
         let l1: Token![<] = input.parse()?;
         let t: Ident = input.parse()?;
+
+        let mut attrs: Vec<(String,String)> = Vec::new();
+        while input.peek(SynIdent) {
+            let key: Ident = input.parse()?;
+            let eq: Token![=] = input.parse()?;
+            let val: Literal = input.parse()?;
+            attrs.push(( key.to_string(), val.to_string() ));
+        }
+
         let l2: Token![>] = input.parse()?;
 
-        let inner: Rdxl = input.parse()?;
+        if t.to_string() == "br" {
+           Ok(RdxlTag {
+              tag: t.to_string(),
+              attrs: attrs,
+              inner: Rdxl { crumbs: vec!() },
+              span: l1.span.clone()
+           })
+        } else {
+           let inner: Rdxl = input.parse()?;
 
-        let r1: Token![<] = input.parse()?;
-        let r2: Token![/] = input.parse()?;
-        let t2: Ident = input.parse()?;
-        let r3: Token![>] = input.parse()?;
+           let r1: Token![<] = input.parse()?;
+           let r2: Token![/] = input.parse()?;
+           let t2: Ident = input.parse()?;
+           let r3: Token![>] = input.parse()?;
         
-        Ok(RdxlTag {
-           tag: t.to_string(),
-           attrs: vec!(),
-           inner: inner,
-           span: l1.span.clone()
-        })
+           Ok(RdxlTag {
+              tag: t.to_string(),
+              attrs: attrs,
+              inner: inner,
+              span: l1.span.clone()
+           })
+       }
     }
 }
 
