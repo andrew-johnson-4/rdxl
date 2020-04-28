@@ -10,13 +10,22 @@ use quote::__private::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result};
 use syn::{parse_macro_input, Ident as SynIdent, Token};
 
+struct RdxlTag {
+   tag: String,
+   attrs: Vec<(String,String)>,
+   inner: Rdxl,
+   span: Span
+}
+
 enum RdxlCrumb {
-   S(String, Span)
+   S(String, Span),
+   T(RdxlTag)
 }
 impl RdxlCrumb {
     fn span(&self) -> Span {
         match self {
             RdxlCrumb::S(_,sp) => { sp.clone() }
+            RdxlCrumb::T(t) => { t.span.clone() }
         }
     }
     fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
@@ -260,6 +269,8 @@ impl ToTokens for RdxlCrumb {
               tokens.append(gr);
 
               tokens.append(Punct::new(';', Spacing::Alone));
+           },
+           RdxlCrumb::T(t) => {
            }
         }
     }
