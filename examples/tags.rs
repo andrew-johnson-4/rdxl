@@ -4,4 +4,5 @@
 fn main(){
    println!("{}", rdxl!(<div>dave</div><div>david</div>) );
    println!("{}", rdxl!(<a href="there">this that</a><br><p attr="something.f()">that this</p>) );
+   //println!("{}", rdxl!(<a></b>) );
 }

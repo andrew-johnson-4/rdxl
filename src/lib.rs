@@ -7,7 +7,7 @@ use self::proc_macro::TokenStream;
 
 use quote::{quote, TokenStreamExt, ToTokens};
 use quote::__private::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
-use syn::parse::{Parse, ParseStream, Result};
+use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{parse_macro_input, Ident as SynIdent, Token};
 
 struct RdxlTag {
@@ -67,12 +67,12 @@ impl Parse for RdxlTag {
         let mut attrs: Vec<(String,String)> = Vec::new();
         while input.peek(SynIdent) {
             let key: Ident = input.parse()?;
-            let eq: Token![=] = input.parse()?;
+            let _eq: Token![=] = input.parse()?;
             let val: Literal = input.parse()?;
             attrs.push(( key.to_string(), val.to_string() ));
         }
 
-        let l2: Token![>] = input.parse()?;
+        let _l2: Token![>] = input.parse()?;
 
         if t.to_string() == "br" {
            Ok(RdxlTag {
@@ -84,10 +84,15 @@ impl Parse for RdxlTag {
         } else {
            let inner: Rdxl = input.parse()?;
 
-           let r1: Token![<] = input.parse()?;
-           let r2: Token![/] = input.parse()?;
+           let _r1: Token![<] = input.parse()?;
+           let _r2: Token![/] = input.parse()?;
            let t2: Ident = input.parse()?;
-           let r3: Token![>] = input.parse()?;
+           if t.to_string() != t2.to_string() {
+              let msg = format!("Expected </{}> found </{}>", t, t2);
+              let r = Error::new(t2.span(), msg);
+              return Err(r)
+           }
+           let _r3: Token![>] = input.parse()?;
         
            Ok(RdxlTag {
               tag: t.to_string(),
