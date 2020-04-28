@@ -22,7 +22,27 @@ impl ToTokens for RdxlTag {
         tokens.append(Punct::new('.', Spacing::Alone));
         tokens.append(Ident::new("push_str", self.span.clone()));
         let mut ts = quote::__private::TokenStream::new();
-        ts.append(Literal::string(&format!("<{}>", self.tag)));
+        ts.append(Literal::string(&format!("<{}", self.tag)));
+        let gr = Group::new(Delimiter::Parenthesis, ts);
+        tokens.append(gr);
+        tokens.append(Punct::new(';', Spacing::Alone));
+
+        for (k,v) in self.attrs.iter() {
+            tokens.append(Ident::new("stream", self.span.clone()));
+            tokens.append(Punct::new('.', Spacing::Alone));
+            tokens.append(Ident::new("push_str", self.span.clone()));
+            let mut ts = quote::__private::TokenStream::new();
+            ts.append(Literal::string(&format!(" {}={}", k, v)));
+            let gr = Group::new(Delimiter::Parenthesis, ts);
+            tokens.append(gr);
+            tokens.append(Punct::new(';', Spacing::Alone));
+        }
+
+        tokens.append(Ident::new("stream", self.span.clone()));
+        tokens.append(Punct::new('.', Spacing::Alone));
+        tokens.append(Ident::new("push_str", self.span.clone()));
+        let mut ts = quote::__private::TokenStream::new();
+        ts.append(Literal::string(">"));
         let gr = Group::new(Delimiter::Parenthesis, ts);
         tokens.append(gr);
         tokens.append(Punct::new(';', Spacing::Alone));
