@@ -16,6 +16,29 @@ struct RdxlTag {
    inner: Rdxl,
    span: Span
 }
+impl ToTokens for RdxlTag {
+    fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
+        tokens.append(Ident::new("stream", self.span.clone()));
+        tokens.append(Punct::new('.', Spacing::Alone));
+        tokens.append(Ident::new("push_str", self.span.clone()));
+        let mut ts = quote::__private::TokenStream::new();
+        ts.append(Literal::string(&format!("<{}>", self.tag)));
+        let gr = Group::new(Delimiter::Parenthesis, ts);
+        tokens.append(gr);
+        tokens.append(Punct::new(';', Spacing::Alone));
+
+        self.inner.to_tokens(tokens);
+
+        tokens.append(Ident::new("stream", self.span.clone()));
+        tokens.append(Punct::new('.', Spacing::Alone));
+        tokens.append(Ident::new("push_str", self.span.clone()));
+        let mut ts = quote::__private::TokenStream::new();
+        ts.append(Literal::string(&format!("</{}>", self.tag)));
+        let gr = Group::new(Delimiter::Parenthesis, ts);
+        tokens.append(gr);
+        tokens.append(Punct::new(';', Spacing::Alone));
+    }
+}
 impl Parse for RdxlTag {
     fn parse(input: ParseStream) -> Result<Self> {
         let l1: Token![<] = input.parse()?;
@@ -314,6 +337,7 @@ impl ToTokens for RdxlCrumb {
               tokens.append(Punct::new(';', Spacing::Alone));
            },
            RdxlCrumb::T(t) => {
+              t.to_tokens(tokens);
            }
         }
     }
