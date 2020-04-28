@@ -16,6 +16,27 @@ struct RdxlTag {
    inner: Rdxl,
    span: Span
 }
+impl Parse for RdxlTag {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let l1: Token![<] = input.parse()?;
+        let t: Ident = input.parse()?;
+        let l2: Token![>] = input.parse()?;
+
+        let inner: Rdxl = input.parse()?;
+
+        let r1: Token![<] = input.parse()?;
+        let r2: Token![/] = input.parse()?;
+        let t2: Ident = input.parse()?;
+        let r3: Token![>] = input.parse()?;
+        
+        Ok(RdxlTag {
+           tag: t.to_string(),
+           attrs: vec!(),
+           inner: inner,
+           span: l1.span.clone()
+        })
+    }
+}
 
 enum RdxlCrumb {
    S(String, Span),
@@ -82,7 +103,8 @@ impl RdxlCrumb {
               input.peek(Token![;]) ||
               input.peek(Token![,]) ||
               input.peek(Token![.]) ||
-              input.peek(Token![?]) {
+              input.peek(Token![?]) ||
+              (input.peek(Token![<]) && !input.peek2(Token![/])) {
 
 
            let c: RdxlCrumb = input.parse()?;
@@ -93,7 +115,10 @@ impl RdxlCrumb {
 }
 impl Parse for RdxlCrumb {
     fn parse(input: ParseStream) -> Result<Self> {
-        if input.peek(Token![!]) {
+        if input.peek(Token![<]) {
+           let t: RdxlTag = input.parse()?;
+           Ok(RdxlCrumb::T(t))
+        } else if input.peek(Token![!]) {
            let id: Token![!] = input.parse()?;
            Ok(RdxlCrumb::S("!".to_string(), id.span.clone()))
         } else if input.peek(Token![@]) {
