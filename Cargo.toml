@@ -23,3 +23,7 @@ path = "examples/simple.rs"
 [[bin]]
 name = "example_tags"
 path = "examples/tags.rs"
+
+[[bin]]
+name = "example_vars"
+path = "examples/vars.rs"
