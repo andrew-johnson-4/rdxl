@@ -3,12 +3,31 @@
 #![crate_type = "proc-macro"]
 extern crate proc_macro;
 extern crate quote;
+#[macro_use] extern crate syn;
 use self::proc_macro::TokenStream;
 
 use quote::{quote, TokenStreamExt, ToTokens};
 use quote::__private::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
-use syn::{parse_macro_input, Ident as SynIdent, Token};
+use syn::{parse_macro_input, Ident as SynIdent, Token, Expr};
+use syn::token::Brace;
+
+struct RdxlExpr {
+   brace_token1: Brace,
+   _brace_token2: Brace,
+   expr: Expr
+}
+impl Parse for RdxlExpr {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let _content;
+        let content2;
+        Ok(RdxlExpr {
+           brace_token1: braced!(_content in input),
+           _brace_token2: braced!(content2 in _content),
+           expr: content2.call(Expr::parse)?,
+        })
+    }
+}
 
 struct RdxlTag {
    tag: String,
@@ -106,18 +125,21 @@ impl Parse for RdxlTag {
 
 enum RdxlCrumb {
    S(String, Span),
-   T(RdxlTag)
+   T(RdxlTag),
+   E(RdxlExpr),
 }
 impl RdxlCrumb {
     fn span(&self) -> Span {
         match self {
             RdxlCrumb::S(_,sp) => { sp.clone() }
             RdxlCrumb::T(t) => { t.span.clone() }
+            RdxlCrumb::E(e) => { e.brace_token1.span.clone() }
         }
     }
     fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
         let mut cs = vec!();
         while input.peek(SynIdent) ||
+              input.peek(Brace) ||
               input.peek(Token![as]) ||
               input.peek(Token![break]) ||
               input.peek(Token![const]) ||
@@ -184,6 +206,9 @@ impl Parse for RdxlCrumb {
         if input.peek(Token![<]) {
            let t: RdxlTag = input.parse()?;
            Ok(RdxlCrumb::T(t))
+        } else if input.peek(Brace) {
+           let e: RdxlExpr = input.parse()?;
+           Ok(RdxlCrumb::E(e))
         } else if input.peek(Token![!]) {
            let id: Token![!] = input.parse()?;
            Ok(RdxlCrumb::S("!".to_string(), id.span.clone()))
@@ -363,6 +388,28 @@ impl ToTokens for RdxlCrumb {
            },
            RdxlCrumb::T(t) => {
               t.to_tokens(tokens);
+           }
+           RdxlCrumb::E(e) => {
+              let ss = e.brace_token1.span.clone();
+
+              tokens.append(Ident::new("stream", ss.clone()));
+              tokens.append(Punct::new('.', Spacing::Alone));
+              tokens.append(Ident::new("push_str", ss.clone()));
+
+              let mut ts = quote::__private::TokenStream::new();
+
+              ts.append(Punct::new('&', Spacing::Alone));
+              e.expr.to_tokens(&mut ts);
+              ts.append(Punct::new('.', Spacing::Alone));
+              ts.append(Ident::new("to_string", ss.clone()));
+              let ets = quote::__private::TokenStream::new();
+              let egr = Group::new(Delimiter::Parenthesis, ets);
+              ts.append(egr);
+
+              let gr = Group::new(Delimiter::Parenthesis, ts);
+              tokens.append(gr);
+
+              tokens.append(Punct::new(';', Spacing::Alone));
            }
         }
     }
