@@ -20,4 +20,12 @@ fn main(){
          {{ ; my_counter -= 1 }}
       }} }}
    </div>));
+
+   let mut my_some = Some(23);
+   println!("{}",rdxl!(<div>
+      {{ while let Some(my_num) = my_some {{
+         <span>{{my_num}}</span>
+         {{ ; my_some = None }}
+      }} }}
+   </div>));
 }
