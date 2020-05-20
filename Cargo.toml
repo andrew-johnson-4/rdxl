@@ -38,3 +38,7 @@ path = "examples/loops.rs"
 [[bin]]
 name = "example_misc"
 path = "examples/misc.rs"
+
+[[bin]]
+name = "example_cond"
+path = "examples/cond.rs"

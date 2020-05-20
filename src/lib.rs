@@ -17,7 +17,8 @@ enum RdxlExprE {
    E(Expr),
    F(Token![for],Pat,Expr,Vec<RdxlCrumb>),
    W(Token![while],Expr,Vec<RdxlCrumb>),
-   L(Token![let],Pat,Expr)
+   L(Token![let],Pat,Expr),
+   I(Token![if],Expr,Vec<RdxlCrumb>,Vec<(Expr,Vec<RdxlCrumb>)>,Vec<RdxlCrumb>)
 }
 impl ToTokens for RdxlExprE {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
@@ -57,6 +58,26 @@ impl ToTokens for RdxlExprE {
               }
               let egr = Group::new(Delimiter::Brace, ets);
               tokens.append(egr);
+           }, RdxlExprE::I(i,c,bs,es,e) => {
+              tokens.append(Ident::new("if", i.span.clone()));
+              c.to_tokens(tokens);
+
+              let mut ets = proc_macro2::TokenStream::new();
+              for b in bs.iter() {
+                 b.to_tokens(&mut ets);
+              }
+              let egr = Group::new(Delimiter::Brace, ets);
+              tokens.append(egr);
+
+              if e.len() > 0 {
+                 tokens.append(Ident::new("else", i.span.clone()));
+                 let mut ets = proc_macro2::TokenStream::new();
+                 for b in e.iter() {
+                    b.to_tokens(&mut ets);
+                 }
+                 let egr = Group::new(Delimiter::Brace, ets);
+                 tokens.append(egr);
+              }
            }, RdxlExprE::W(w,i,cs) => {
               tokens.append(Ident::new("while", w.span.clone()));
               i.to_tokens(tokens);
@@ -99,6 +120,26 @@ impl Parse for RdxlExprE {
           let _brace2 = braced!(content2 in content);
           let body: Vec<RdxlCrumb> = content2.call(RdxlCrumb::parse_outer)?;
           Ok(RdxlExprE::W(_while,iter,body))
+       } else if input.peek(Token![if]) {
+          let _if: Token![if] = input.parse()?;
+          let b: Expr = input.parse()?;
+          let mut e = Vec::new();
+          let content;
+          let content2;
+          let _brace1 = braced!(content in input);
+          let _brace2 = braced!(content2 in content);
+          let body: Vec<RdxlCrumb> = content2.call(RdxlCrumb::parse_outer)?;
+
+          if input.peek(Token![else]) {
+             let _else: Token![else] = input.parse()?;
+             let content;
+             let content2;
+             let _brace1 = braced!(content in input);
+             let _brace2 = braced!(content2 in content);
+             e = content2.call(RdxlCrumb::parse_outer)?;
+          }
+
+          Ok(RdxlExprE::I(_if,b,body,vec![],e))
        } else if input.peek(Token![let]) {
           let _let: Token![let] = input.parse()?;
           let pat: Pat = input.parse()?;
