@@ -69,6 +69,18 @@ impl ToTokens for RdxlExprE {
               let egr = Group::new(Delimiter::Brace, ets);
               tokens.append(egr);
 
+              for (c,e) in es.iter() {
+                 tokens.append(Ident::new("else", i.span.clone()));
+                 tokens.append(Ident::new("if", i.span.clone()));
+                 c.to_tokens(tokens);
+                 let mut ets = proc_macro2::TokenStream::new();
+                 for b in e.iter() {
+                    b.to_tokens(&mut ets);
+                 }
+                 let egr = Group::new(Delimiter::Brace, ets);
+                 tokens.append(egr);
+              }
+
               if e.len() > 0 {
                  tokens.append(Ident::new("else", i.span.clone()));
                  let mut ets = proc_macro2::TokenStream::new();
@@ -123,12 +135,25 @@ impl Parse for RdxlExprE {
        } else if input.peek(Token![if]) {
           let _if: Token![if] = input.parse()?;
           let b: Expr = input.parse()?;
+          let mut es = Vec::new();
           let mut e = Vec::new();
           let content;
           let content2;
           let _brace1 = braced!(content in input);
           let _brace2 = braced!(content2 in content);
           let body: Vec<RdxlCrumb> = content2.call(RdxlCrumb::parse_outer)?;
+
+          while input.peek(Token![else]) && input.peek2(Token![if]) {
+             let _else: Token![else] = input.parse()?;
+             let _if: Token![if] = input.parse()?;
+             let b: Expr = input.parse()?;
+             let content;
+             let content2;
+             let _brace1 = braced!(content in input);
+             let _brace2 = braced!(content2 in content);
+             let e = content2.call(RdxlCrumb::parse_outer)?;
+             es.push((b,e));
+          }
 
           if input.peek(Token![else]) {
              let _else: Token![else] = input.parse()?;
@@ -139,7 +164,7 @@ impl Parse for RdxlExprE {
              e = content2.call(RdxlCrumb::parse_outer)?;
           }
 
-          Ok(RdxlExprE::I(_if,b,body,vec![],e))
+          Ok(RdxlExprE::I(_if,b,body,es,e))
        } else if input.peek(Token![let]) {
           let _let: Token![let] = input.parse()?;
           let pat: Pat = input.parse()?;
