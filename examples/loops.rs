@@ -11,4 +11,13 @@ fn main(){
          <span>{{my_int}}, {{my_str}}, {{v}}</span>
       }} }}
    </div>));
+
+   let mut my_counter = 3;
+
+   println!("{}",rdxl!(<div>
+      {{ while my_counter > 0 {{
+         <span>{{my_counter}}</span>
+         {{ ; my_counter -= 1 }}
+      }} }}
+   </div>));
 }

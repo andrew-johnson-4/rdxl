@@ -16,6 +16,7 @@ enum RdxlExprE {
    S(Expr),
    E(Expr),
    F(Token![for],Pat,Expr,Vec<RdxlCrumb>),
+   W(Token![while],Expr,Vec<RdxlCrumb>),
    L(Token![let],Pat,Expr)
 }
 impl ToTokens for RdxlExprE {
@@ -56,6 +57,16 @@ impl ToTokens for RdxlExprE {
               }
               let egr = Group::new(Delimiter::Brace, ets);
               tokens.append(egr);
+           }, RdxlExprE::W(w,i,cs) => {
+              tokens.append(Ident::new("while", w.span.clone()));
+              i.to_tokens(tokens);
+
+              let mut ets = proc_macro2::TokenStream::new();
+              for c in cs.iter() {
+                 c.to_tokens(&mut ets);
+              }
+              let egr = Group::new(Delimiter::Brace, ets);
+              tokens.append(egr);
            }, RdxlExprE::L(t,l,e) => {
               tokens.append(Ident::new("let", t.span.clone()));
               l.to_tokens(tokens);
@@ -79,6 +90,15 @@ impl Parse for RdxlExprE {
           let _brace2 = braced!(content2 in content);
           let body: Vec<RdxlCrumb> = content2.call(RdxlCrumb::parse_outer)?;
           Ok(RdxlExprE::F(_for,pat,iter,body))
+       } else if input.peek(Token![while]) {
+          let _while: Token![while] = input.parse()?;
+          let iter: Expr = input.parse()?;
+          let content;
+          let content2;
+          let _brace1 = braced!(content in input);
+          let _brace2 = braced!(content2 in content);
+          let body: Vec<RdxlCrumb> = content2.call(RdxlCrumb::parse_outer)?;
+          Ok(RdxlExprE::W(_while,iter,body))
        } else if input.peek(Token![let]) {
           let _let: Token![let] = input.parse()?;
           let pat: Pat = input.parse()?;
