@@ -13,6 +13,7 @@ use syn::token::Brace;
 
 
 enum RdxlExprE {
+   S(Expr),
    E(Expr),
    F(Token![for],Pat,Expr,Vec<RdxlCrumb>)
 }
@@ -38,6 +39,9 @@ impl ToTokens for RdxlExprE {
 
               let gr = Group::new(Delimiter::Parenthesis, ts);
               tokens.append(gr);
+              tokens.append(Punct::new(';', Spacing::Alone));
+           }, RdxlExprE::S(e) => {
+              e.to_tokens(tokens);
               tokens.append(Punct::new(';', Spacing::Alone));
            }, RdxlExprE::F(f,p,i,cs) => {
               tokens.append(Ident::new("for", f.span.clone()));
@@ -68,6 +72,9 @@ impl Parse for RdxlExprE {
           let _brace2 = braced!(content2 in content);
           let body: Vec<RdxlCrumb> = content2.call(RdxlCrumb::parse_outer)?;
           Ok(RdxlExprE::F(_for,pat,iter,body))
+       } else if input.peek(Token![;]) {
+          let _semi: Token![;] = input.parse()?;
+          Ok(RdxlExprE::S(input.call(Expr::parse)?))
        } else {
           Ok(RdxlExprE::E(input.call(Expr::parse)?))
        }
