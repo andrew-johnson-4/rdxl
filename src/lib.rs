@@ -12,10 +12,36 @@ use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{parse_macro_input, Ident as SynIdent, Token, Expr};
 use syn::token::Brace;
 
+enum RdxlExprE {
+   E(Expr),
+   F(Expr,quote::__private::TokenStream)
+}
+impl ToTokens for RdxlExprE {
+    fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
+        match self {
+           RdxlExprE::E(e) => {
+              e.to_tokens(tokens);
+           }, RdxlExprE::F(e,b) => {
+              e.to_tokens(tokens);
+           }
+        }
+    }
+}
+impl Parse for RdxlExprE {
+    fn parse(input: ParseStream) -> Result<Self> {
+       if input.peek(Token![for]) {
+          let _for: Token![for] = input.parse()?;
+          Ok(RdxlExprE::E(input.call(Expr::parse)?))
+       } else {
+          Ok(RdxlExprE::E(input.call(Expr::parse)?))
+       }
+    }
+}
+
 struct RdxlExpr {
    brace_token1: Brace,
    _brace_token2: Brace,
-   expr: Expr
+   expr: RdxlExprE
 }
 impl Parse for RdxlExpr {
     fn parse(input: ParseStream) -> Result<Self> {
@@ -24,7 +50,7 @@ impl Parse for RdxlExpr {
         Ok(RdxlExpr {
            brace_token1: braced!(_content in input),
            _brace_token2: braced!(content2 in _content),
-           expr: content2.call(Expr::parse)?,
+           expr: content2.call(RdxlExprE::parse)?,
         })
     }
 }

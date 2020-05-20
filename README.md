@@ -8,9 +8,9 @@ let my_str = "asdf";
 let my_vec = vec![true, false, true, true];
 
 println!(rdxl!(<div>
-   {{ for v in my_vec.iter() }}
+   {{ for v in my_vec.iter() {{
       <span>{{my_int}}, {{my_str}}, {{v}}</span>
-   {{ end }}
+   }} }}
 </div>));
 ```
 

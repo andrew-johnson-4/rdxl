@@ -27,3 +27,7 @@ path = "examples/tags.rs"
 [[bin]]
 name = "example_vars"
 path = "examples/vars.rs"
+
+[[bin]]
+name = "example_loops"
+path = "examples/loops.rs"
