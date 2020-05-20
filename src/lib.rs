@@ -1,13 +1,12 @@
 #![recursion_limit = "128"]
 #![feature(type_ascription)]
 #![crate_type = "proc-macro"]
-extern crate proc_macro;
 extern crate quote;
 #[macro_use] extern crate syn;
-use self::proc_macro::TokenStream;
 
 use quote::{quote, TokenStreamExt, ToTokens};
-use quote::__private::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
+use proc_macro::{TokenStream};
+use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{parse_macro_input, Ident as SynIdent, Token, Expr, Pat};
 use syn::token::Brace;
@@ -18,7 +17,7 @@ enum RdxlExprE {
    F(Pat,Expr,Vec<RdxlCrumb>)
 }
 impl ToTokens for RdxlExprE {
-    fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
            RdxlExprE::E(e) => {
               e.to_tokens(tokens);
@@ -71,11 +70,11 @@ struct RdxlTag {
    span: Span
 }
 impl ToTokens for RdxlTag {
-    fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         tokens.append(Ident::new("stream", self.span.clone()));
         tokens.append(Punct::new('.', Spacing::Alone));
         tokens.append(Ident::new("push_str", self.span.clone()));
-        let mut ts = quote::__private::TokenStream::new();
+        let mut ts = proc_macro2::TokenStream::new();
         ts.append(Literal::string(&format!("<{}", self.tag)));
         let gr = Group::new(Delimiter::Parenthesis, ts);
         tokens.append(gr);
@@ -85,7 +84,7 @@ impl ToTokens for RdxlTag {
             tokens.append(Ident::new("stream", self.span.clone()));
             tokens.append(Punct::new('.', Spacing::Alone));
             tokens.append(Ident::new("push_str", self.span.clone()));
-            let mut ts = quote::__private::TokenStream::new();
+            let mut ts = proc_macro2::TokenStream::new();
             ts.append(Literal::string(&format!(" {}={}", k, v)));
             let gr = Group::new(Delimiter::Parenthesis, ts);
             tokens.append(gr);
@@ -95,7 +94,7 @@ impl ToTokens for RdxlTag {
         tokens.append(Ident::new("stream", self.span.clone()));
         tokens.append(Punct::new('.', Spacing::Alone));
         tokens.append(Ident::new("push_str", self.span.clone()));
-        let mut ts = quote::__private::TokenStream::new();
+        let mut ts = proc_macro2::TokenStream::new();
         ts.append(Literal::string(">"));
         let gr = Group::new(Delimiter::Parenthesis, ts);
         tokens.append(gr);
@@ -106,7 +105,7 @@ impl ToTokens for RdxlTag {
         tokens.append(Ident::new("stream", self.span.clone()));
         tokens.append(Punct::new('.', Spacing::Alone));
         tokens.append(Ident::new("push_str", self.span.clone()));
-        let mut ts = quote::__private::TokenStream::new();
+        let mut ts = proc_macro2::TokenStream::new();
         ts.append(Literal::string(&format!("</{}>", self.tag)));
         let gr = Group::new(Delimiter::Parenthesis, ts);
         tokens.append(gr);
@@ -407,14 +406,14 @@ impl Parse for RdxlCrumb {
     }
 }
 impl ToTokens for RdxlCrumb {
-    fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
            RdxlCrumb::S(s,ss) => {
               tokens.append(Ident::new("stream", ss.clone()));
               tokens.append(Punct::new('.', Spacing::Alone));
               tokens.append(Ident::new("push_str", ss.clone()));
 
-              let mut ts = quote::__private::TokenStream::new();
+              let mut ts = proc_macro2::TokenStream::new();
               ts.append(Literal::string(&s));
               let gr = Group::new(Delimiter::Parenthesis, ts);
               tokens.append(gr);
@@ -431,13 +430,13 @@ impl ToTokens for RdxlCrumb {
               tokens.append(Punct::new('.', Spacing::Alone));
               tokens.append(Ident::new("push_str", ss.clone()));
 
-              let mut ts = quote::__private::TokenStream::new();
+              let mut ts = proc_macro2::TokenStream::new();
 
               ts.append(Punct::new('&', Spacing::Alone));
               e.expr.to_tokens(&mut ts);
               ts.append(Punct::new('.', Spacing::Alone));
               ts.append(Ident::new("to_string", ss.clone()));
-              let ets = quote::__private::TokenStream::new();
+              let ets = proc_macro2::TokenStream::new();
               let egr = Group::new(Delimiter::Parenthesis, ets);
               ts.append(egr);
 
@@ -454,7 +453,7 @@ struct Rdxl {
     crumbs: Vec<RdxlCrumb>
 }
 impl ToTokens for Rdxl {
-    fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let mut prev: Option<Span> = None;
         for c in self.crumbs.iter() {
             let ss = c.span();
@@ -465,7 +464,7 @@ impl ToTokens for Rdxl {
               tokens.append(Punct::new('.', Spacing::Alone));
               tokens.append(Ident::new("push_str", ss.clone()));
 
-              let mut ts = quote::__private::TokenStream::new();
+              let mut ts = proc_macro2::TokenStream::new();
               ts.append(Literal::string(" "));
               let gr = Group::new(Delimiter::Parenthesis, ts);
               tokens.append(gr);
