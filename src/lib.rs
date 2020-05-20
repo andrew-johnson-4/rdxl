@@ -9,20 +9,21 @@ use self::proc_macro::TokenStream;
 use quote::{quote, TokenStreamExt, ToTokens};
 use quote::__private::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
-use syn::{parse_macro_input, Ident as SynIdent, Token, Expr};
+use syn::{parse_macro_input, Ident as SynIdent, Token, Expr, Pat};
 use syn::token::Brace;
+
 
 enum RdxlExprE {
    E(Expr),
-   F(Expr,quote::__private::TokenStream)
+   F(Pat,Expr,Vec<RdxlCrumb>)
 }
 impl ToTokens for RdxlExprE {
     fn to_tokens(&self, tokens: &mut quote::__private::TokenStream) {
         match self {
            RdxlExprE::E(e) => {
               e.to_tokens(tokens);
-           }, RdxlExprE::F(e,b) => {
-              e.to_tokens(tokens);
+           }, RdxlExprE::F(p,i,cs) => {
+              i.to_tokens(tokens);
            }
         }
     }
@@ -31,7 +32,15 @@ impl Parse for RdxlExprE {
     fn parse(input: ParseStream) -> Result<Self> {
        if input.peek(Token![for]) {
           let _for: Token![for] = input.parse()?;
-          Ok(RdxlExprE::E(input.call(Expr::parse)?))
+          let pat: Pat = input.parse()?;
+          let _in: Token![in] = input.parse()?;
+          let iter: Expr = input.parse()?;
+          let content;
+          let content2;
+          let _brace1 = braced!(content in input);
+          let _brace2 = braced!(content2 in content);
+          let body: Vec<RdxlCrumb> = input.call(RdxlCrumb::parse_outer)?;
+          Ok(RdxlExprE::F(pat,iter,body))
        } else {
           Ok(RdxlExprE::E(input.call(Expr::parse)?))
        }
