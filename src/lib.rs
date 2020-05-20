@@ -14,15 +14,43 @@ use syn::token::Brace;
 
 enum RdxlExprE {
    E(Expr),
-   F(Pat,Expr,Vec<RdxlCrumb>)
+   F(Token![for],Pat,Expr,Vec<RdxlCrumb>)
 }
 impl ToTokens for RdxlExprE {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
            RdxlExprE::E(e) => {
-              e.to_tokens(tokens);
-           }, RdxlExprE::F(p,i,cs) => {
+              let ss = Span::call_site();
+
+              tokens.append(Ident::new("stream", ss.clone()));
+              tokens.append(Punct::new('.', Spacing::Alone));
+              tokens.append(Ident::new("push_str", ss.clone()));
+
+              let mut ts = proc_macro2::TokenStream::new();
+
+              ts.append(Punct::new('&', Spacing::Alone));
+              e.to_tokens(&mut ts);
+              ts.append(Punct::new('.', Spacing::Alone));
+              ts.append(Ident::new("to_string", ss.clone()));
+              let ets = proc_macro2::TokenStream::new();
+              let egr = Group::new(Delimiter::Parenthesis, ets);
+              ts.append(egr);
+
+              let gr = Group::new(Delimiter::Parenthesis, ts);
+              tokens.append(gr);
+              tokens.append(Punct::new(';', Spacing::Alone));
+           }, RdxlExprE::F(f,p,i,cs) => {
+              tokens.append(Ident::new("for", f.span.clone()));
+              p.to_tokens(tokens);
+              tokens.append(Ident::new("in", f.span.clone())); 
               i.to_tokens(tokens);
+
+              let mut ets = proc_macro2::TokenStream::new();
+              for c in cs.iter() {
+                 c.to_tokens(&mut ets);
+              }
+              let egr = Group::new(Delimiter::Brace, ets);
+              tokens.append(egr);
            }
         }
     }
@@ -38,8 +66,8 @@ impl Parse for RdxlExprE {
           let content2;
           let _brace1 = braced!(content in input);
           let _brace2 = braced!(content2 in content);
-          let body: Vec<RdxlCrumb> = input.call(RdxlCrumb::parse_outer)?;
-          Ok(RdxlExprE::F(pat,iter,body))
+          let body: Vec<RdxlCrumb> = content2.call(RdxlCrumb::parse_outer)?;
+          Ok(RdxlExprE::F(_for,pat,iter,body))
        } else {
           Ok(RdxlExprE::E(input.call(Expr::parse)?))
        }
@@ -60,6 +88,11 @@ impl Parse for RdxlExpr {
            _brace_token2: braced!(content2 in _content),
            expr: content2.call(RdxlExprE::parse)?,
         })
+    }
+}
+impl ToTokens for RdxlExpr {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+        self.expr.to_tokens(tokens)
     }
 }
 
@@ -424,26 +457,7 @@ impl ToTokens for RdxlCrumb {
               t.to_tokens(tokens);
            }
            RdxlCrumb::E(e) => {
-              let ss = e.brace_token1.span.clone();
-
-              tokens.append(Ident::new("stream", ss.clone()));
-              tokens.append(Punct::new('.', Spacing::Alone));
-              tokens.append(Ident::new("push_str", ss.clone()));
-
-              let mut ts = proc_macro2::TokenStream::new();
-
-              ts.append(Punct::new('&', Spacing::Alone));
-              e.expr.to_tokens(&mut ts);
-              ts.append(Punct::new('.', Spacing::Alone));
-              ts.append(Ident::new("to_string", ss.clone()));
-              let ets = proc_macro2::TokenStream::new();
-              let egr = Group::new(Delimiter::Parenthesis, ets);
-              ts.append(egr);
-
-              let gr = Group::new(Delimiter::Parenthesis, ts);
-              tokens.append(gr);
-
-              tokens.append(Punct::new(';', Spacing::Alone));
+              e.to_tokens(tokens);
            }
         }
     }
