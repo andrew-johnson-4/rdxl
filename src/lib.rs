@@ -6,7 +6,7 @@ use quote::{quote, TokenStreamExt, ToTokens};
 use proc_macro::{TokenStream};
 use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
-use syn::{parse_macro_input, Ident as SynIdent, Token, Expr, Pat, bracketed, braced};
+use syn::{parse_macro_input, Ident as SynIdent, Token, Expr, Pat, LitStr, bracketed, braced};
 use syn::token::{Bracket,Brace};
 
 
@@ -333,6 +333,7 @@ impl Parse for RdxlTag {
 }
 
 enum RdxlCrumb {
+   L(LitStr),
    S(String, Span),
    T(RdxlTag),
    E(RdxlExpr),
@@ -345,11 +346,13 @@ impl RdxlCrumb {
             RdxlCrumb::T(t) => { t.span.clone() }
             RdxlCrumb::E(e) => { e.brace_token1.span.clone() }
             RdxlCrumb::F(_) => { Span::call_site() }
+            RdxlCrumb::L(l) => { l.span() }
         }
     }
     fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
         let mut cs = vec!();
         while input.peek(SynIdent) ||
+              input.peek(LitStr) ||
               input.peek(Brace) ||
               input.peek(Bracket) ||
               input.peek(Token![as]) ||
@@ -424,15 +427,18 @@ impl Parse for RdxlCrumb {
         } else if input.peek(Brace) {
            let e: RdxlExpr = input.parse()?;
            Ok(RdxlCrumb::E(e))
+        } else if input.peek(LitStr) {
+           let lit: LitStr = input.parse()?;
+           Ok(RdxlCrumb::L(lit))
         } else if input.peek(Token![!]) {
            let id: Token![!] = input.parse()?;
            Ok(RdxlCrumb::S("!".to_string(), id.span.clone()))
-        } else if input.peek(Token![@]) {
-           let id: Token![@] = input.parse()?;
-           Ok(RdxlCrumb::S("@".to_string(), id.span.clone()))
         } else if input.peek(Token![#]) {
            let id: Token![#] = input.parse()?;
            Ok(RdxlCrumb::S("#".to_string(), id.span.clone()))
+        } else if input.peek(Token![@]) {
+           let id: Token![@] = input.parse()?;
+           Ok(RdxlCrumb::S("@".to_string(), id.span.clone()))
         } else if input.peek(Token![$]) {
            let id: Token![$] = input.parse()?;
            Ok(RdxlCrumb::S("$".to_string(), id.span.clone()))
@@ -596,6 +602,19 @@ impl ToTokens for RdxlCrumb {
 
               let mut ts = proc_macro2::TokenStream::new();
               ts.append(Literal::string(&s));
+              let gr = Group::new(Delimiter::Parenthesis, ts);
+              tokens.append(gr);
+
+              tokens.append(Punct::new(';', Spacing::Alone));
+           },
+           RdxlCrumb::L(l) => {
+              let ss = l.span().clone();
+              tokens.append(Ident::new("stream", ss.clone()));
+              tokens.append(Punct::new('.', Spacing::Alone));
+              tokens.append(Ident::new("push_str", ss.clone()));
+
+              let mut ts = proc_macro2::TokenStream::new();
+              l.to_tokens(&mut ts);
               let gr = Group::new(Delimiter::Parenthesis, ts);
               tokens.append(gr);
 

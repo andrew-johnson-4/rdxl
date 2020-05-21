@@ -4,6 +4,7 @@
 fn main(){
    println!("{}", rdxl!(World) );
    println!("{}", rdxl!(Hello World) );
-   println!("{}", rdxl!(Hello World ,.!@#$%^*|:;,.?/~) );
+   println!("{}", rdxl!(Hello World ,.!@$#%^*|:;,.?/~) );
    println!("{}", rdxl!(while if let continue break) );
+   println!("{}", rdxl!("#""{""}#"));
 }
