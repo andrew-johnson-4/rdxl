@@ -1,12 +1,13 @@
 [package]
 name = "rdxl"
-version = "0.1.13"
+version = "0.1.14"
 authors = ["Andrew <andrew@subarctic.org>"]
 license = "MIT"
 description = "Rusty Domain Extensible Language"
 edition = "2018"
 readme = "README.md"
 repository = "https://github.com/andrew-johnson-4/rdxl"
+keywords = ["xml","html","templating","library"]
 
 [lib]
 proc-macro = true
