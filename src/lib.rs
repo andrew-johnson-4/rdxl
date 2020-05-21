@@ -1,16 +1,52 @@
 #![recursion_limit = "128"]
 #![feature(type_ascription)]
 #![crate_type = "proc-macro"]
-extern crate quote;
-#[macro_use] extern crate syn;
 
 use quote::{quote, TokenStreamExt, ToTokens};
 use proc_macro::{TokenStream};
 use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
-use syn::{parse_macro_input, Ident as SynIdent, Token, Expr, Pat};
-use syn::token::Brace;
+use syn::{parse_macro_input, Ident as SynIdent, Token, Expr, Pat, bracketed, braced};
+use syn::token::{Bracket,Brace};
 
+
+struct RdxlExprF {
+   context: String,
+   expr: Expr
+}
+impl ToTokens for RdxlExprF {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+       let ss = Span::call_site();
+
+       tokens.append(Ident::new("stream", ss.clone()));
+       tokens.append(Punct::new('.', Spacing::Alone));
+       tokens.append(Ident::new("push_str", ss.clone()));
+
+       let mut ts = proc_macro2::TokenStream::new();
+
+       ts.append(Punct::new('&', Spacing::Alone));
+       self.expr.to_tokens(&mut ts);
+       ts.append(Punct::new('.', Spacing::Alone));
+       ts.append(Ident::new(&format!("to_{}", self.context), ss.clone()));
+       let ets = proc_macro2::TokenStream::new();
+       let egr = Group::new(Delimiter::Parenthesis, ets);
+       ts.append(egr);
+
+       let gr = Group::new(Delimiter::Parenthesis, ts);
+       tokens.append(gr);
+       tokens.append(Punct::new(';', Spacing::Alone));
+    }
+}
+impl RdxlExprF {
+    fn parse(context: String, input: ParseStream) -> Result<Self> {
+       let content;
+       let content2;
+       let _bracket1 = bracketed!(content in input);
+       let _bracket2 = bracketed!(content2 in content);
+       let expr: Expr = content2.parse()?;
+       Ok(RdxlExprF{ context:context, expr:expr })
+    }
+}
 
 enum RdxlExprE {
    S(Expr),
@@ -300,6 +336,7 @@ enum RdxlCrumb {
    S(String, Span),
    T(RdxlTag),
    E(RdxlExpr),
+   F(RdxlExprF),
 }
 impl RdxlCrumb {
     fn span(&self) -> Span {
@@ -307,12 +344,14 @@ impl RdxlCrumb {
             RdxlCrumb::S(_,sp) => { sp.clone() }
             RdxlCrumb::T(t) => { t.span.clone() }
             RdxlCrumb::E(e) => { e.brace_token1.span.clone() }
+            RdxlCrumb::F(_) => { Span::call_site() }
         }
     }
     fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
         let mut cs = vec!();
         while input.peek(SynIdent) ||
               input.peek(Brace) ||
+              input.peek(Bracket) ||
               input.peek(Token![as]) ||
               input.peek(Token![break]) ||
               input.peek(Token![const]) ||
@@ -379,6 +418,9 @@ impl Parse for RdxlCrumb {
         if input.peek(Token![<]) {
            let t: RdxlTag = input.parse()?;
            Ok(RdxlCrumb::T(t))
+        } else if input.peek(Bracket) {
+           let f: RdxlExprF = RdxlExprF::parse("markup".to_string(),input)?;
+           Ok(RdxlCrumb::F(f))
         } else if input.peek(Brace) {
            let e: RdxlExpr = input.parse()?;
            Ok(RdxlCrumb::E(e))
@@ -563,6 +605,9 @@ impl ToTokens for RdxlCrumb {
               t.to_tokens(tokens);
            }
            RdxlCrumb::E(e) => {
+              e.to_tokens(tokens);
+           }
+           RdxlCrumb::F(e) => {
               e.to_tokens(tokens);
            }
         }

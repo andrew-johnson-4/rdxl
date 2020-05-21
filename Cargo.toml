@@ -1,6 +1,6 @@
 [package]
 name = "rdxl"
-version = "0.1.14"
+version = "0.1.15"
 authors = ["Andrew <andrew@subarctic.org>"]
 license = "MIT"
 description = "Rusty Domain Extensible Language"
@@ -43,3 +43,7 @@ path = "examples/misc.rs"
 [[bin]]
 name = "example_cond"
 path = "examples/cond.rs"
+
+[[bin]]
+name = "example_context"
+path = "examples/context.rs"
