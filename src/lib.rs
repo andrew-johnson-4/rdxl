@@ -238,9 +238,14 @@ impl ToTokens for RdxlExpr {
     }
 }
 
+enum RdxlAttr {
+   S(String),
+   F(RdxlExprF)
+}
+
 struct RdxlTag {
    tag: String,
-   attrs: Vec<(String,String)>,
+   attrs: Vec<(String,RdxlAttr)>,
    inner: Rdxl,
    span: Span
 }
@@ -260,10 +265,21 @@ impl ToTokens for RdxlTag {
             tokens.append(Punct::new('.', Spacing::Alone));
             tokens.append(Ident::new("push_str", self.span.clone()));
             let mut ts = proc_macro2::TokenStream::new();
-            ts.append(Literal::string(&format!(" {}={}", k, v)));
-            let gr = Group::new(Delimiter::Parenthesis, ts);
-            tokens.append(gr);
-            tokens.append(Punct::new(';', Spacing::Alone));
+
+            match v {
+               RdxlAttr::S(s) => {
+                  ts.append(Literal::string(&format!(" {}={}", k, s)));
+                  let gr = Group::new(Delimiter::Parenthesis, ts);
+                  tokens.append(gr);
+                  tokens.append(Punct::new(';', Spacing::Alone));
+               }, RdxlAttr::F(f) => {
+                  ts.append(Literal::string(&format!(" {}=", k)));
+                  let gr = Group::new(Delimiter::Parenthesis, ts);
+                  tokens.append(gr);
+                  tokens.append(Punct::new(';', Spacing::Alone));
+                  f.to_tokens(tokens);
+               }
+            }
         }
 
         tokens.append(Ident::new("stream", self.span.clone()));
@@ -292,12 +308,17 @@ impl Parse for RdxlTag {
         let l1: Token![<] = input.parse()?;
         let t: Ident = input.parse()?;
 
-        let mut attrs: Vec<(String,String)> = Vec::new();
+        let mut attrs: Vec<(String,RdxlAttr)> = Vec::new();
         while input.peek(SynIdent) {
             let key: Ident = input.parse()?;
             let _eq: Token![=] = input.parse()?;
-            let val: Literal = input.parse()?;
-            attrs.push(( key.to_string(), val.to_string() ));
+            if input.peek(Bracket) {
+               let f: RdxlExprF = RdxlExprF::parse(key.to_string(),input)?;
+               attrs.push(( key.to_string(), RdxlAttr::F(f) ));
+            } else {
+               let val: Literal = input.parse()?;
+               attrs.push(( key.to_string(), RdxlAttr::S(val.to_string()) ));
+            }
         }
 
         let _l2: Token![>] = input.parse()?;
