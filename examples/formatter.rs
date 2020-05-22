@@ -10,4 +10,5 @@ impl MyVal {
 
 fn main(){
    println!("{}", rdxl!(<div style=[[ MyVal{} ]]>dave</div>) );
+   println!("{}", rdxl!(<div an_attr={{ 2 }}>dave</div>) );
 }

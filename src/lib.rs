@@ -240,7 +240,8 @@ impl ToTokens for RdxlExpr {
 
 enum RdxlAttr {
    S(String),
-   F(RdxlExprF)
+   F(RdxlExprF),
+   E(RdxlExpr)
 }
 
 struct RdxlTag {
@@ -278,6 +279,12 @@ impl ToTokens for RdxlTag {
                   tokens.append(gr);
                   tokens.append(Punct::new(';', Spacing::Alone));
                   f.to_tokens(tokens);
+               }, RdxlAttr::E(e) => {
+                  ts.append(Literal::string(&format!(" {}=", k)));
+                  let gr = Group::new(Delimiter::Parenthesis, ts);
+                  tokens.append(gr);
+                  tokens.append(Punct::new(';', Spacing::Alone));
+                  e.to_tokens(tokens);
                }
             }
         }
@@ -315,6 +322,9 @@ impl Parse for RdxlTag {
             if input.peek(Bracket) {
                let f: RdxlExprF = RdxlExprF::parse(key.to_string(),input)?;
                attrs.push(( key.to_string(), RdxlAttr::F(f) ));
+            } else if input.peek(Brace) {
+               let e: RdxlExpr = input.parse()?;
+               attrs.push(( key.to_string(), RdxlAttr::E(e) ));
             } else {
                let val: Literal = input.parse()?;
                attrs.push(( key.to_string(), RdxlAttr::S(val.to_string()) ));

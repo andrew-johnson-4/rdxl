@@ -1,6 +1,6 @@
 [package]
 name = "rdxl"
-version = "0.1.17"
+version = "0.1.18"
 authors = ["Andrew <andrew@subarctic.org>"]
 license = "MIT"
 description = "Rusty Domain Extensible Language"
