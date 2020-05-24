@@ -51,7 +51,7 @@
 //!
 //! # Html attributes
 //! ```no_run
-//! rdxl(<div style={{ "\"color:red;\"" }}>
+//! rdxl!(<div style={{ "\"color:red;\"" }}>
 //!   inside div
 //! </div>)
 //! ```
