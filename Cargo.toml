@@ -19,3 +19,35 @@ proc-macro2 = { version="1.0", features=["span-locations"] }
 [dependencies.syn]
 version = "1.0"
 features = ["full"]
+
+[[example]]
+name = "cond"
+file = "examples/cond.rs"
+
+[[example]]
+name = "context"
+file = "examples/context.rs"
+
+[[example]]
+name = "formatter"
+file = "examples/formatter.rs"
+
+[[example]]
+name = "loops"
+file = "examples/loops.rs"
+
+[[example]]
+name = "misc"
+file = "examples/misc.rs"
+
+[[example]]
+name = "simple"
+file = "examples/simple.rs"
+
+[[example]]
+name = "tags"
+file = "examples/tags.rs"
+
+[[example]]
+name = "vars"
+file = "examples/vars.rs"
