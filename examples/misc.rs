@@ -5,9 +5,9 @@ fn main(){
    let mut x = 5;
    println!("{}",rdxl!(<div>
       {{ x }},
-      {{ ; x = 3 }}
+      {{ x = 3; }}
       {{ x }},
-      {{ ; x = 7 }}
+      {{ x = 7; }}
       {{ x }},
       {{ let mut y = 2 }}
       {{ y }},

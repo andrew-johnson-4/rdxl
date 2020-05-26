@@ -264,11 +264,14 @@ impl Parse for RdxlExprE {
           let _eq: Token![=] = input.parse()?;
           let expr: Expr = input.parse()?;
           Ok(RdxlExprE::L(_let,pat,expr))
-       } else if input.peek(Token![;]) {
-          let _semi: Token![;] = input.parse()?;
-          Ok(RdxlExprE::S(input.call(Expr::parse)?))
        } else {
-          Ok(RdxlExprE::E(input.call(Expr::parse)?))
+          let e: Expr = input.parse()?;
+          if input.peek(Token![;]) {
+             let _semi: Token![;] = input.parse()?;
+             Ok(RdxlExprE::S(e))
+          } else {
+             Ok(RdxlExprE::E(e))
+          }
        }
     }
 }

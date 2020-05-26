@@ -17,7 +17,7 @@ fn main(){
    println!("{}",rdxl!(<div>
       {{ while my_counter > 0 {{
          <span>{{my_counter}}</span>
-         {{ ; my_counter -= 1 }}
+         {{ my_counter -= 1; }}
       }} }}
    </div>));
 
@@ -25,7 +25,7 @@ fn main(){
    println!("{}",rdxl!(<div>
       {{ while let Some(my_num) = my_some {{
          <span>{{my_num}}</span>
-         {{ ; my_some = None }}
+         {{ my_some = None; }}
       }} }}
    </div>));
 }
