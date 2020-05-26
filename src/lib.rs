@@ -373,18 +373,84 @@ impl Parse for RdxlTag {
         let t: Ident = input.parse()?;
 
         let mut attrs: Vec<(String,RdxlAttr)> = Vec::new();
-        while input.peek(SynIdent) {
-            let key: Ident = input.parse()?;
+        while input.peek(SynIdent) ||
+              input.peek(Token![as]) ||
+              input.peek(Token![break]) ||
+              input.peek(Token![const]) ||
+              input.peek(Token![continue]) ||
+              input.peek(Token![crate]) ||
+              input.peek(Token![else]) ||
+              input.peek(Token![enum]) ||
+              input.peek(Token![extern]) ||
+              input.peek(Token![fn]) ||
+              input.peek(Token![for]) ||
+              input.peek(Token![if]) ||
+              input.peek(Token![impl]) ||
+              input.peek(Token![in]) ||
+              input.peek(Token![let]) ||
+              input.peek(Token![loop]) ||
+              input.peek(Token![match]) ||
+              input.peek(Token![mod]) ||
+              input.peek(Token![move]) ||
+              input.peek(Token![mut]) ||
+              input.peek(Token![pub]) ||
+              input.peek(Token![ref]) ||
+              input.peek(Token![return]) ||
+              input.peek(Token![self]) ||
+              input.peek(Token![Self]) ||
+              input.peek(Token![static]) ||
+              input.peek(Token![struct]) ||
+              input.peek(Token![super]) ||
+              input.peek(Token![trait]) ||
+              input.peek(Token![type]) ||
+              input.peek(Token![unsafe]) ||
+              input.peek(Token![use]) ||
+              input.peek(Token![where]) ||
+              input.peek(Token![while]) {
+            let key = if input.peek(Token![as]) { let _:Token![as] = input.parse()?; "as".to_string()
+            } else if input.peek(Token![break]) { let _:Token![break] = input.parse()?; "break".to_string()
+            } else if input.peek(Token![const]) { let _:Token![const] = input.parse()?; "const".to_string()
+            } else if input.peek(Token![continue]) { let _:Token![continue] = input.parse()?; "continue".to_string()
+            } else if input.peek(Token![crate]) { let _:Token![crate] = input.parse()?; "crate".to_string()
+            } else if input.peek(Token![else]) { let _:Token![else] = input.parse()?; "else".to_string()
+            } else if input.peek(Token![enum]) { let _:Token![enum] = input.parse()?; "enum".to_string()
+            } else if input.peek(Token![extern]) { let _:Token![extern] = input.parse()?; "extern".to_string()
+            } else if input.peek(Token![fn]) { let _:Token![fn] = input.parse()?; "fn".to_string()
+            } else if input.peek(Token![for]) { let _:Token![for] = input.parse()?; "for".to_string()
+            } else if input.peek(Token![if]) { let _:Token![if] = input.parse()?; "if".to_string()
+            } else if input.peek(Token![impl]) { let _:Token![impl] = input.parse()?; "impl".to_string()
+            } else if input.peek(Token![in]) { let _:Token![in] = input.parse()?; "in".to_string()
+            } else if input.peek(Token![let]) { let _:Token![let] = input.parse()?; "let".to_string()
+            } else if input.peek(Token![loop]) { let _:Token![loop] = input.parse()?; "loop".to_string()
+            } else if input.peek(Token![match]) { let _:Token![match] = input.parse()?; "match".to_string()
+            } else if input.peek(Token![mod]) { let _:Token![mod] = input.parse()?; "mod".to_string()
+            } else if input.peek(Token![move]) { let _:Token![move] = input.parse()?; "move".to_string()
+            } else if input.peek(Token![mut]) { let _:Token![mut] = input.parse()?; "mut".to_string()
+            } else if input.peek(Token![pub]) { let _:Token![pub] = input.parse()?; "pub".to_string()
+            } else if input.peek(Token![ref]) { let _:Token![ref] = input.parse()?; "ref".to_string()
+            } else if input.peek(Token![return]) { let _:Token![return] = input.parse()?; "return".to_string()
+            } else if input.peek(Token![self]) { let _:Token![self] = input.parse()?; "self".to_string()
+            } else if input.peek(Token![Self]) { let _:Token![Self] = input.parse()?; "Self".to_string()
+            } else if input.peek(Token![static]) { let _:Token![static] = input.parse()?; "static".to_string()
+            } else if input.peek(Token![struct]) { let _:Token![struct] = input.parse()?; "struct".to_string()
+            } else if input.peek(Token![super]) { let _:Token![super] = input.parse()?; "super".to_string()
+            } else if input.peek(Token![trait]) { let _:Token![trait] = input.parse()?; "trait".to_string()
+            } else if input.peek(Token![type]) { let _:Token![type] = input.parse()?; "type".to_string()
+            } else if input.peek(Token![unsafe]) { let _:Token![unsafe] = input.parse()?; "unsafe".to_string()
+            } else if input.peek(Token![use]) { let _:Token![use] = input.parse()?; "use".to_string()
+            } else if input.peek(Token![where]) { let _:Token![where] = input.parse()?; "where".to_string()
+            } else if input.peek(Token![while]) { let _:Token![while] = input.parse()?; "while".to_string()
+            } else { let key: Ident = input.parse()?; key.to_string() };
             let _eq: Token![=] = input.parse()?;
             if input.peek(Bracket) {
-               let f: RdxlExprF = RdxlExprF::parse(key.to_string(),input)?;
-               attrs.push(( key.to_string(), RdxlAttr::F(f) ));
+               let f: RdxlExprF = RdxlExprF::parse(key.clone(),input)?;
+               attrs.push(( key.clone(), RdxlAttr::F(f) ));
             } else if input.peek(Brace) {
                let e: RdxlExpr = input.parse()?;
-               attrs.push(( key.to_string(), RdxlAttr::E(e) ));
+               attrs.push(( key, RdxlAttr::E(e) ));
             } else {
                let val: Literal = input.parse()?;
-               attrs.push(( key.to_string(), RdxlAttr::S(val.to_string()) ));
+               attrs.push(( key, RdxlAttr::S(val.to_string()) ));
             }
         }
 
