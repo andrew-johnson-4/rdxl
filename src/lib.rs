@@ -346,25 +346,36 @@ impl ToTokens for RdxlTag {
             }
         }
 
-        tokens.append(Ident::new("stream", self.span.clone()));
-        tokens.append(Punct::new('.', Spacing::Alone));
-        tokens.append(Ident::new("push_str", self.span.clone()));
-        let mut ts = proc_macro2::TokenStream::new();
-        ts.append(Literal::string(">"));
-        let gr = Group::new(Delimiter::Parenthesis, ts);
-        tokens.append(gr);
-        tokens.append(Punct::new(';', Spacing::Alone));
+        if self.inner.crumbs.len()==0 {
+           tokens.append(Ident::new("stream", self.span.clone()));
+           tokens.append(Punct::new('.', Spacing::Alone));
+           tokens.append(Ident::new("push_str", self.span.clone()));
+           let mut ts = proc_macro2::TokenStream::new();
+           ts.append(Literal::string("/>"));
+           let gr = Group::new(Delimiter::Parenthesis, ts);
+           tokens.append(gr);
+           tokens.append(Punct::new(';', Spacing::Alone));
+        } else {
+           tokens.append(Ident::new("stream", self.span.clone()));
+           tokens.append(Punct::new('.', Spacing::Alone));
+           tokens.append(Ident::new("push_str", self.span.clone()));
+           let mut ts = proc_macro2::TokenStream::new();
+           ts.append(Literal::string(">"));
+           let gr = Group::new(Delimiter::Parenthesis, ts);
+           tokens.append(gr);
+           tokens.append(Punct::new(';', Spacing::Alone));
 
-        self.inner.to_tokens(tokens);
+           self.inner.to_tokens(tokens);
 
-        tokens.append(Ident::new("stream", self.span.clone()));
-        tokens.append(Punct::new('.', Spacing::Alone));
-        tokens.append(Ident::new("push_str", self.span.clone()));
-        let mut ts = proc_macro2::TokenStream::new();
-        ts.append(Literal::string(&format!("</{}>", self.tag)));
-        let gr = Group::new(Delimiter::Parenthesis, ts);
-        tokens.append(gr);
-        tokens.append(Punct::new(';', Spacing::Alone));
+           tokens.append(Ident::new("stream", self.span.clone()));
+           tokens.append(Punct::new('.', Spacing::Alone));
+           tokens.append(Ident::new("push_str", self.span.clone()));
+           let mut ts = proc_macro2::TokenStream::new();
+           ts.append(Literal::string(&format!("</{}>", self.tag)));
+           let gr = Group::new(Delimiter::Parenthesis, ts);
+           tokens.append(gr);
+           tokens.append(Punct::new(';', Spacing::Alone));
+        }
     }
 }
 impl Parse for RdxlTag {
@@ -454,9 +465,10 @@ impl Parse for RdxlTag {
             }
         }
 
-        let _l2: Token![>] = input.parse()?;
+        if input.peek(Token![/]) {
+           let _r1: Token![/] = input.parse()?;
+           let _r2: Token![>] = input.parse()?;
 
-        if t.to_string() == "br" {
            Ok(RdxlTag {
               tag: t.to_string(),
               attrs: attrs,
@@ -464,6 +476,8 @@ impl Parse for RdxlTag {
               span: l1.span.clone()
            })
         } else {
+           let _l2: Token![>] = input.parse()?;
+
            let inner: Rdxl = input.parse()?;
 
            let _r1: Token![<] = input.parse()?;
