@@ -1,6 +1,6 @@
 # Rusty Domain Extensible Language
 
-Domain specific language macros for Rust to generate html or xml or AST.
+Domain specific language macros for Rust to generate xhtml.
 
 ```rust
 let my_int = 3;
