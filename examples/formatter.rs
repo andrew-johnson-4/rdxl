@@ -1,5 +1,5 @@
 #![feature(proc_macro_hygiene)]
-#[macro_use] extern crate rdxl;
+use rdxl::xhtml;
 
 struct MyVal {}
 impl MyVal {
@@ -9,6 +9,6 @@ impl MyVal {
 }
 
 fn main(){
-   println!("{}", rdxl!(<div style=[[ MyVal{} ]]>dave</div>) );
-   println!("{}", rdxl!(<div an_attr={{ 2 }}>dave</div>) );
+   println!("{}", xhtml!(<div style=[[ MyVal{} ]]>dave</div>) );
+   println!("{}", xhtml!(<div an_attr={{ 2 }}>dave</div>) );
 }

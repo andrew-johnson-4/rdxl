@@ -15,7 +15,7 @@
 //! ```no_run
 //! let x = 5;
 //! let y = "asdf";
-//! rdxl!({{ x }}, {{ y }})
+//! xhtml!({{ x }}, {{ y }})
 //! ```
 //!
 //! # Conditional expressions
@@ -23,7 +23,7 @@
 //! ```no_run
 //! let x = 5;
 //! let y = "asdf";
-//! rdxl!({{ if x>3 {{
+//! xhtml!({{ if x>3 {{
 //!   Case One
 //! }} else if x>2 {{
 //!   Case Two
@@ -35,7 +35,7 @@
 //! # Loop expressions
 //!
 //! ```no_run
-//! rdxl!(<ul>{{ for i in 0..10 {{
+//! xhtml!(<ul>{{ for i in 0..10 {{
 //!   <li>{{ i }}</li>
 //! }} }}</ul>)
 //! ```
@@ -43,7 +43,7 @@
 //! # Miscellaneous expressions
 //!
 //! ```no_run
-//! rdxl!(
+//! xhtml!(
 //!   {{ let x = 5; }}
 //!   {{ x }}
 //! )
@@ -51,7 +51,7 @@
 //!
 //! # Html attributes
 //! ```no_run
-//! rdxl!(<div style={{ "\"color:red;\"" }}>
+//! xhtml!(<div style={{ "\"color:red;\"" }}>
 //!   inside div
 //! </div>)
 //! ```
@@ -844,7 +844,7 @@ impl Parse for Rdxl {
 }
 
 #[proc_macro]
-pub fn rdxl(input: TokenStream) -> TokenStream {
+pub fn xhtml(input: TokenStream) -> TokenStream {
     let rdxls = parse_macro_input!(input as Rdxl);
 
     // Build the output, possibly using quasi-quotation
@@ -858,4 +858,3 @@ pub fn rdxl(input: TokenStream) -> TokenStream {
 
     TokenStream::from(expanded)
 }
-

@@ -1,11 +1,11 @@
 #![feature(proc_macro_hygiene)]
-#[macro_use] extern crate rdxl;
+use rdxl::xhtml;
 
 fn main(){
    let x = 5;
    let y = Some(2);
 
-   println!("{}",rdxl!(<div>
+   println!("{}",xhtml!(<div>
       {{ if x > 2 {{
          {{ x }}
       }} }}

@@ -1,5 +1,5 @@
 #![feature(proc_macro_hygiene)]
-#[macro_use] extern crate rdxl;
+use rdxl::xhtml;
 
 struct MyMarkup {
    a:u64
@@ -12,8 +12,8 @@ impl MyMarkup {
 
 fn main(){
    let x = MyMarkup { a:22 };
-   println!("{}", rdxl!([[ x ]]) );
+   println!("{}", xhtml!([[ x ]]) );
 
    //fails due to no method "to_markup" on integer
-   //println!("{}", rdxl!([[ 5 ]]) );
+   //println!("{}", xhtml!([[ 5 ]]) );
 }

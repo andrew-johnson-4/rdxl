@@ -1,9 +1,9 @@
 #![feature(proc_macro_hygiene)]
-#[macro_use] extern crate rdxl;
+use rdxl::xhtml;
 
 fn main(){
    let mut x = 5;
-   println!("{}",rdxl!(<div>
+   println!("{}",xhtml!(<div>
       {{ x }},
       {{ x = 3; }}
       {{ x }},
