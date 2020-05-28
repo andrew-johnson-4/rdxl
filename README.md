@@ -7,11 +7,11 @@ let my_int = 3;
 let my_str = "asdf";
 let my_vec = vec![true, false, true, true];
 
-println!("{}",rdxl!(<div>
+println!("{}",rdxl!(<ul>
    {{ for v in my_vec.iter() {{
-      <span>{{my_int}}, {{my_str}}, {{v}}</span>
+      <li>{{my_int}}, {{my_str}}, {{v}}</li>
    }} }}
-</div>));
+</ul>));
 ```
 
 ## Contribution
