@@ -8,7 +8,6 @@ use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent, Token, Expr, Pat, LitChar, LitBool, LitStr, LitInt, bracketed, braced};
 use syn::token::{Bracket,Brace};
-use syn::spanned::Spanned;
 
 pub struct XhtmlExprF {
    context: String,
@@ -241,6 +240,61 @@ impl ToTokens for XhtmlExpr {
     }
 }
 
+pub enum XhtmlClassAttr {
+   S(String),
+   B(bool),
+   C(char),
+   U(u64),
+   F(String,Expr),
+   E(Expr)
+}
+impl XhtmlClassAttr {
+   fn parse(input: ParseStream, key: String) -> Result<Self> {
+      if input.peek(LitBool) {
+         let b: LitBool = input.parse()?;
+         Ok(XhtmlClassAttr::S(format!("{}", b.value)))
+      } else if input.peek(LitInt) {
+         let b: LitInt = input.parse()?;
+         let u: u64 = b.base10_parse()?;
+         Ok(XhtmlClassAttr::U(u))
+      } else if input.peek(LitChar) {
+         let b: LitChar = input.parse()?;
+         Ok(XhtmlClassAttr::C(b.value()))
+      } else {
+         let val: LitStr = input.parse()?;
+         Ok(XhtmlClassAttr::S(val.value()))
+      }
+   }
+}
+impl ToTokens for XhtmlClassAttr {
+   fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+      let span = Span::call_site();
+      match self {
+         XhtmlClassAttr::S(s) => {
+            let l: Literal = Literal::string(&s);
+            tokens.append(l);
+            tokens.append(Punct::new('.', Spacing::Alone));
+            tokens.append(Ident::new("to_string", span.clone()));
+            let ts = proc_macro2::TokenStream::new();
+            let gr = Group::new(Delimiter::Parenthesis, ts);
+            tokens.append(gr);
+         }, XhtmlClassAttr::B(e) => {
+            tokens.append(Ident::new(&format!("{}", e), span.clone()));
+         }, XhtmlClassAttr::C(e) => {
+            let l: Literal = Literal::character(*e);
+            tokens.append(l);
+         }, XhtmlClassAttr::U(e) => {
+            let l: Literal = Literal::u64_unsuffixed(*e);
+            tokens.append(l);
+         }, XhtmlClassAttr::F(f,e) => {
+            panic!("unimplemented")
+         }, XhtmlClassAttr::E(e) => {
+            panic!("unimplemented")
+         }
+      }
+   }
+}
+
 pub enum XhtmlAttr {
    S(String),
    F(XhtmlExprF),
@@ -284,7 +338,7 @@ impl Parse for XhtmlClassChild {
 pub struct XhtmlClass {
    open: Token![<],
    name: String,
-   attrs: Vec<(String,XhtmlAttr)>,
+   attrs: Vec<(String,XhtmlClassAttr)>,
    children: Vec<XhtmlClassChild>,
    close: Token![>]
 }
@@ -293,6 +347,24 @@ impl ToTokens for XhtmlClass {
        let span = Span::call_site();
        tokens.append(Ident::new(&self.name, span));
        let mut ts = proc_macro2::TokenStream::new();
+
+       for (k,v) in self.attrs.iter() {
+          ts.append(Ident::new(k, span));
+          ts.append(Punct::new(':', Spacing::Alone));
+          v.to_tokens(&mut ts);
+          ts.append(Punct::new(',', Spacing::Alone));
+       }
+
+       ts.append(Ident::new("children", span));
+       ts.append(Punct::new(':', Spacing::Alone));
+       ts.append(Ident::new("vec", span));
+       ts.append(Punct::new('!', Spacing::Alone));
+
+       let cs = proc_macro2::TokenStream::new();
+       let cgr = Group::new(Delimiter::Bracket, cs);
+       ts.append(cgr);
+       ts.append(Punct::new(',', Spacing::Alone));
+
        let gr = Group::new(Delimiter::Brace, ts);
        tokens.append(gr);
     }
@@ -307,7 +379,7 @@ impl Parse for XhtmlClass {
        while input.peek(SynIdent) {
           let attr_name: Ident = input.parse()?;
           let _eq: Token![=] = input.parse()?;
-          let attr_val: XhtmlAttr = XhtmlAttr::parse(input, attr_name.to_string())?;
+          let attr_val = XhtmlClassAttr::parse(input, attr_name.to_string())?;
           attrs.push((attr_name.to_string(), attr_val));
        }
 
