@@ -252,7 +252,7 @@ impl XhtmlClassAttr {
    fn parse(input: ParseStream, key: String) -> Result<Self> {
       if input.peek(LitBool) {
          let b: LitBool = input.parse()?;
-         Ok(XhtmlClassAttr::S(format!("{}", b.value)))
+         Ok(XhtmlClassAttr::B(b.value))
       } else if input.peek(LitInt) {
          let b: LitInt = input.parse()?;
          let u: u64 = b.base10_parse()?;
@@ -360,7 +360,20 @@ impl ToTokens for XhtmlClass {
        ts.append(Ident::new("vec", span));
        ts.append(Punct::new('!', Spacing::Alone));
 
-       let cs = proc_macro2::TokenStream::new();
+       let mut cs = proc_macro2::TokenStream::new();
+       for c in self.children.iter() {
+          if let XhtmlClassChild::C(c) = c {
+             cs.append(Ident::new(&format!("{}Children", self.name), span));
+             cs.append(Punct::new(':', Spacing::Joint));
+             cs.append(Punct::new(':', Spacing::Joint));
+             cs.append(Ident::new(&c.name, span));
+             let mut ecs = proc_macro2::TokenStream::new();
+             c.to_tokens(&mut ecs);
+             let cgr = Group::new(Delimiter::Parenthesis, ecs);
+             cs.append(cgr);
+             cs.append(Punct::new(',', Spacing::Alone));
+          }
+       }
        let cgr = Group::new(Delimiter::Bracket, cs);
        ts.append(cgr);
        ts.append(Punct::new(',', Spacing::Alone));
