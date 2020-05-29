@@ -14,6 +14,29 @@ println!("{}",xhtml!(<ul>
 </ul>));
 ```
 
+Modularized templating is encouraged through custom XML elements:
+
+```rust
+xtype!(<!MyList my_string:String my_int:u64>
+   <!MyItem my_bool:bool/>
+   <!MyOtherItem my_char:char/>
+</MyList>)
+
+xrender!(MyList, |my_list| {
+  <ul>
+    <li>{{ my_list.my_string }}</li>
+    <li>{{ my_list.my_int }}</li>
+    {{ for i in my_list.children.iter() {{
+      {{ if let MyListChildren::MyItem(my_item) = i {{
+        <li>MyItem: {{ my_item.my_bool }}</li>
+      }} else if let MyListChildren::MyOtherItem(my_other_item) = i {{
+        <li>MyOtherItem: {{ my_other_item.char }}</li>
+      }} }}
+    }} }}
+  </ul>
+})
+```
+
 ## Contribution
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in rdxl by you,
 shall be dual licensed under the MIT and Apache 2.0 license without any additional terms or conditions.
