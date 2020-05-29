@@ -2,9 +2,11 @@
 use rdxl::{xhtml,xtype,xrender};
 use std::fmt;
 
+xtype!(<!MyPredefinedType/>);
 xtype!(<!MyList my_string:String my_int:u64>
    <!MyItem my_bool:bool/>
    <!MyOtherItem my_char:char/>
+   <?MyPredefinedType/>
 </MyList>);
 
 xrender!(MyList, <ul>

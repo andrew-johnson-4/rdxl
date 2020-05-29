@@ -26,6 +26,7 @@ impl Parse for XTypeAttr {
 
 pub struct XType {
    pub open: Token![<],
+   pub defined: bool,
    pub tag_name: SynIdent,
    pub tag_attrs: Vec<XTypeAttr>,
    pub tag_children: Vec<XType>,
@@ -34,6 +35,7 @@ pub struct XType {
 
 impl ToTokens for XType {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+       if self.defined { return; }
        let span = self.open.span.join(self.close.span).unwrap();
 
        tokens.append(Ident::new("struct", span.clone()));
@@ -88,6 +90,23 @@ impl ToTokens for XType {
 impl Parse for XType {
     fn parse(input: ParseStream) -> Result<Self> {
         let open: Token![<] = input.parse()?;
+
+        if input.peek(Token![?]) {
+           let _q: Token![?] = input.parse()?;
+           let tag_name: SynIdent = input.parse()?;
+           let _s: Token![/] = input.parse()?;
+           let close: Token![>] = input.parse()?;
+
+           return Ok(XType {
+              open: open,
+              defined: true,
+              tag_name: tag_name,
+              tag_attrs: Vec::new(),
+              tag_children: Vec::new(),
+              close: close
+           })
+        }
+
         let _exc: Token![!] = input.parse()?;
         let tag_name: SynIdent = input.parse()?;
 
@@ -102,6 +121,7 @@ impl Parse for XType {
            let close: Token![>] = input.parse()?;
            Ok(XType {
               open: open,
+              defined: false,
               tag_name: tag_name,
               tag_attrs: tag_attrs,
               tag_children: Vec::new(),
@@ -111,7 +131,7 @@ impl Parse for XType {
            let _close_opening_tag: Token![>] = input.parse()?;
 
            let mut children = Vec::new();
-           while input.peek(Token![<]) && input.peek2(Token![!]) {
+           while input.peek(Token![<]) && (input.peek2(Token![!]) || input.peek2(Token![?])) {
               let child: XType = input.parse()?;
               children.push(child);
            }
@@ -129,6 +149,7 @@ impl Parse for XType {
            let close: Token![>] = input.parse()?;
            Ok(XType {
               open: open,
+              defined: false,
               tag_name: tag_name,
               tag_attrs: tag_attrs,
               tag_children: children,
