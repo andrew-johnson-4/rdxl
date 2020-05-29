@@ -48,15 +48,7 @@ impl ToTokens for XType {
           ts.append(Punct::new(',', Spacing::Alone));
        }
 
-       if self.tag_children.len()==1 {
-          ts.append(Ident::new("children", span.clone()));
-          ts.append(Punct::new(':', Spacing::Alone));
-          ts.append(Ident::new("Vec", span.clone()));
-          ts.append(Punct::new('<', Spacing::Alone));
-          ts.append(Ident::new(&self.tag_children[0].tag_name.to_string(), span.clone()));
-          ts.append(Punct::new('>', Spacing::Alone));
-          ts.append(Punct::new(',', Spacing::Alone));
-       } else if self.tag_children.len()>1 {
+       if self.tag_children.len()>0 {
           ts.append(Ident::new("children", span.clone()));
           ts.append(Punct::new(':', Spacing::Alone));
           ts.append(Ident::new("Vec", span.clone()));
@@ -69,7 +61,7 @@ impl ToTokens for XType {
        let gr = Group::new(Delimiter::Brace, ts);
        tokens.append(gr);
 
-       if self.tag_children.len()>1 {
+       if self.tag_children.len()>0 {
           tokens.append(Ident::new("enum", span.clone()));
           tokens.append(Ident::new(&format!("{}Children", self.tag_name.to_string()), span.clone()));
 
