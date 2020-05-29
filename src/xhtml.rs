@@ -8,6 +8,7 @@ use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent, Token, Expr, Pat, LitChar, LitBool, LitStr, LitInt, bracketed, braced};
 use syn::token::{Bracket,Brace};
+use syn::spanned::Spanned;
 
 pub struct XhtmlExprF {
    context: String,
@@ -286,6 +287,15 @@ pub struct XhtmlClass {
    attrs: Vec<(String,XhtmlAttr)>,
    children: Vec<XhtmlClassChild>,
    close: Token![>]
+}
+impl ToTokens for XhtmlClass {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+       let span = Span::call_site();
+       tokens.append(Ident::new(&self.name, span));
+       let mut ts = proc_macro2::TokenStream::new();
+       let gr = Group::new(Delimiter::Brace, ts);
+       tokens.append(gr);
+    }
 }
 impl Parse for XhtmlClass {
     fn parse(input: ParseStream) -> Result<Self> {
@@ -836,7 +846,26 @@ impl ToTokens for XhtmlCrumb {
            XhtmlCrumb::F(e) => {
               e.to_tokens(tokens);
            }
-           XhtmlCrumb::C(_c) => {
+           XhtmlCrumb::C(c) => {
+              let span = Span::call_site();
+
+              tokens.append(Ident::new("stream", span.clone()));
+              tokens.append(Punct::new('.', Spacing::Alone));
+              tokens.append(Ident::new("push_str", span.clone()));
+
+              let mut ts = proc_macro2::TokenStream::new();
+              ts.append(Punct::new('&', Spacing::Alone));
+              c.to_tokens(&mut ts);
+              ts.append(Punct::new('.', Spacing::Alone));
+              ts.append(Ident::new("to_string", span.clone()));
+
+              let ets = proc_macro2::TokenStream::new();
+              let egr = Group::new(Delimiter::Parenthesis, ets);
+              ts.append(egr);
+
+              let gr = Group::new(Delimiter::Parenthesis, ts);
+              tokens.append(gr);
+              tokens.append(Punct::new(';', Spacing::Alone));
            }
         }
     }
