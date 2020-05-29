@@ -8,6 +8,7 @@ use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent, Token, Expr, Pat, LitStr, bracketed, braced};
 use syn::token::{Bracket,Brace};
+use syn::spanned::Spanned;
 
 pub struct XhtmlExprF {
    context: String,
@@ -246,6 +247,15 @@ pub enum XhtmlAttr {
    E(XhtmlExpr)
 }
 
+pub enum XhtmlClassChild {}
+pub struct XhtmlClass {
+   open: Token![<],
+   name: String,
+   attrs: Vec<(String,XhtmlAttr)>,
+   children: Vec<XhtmlClassChild>,
+   close: Token![>]
+}
+
 pub struct XhtmlTag {
    tag: String,
    attrs: Vec<(String,XhtmlAttr)>,
@@ -451,6 +461,7 @@ enum XhtmlCrumb {
    T(XhtmlTag),
    E(XhtmlExpr),
    F(XhtmlExprF),
+   C(XhtmlClass)
 }
 impl XhtmlCrumb {
     fn span(&self) -> Span {
@@ -460,6 +471,7 @@ impl XhtmlCrumb {
             XhtmlCrumb::E(e) => { e.brace_token1.span.clone() }
             XhtmlCrumb::F(_) => { Span::call_site() }
             XhtmlCrumb::L(l) => { l.span() }
+            XhtmlCrumb::C(c) => { c.open.span.join(c.close.span).unwrap() }
         }
     }
     fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
@@ -531,7 +543,10 @@ impl XhtmlCrumb {
 }
 impl Parse for XhtmlCrumb {
     fn parse(input: ParseStream) -> Result<Self> {
-        if input.peek(Token![<]) {
+        if input.peek(Token![<]) && input.peek2(Token![!]) {
+           let c: XhtmlClass = input.parse()?;
+           Ok(XhtmlCrumb::C(c))
+        } else if input.peek(Token![<]) {
            let t: XhtmlTag = input.parse()?;
            Ok(XhtmlCrumb::T(t))
         } else if input.peek(Bracket) {
@@ -741,6 +756,8 @@ impl ToTokens for XhtmlCrumb {
            }
            XhtmlCrumb::F(e) => {
               e.to_tokens(tokens);
+           }
+           XhtmlCrumb::C(c) => {
            }
         }
     }
