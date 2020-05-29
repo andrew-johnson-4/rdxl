@@ -249,7 +249,7 @@ pub enum XhtmlClassAttr {
    E(Expr)
 }
 impl XhtmlClassAttr {
-   fn parse(input: ParseStream, key: String) -> Result<Self> {
+   fn parse(input: ParseStream, _key: String) -> Result<Self> {
       if input.peek(LitBool) {
          let b: LitBool = input.parse()?;
          Ok(XhtmlClassAttr::B(b.value))
@@ -286,9 +286,9 @@ impl ToTokens for XhtmlClassAttr {
          }, XhtmlClassAttr::U(e) => {
             let l: Literal = Literal::u64_unsuffixed(*e);
             tokens.append(l);
-         }, XhtmlClassAttr::F(f,e) => {
+         }, XhtmlClassAttr::F(_f,_e) => {
             panic!("unimplemented")
-         }, XhtmlClassAttr::E(e) => {
+         }, XhtmlClassAttr::E(_e) => {
             panic!("unimplemented")
          }
       }
@@ -362,16 +362,18 @@ impl ToTokens for XhtmlClass {
 
        let mut cs = proc_macro2::TokenStream::new();
        for c in self.children.iter() {
-          if let XhtmlClassChild::C(c) = c {
-             cs.append(Ident::new(&format!("{}Children", self.name), span));
-             cs.append(Punct::new(':', Spacing::Joint));
-             cs.append(Punct::new(':', Spacing::Joint));
-             cs.append(Ident::new(&c.name, span));
-             let mut ecs = proc_macro2::TokenStream::new();
-             c.to_tokens(&mut ecs);
-             let cgr = Group::new(Delimiter::Parenthesis, ecs);
-             cs.append(cgr);
-             cs.append(Punct::new(',', Spacing::Alone));
+          match c {
+             XhtmlClassChild::C(c) => {
+                cs.append(Ident::new(&format!("{}Children", self.name), span));
+                cs.append(Punct::new(':', Spacing::Joint));
+                cs.append(Punct::new(':', Spacing::Joint));
+                cs.append(Ident::new(&c.name, span));
+                let mut ecs = proc_macro2::TokenStream::new();
+                c.to_tokens(&mut ecs);
+                let cgr = Group::new(Delimiter::Parenthesis, ecs);
+                cs.append(cgr);
+                cs.append(Punct::new(',', Spacing::Alone));
+             }
           }
        }
        let cgr = Group::new(Delimiter::Bracket, cs);
