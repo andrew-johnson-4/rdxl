@@ -9,11 +9,11 @@ use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent, Token, Expr, Pat, LitStr, bracketed, braced};
 use syn::token::{Bracket,Brace};
 
-pub struct RdxlExprF {
+pub struct XhtmlExprF {
    context: String,
    expr: Expr
 }
-impl ToTokens for RdxlExprF {
+impl ToTokens for XhtmlExprF {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
        let ss = Span::call_site();
 
@@ -36,29 +36,29 @@ impl ToTokens for RdxlExprF {
        tokens.append(Punct::new(';', Spacing::Alone));
     }
 }
-impl RdxlExprF {
+impl XhtmlExprF {
     fn parse(context: String, input: ParseStream) -> Result<Self> {
        let content;
        let content2;
        let _bracket1 = bracketed!(content in input);
        let _bracket2 = bracketed!(content2 in content);
        let expr: Expr = content2.parse()?;
-       Ok(RdxlExprF{ context:context, expr:expr })
+       Ok(XhtmlExprF{ context:context, expr:expr })
     }
 }
 
-enum RdxlExprE {
+enum XhtmlExprE {
    S(Expr),
    E(Expr),
-   F(Token![for],Pat,Expr,Vec<RdxlCrumb>),
-   W(Token![while],Expr,Vec<RdxlCrumb>),
+   F(Token![for],Pat,Expr,Vec<XhtmlCrumb>),
+   W(Token![while],Expr,Vec<XhtmlCrumb>),
    L(Token![let],Pat,Expr),
-   I(Token![if],Expr,Vec<RdxlCrumb>,Vec<(Expr,Vec<RdxlCrumb>)>,Vec<RdxlCrumb>)
+   I(Token![if],Expr,Vec<XhtmlCrumb>,Vec<(Expr,Vec<XhtmlCrumb>)>,Vec<XhtmlCrumb>)
 }
-impl ToTokens for RdxlExprE {
+impl ToTokens for XhtmlExprE {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
-           RdxlExprE::E(e) => {
+           XhtmlExprE::E(e) => {
               let ss = Span::call_site();
 
               tokens.append(Ident::new("stream", ss.clone()));
@@ -78,10 +78,10 @@ impl ToTokens for RdxlExprE {
               let gr = Group::new(Delimiter::Parenthesis, ts);
               tokens.append(gr);
               tokens.append(Punct::new(';', Spacing::Alone));
-           }, RdxlExprE::S(e) => {
+           }, XhtmlExprE::S(e) => {
               e.to_tokens(tokens);
               tokens.append(Punct::new(';', Spacing::Alone));
-           }, RdxlExprE::F(f,p,i,cs) => {
+           }, XhtmlExprE::F(f,p,i,cs) => {
               tokens.append(Ident::new("for", f.span.clone()));
               p.to_tokens(tokens);
               tokens.append(Ident::new("in", f.span.clone())); 
@@ -93,7 +93,7 @@ impl ToTokens for RdxlExprE {
               }
               let egr = Group::new(Delimiter::Brace, ets);
               tokens.append(egr);
-           }, RdxlExprE::I(i,c,bs,es,e) => {
+           }, XhtmlExprE::I(i,c,bs,es,e) => {
               tokens.append(Ident::new("if", i.span.clone()));
               c.to_tokens(tokens);
 
@@ -125,7 +125,7 @@ impl ToTokens for RdxlExprE {
                  let egr = Group::new(Delimiter::Brace, ets);
                  tokens.append(egr);
               }
-           }, RdxlExprE::W(w,i,cs) => {
+           }, XhtmlExprE::W(w,i,cs) => {
               tokens.append(Ident::new("while", w.span.clone()));
               i.to_tokens(tokens);
 
@@ -135,7 +135,7 @@ impl ToTokens for RdxlExprE {
               }
               let egr = Group::new(Delimiter::Brace, ets);
               tokens.append(egr);
-           }, RdxlExprE::L(t,l,e) => {
+           }, XhtmlExprE::L(t,l,e) => {
               tokens.append(Ident::new("let", t.span.clone()));
               l.to_tokens(tokens);
               tokens.append(Punct::new('=', Spacing::Alone));
@@ -145,7 +145,7 @@ impl ToTokens for RdxlExprE {
         }
     }
 }
-impl Parse for RdxlExprE {
+impl Parse for XhtmlExprE {
     fn parse(input: ParseStream) -> Result<Self> {
        if input.peek(Token![for]) {
           let _for: Token![for] = input.parse()?;
@@ -156,8 +156,8 @@ impl Parse for RdxlExprE {
           let content2;
           let _brace1 = braced!(content in input);
           let _brace2 = braced!(content2 in content);
-          let body: Vec<RdxlCrumb> = content2.call(RdxlCrumb::parse_outer)?;
-          Ok(RdxlExprE::F(_for,pat,iter,body))
+          let body: Vec<XhtmlCrumb> = content2.call(XhtmlCrumb::parse_outer)?;
+          Ok(XhtmlExprE::F(_for,pat,iter,body))
        } else if input.peek(Token![while]) {
           let _while: Token![while] = input.parse()?;
           let iter: Expr = input.parse()?;
@@ -165,8 +165,8 @@ impl Parse for RdxlExprE {
           let content2;
           let _brace1 = braced!(content in input);
           let _brace2 = braced!(content2 in content);
-          let body: Vec<RdxlCrumb> = content2.call(RdxlCrumb::parse_outer)?;
-          Ok(RdxlExprE::W(_while,iter,body))
+          let body: Vec<XhtmlCrumb> = content2.call(XhtmlCrumb::parse_outer)?;
+          Ok(XhtmlExprE::W(_while,iter,body))
        } else if input.peek(Token![if]) {
           let _if: Token![if] = input.parse()?;
           let b: Expr = input.parse()?;
@@ -176,7 +176,7 @@ impl Parse for RdxlExprE {
           let content2;
           let _brace1 = braced!(content in input);
           let _brace2 = braced!(content2 in content);
-          let body: Vec<RdxlCrumb> = content2.call(RdxlCrumb::parse_outer)?;
+          let body: Vec<XhtmlCrumb> = content2.call(XhtmlCrumb::parse_outer)?;
 
           while input.peek(Token![else]) && input.peek2(Token![if]) {
              let _else: Token![else] = input.parse()?;
@@ -186,7 +186,7 @@ impl Parse for RdxlExprE {
              let content2;
              let _brace1 = braced!(content in input);
              let _brace2 = braced!(content2 in content);
-             let e = content2.call(RdxlCrumb::parse_outer)?;
+             let e = content2.call(XhtmlCrumb::parse_outer)?;
              es.push((b,e));
           }
 
@@ -196,63 +196,63 @@ impl Parse for RdxlExprE {
              let content2;
              let _brace1 = braced!(content in input);
              let _brace2 = braced!(content2 in content);
-             e = content2.call(RdxlCrumb::parse_outer)?;
+             e = content2.call(XhtmlCrumb::parse_outer)?;
           }
 
-          Ok(RdxlExprE::I(_if,b,body,es,e))
+          Ok(XhtmlExprE::I(_if,b,body,es,e))
        } else if input.peek(Token![let]) {
           let _let: Token![let] = input.parse()?;
           let pat: Pat = input.parse()?;
           let _eq: Token![=] = input.parse()?;
           let expr: Expr = input.parse()?;
-          Ok(RdxlExprE::L(_let,pat,expr))
+          Ok(XhtmlExprE::L(_let,pat,expr))
        } else {
           let e: Expr = input.parse()?;
           if input.peek(Token![;]) {
              let _semi: Token![;] = input.parse()?;
-             Ok(RdxlExprE::S(e))
+             Ok(XhtmlExprE::S(e))
           } else {
-             Ok(RdxlExprE::E(e))
+             Ok(XhtmlExprE::E(e))
           }
        }
     }
 }
 
-pub struct RdxlExpr {
+pub struct XhtmlExpr {
    brace_token1: Brace,
    _brace_token2: Brace,
-   expr: RdxlExprE
+   expr: XhtmlExprE
 }
-impl Parse for RdxlExpr {
+impl Parse for XhtmlExpr {
     fn parse(input: ParseStream) -> Result<Self> {
         let _content;
         let content2;
-        Ok(RdxlExpr {
+        Ok(XhtmlExpr {
            brace_token1: braced!(_content in input),
            _brace_token2: braced!(content2 in _content),
-           expr: content2.call(RdxlExprE::parse)?,
+           expr: content2.call(XhtmlExprE::parse)?,
         })
     }
 }
-impl ToTokens for RdxlExpr {
+impl ToTokens for XhtmlExpr {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         self.expr.to_tokens(tokens)
     }
 }
 
-pub enum RdxlAttr {
+pub enum XhtmlAttr {
    S(String),
-   F(RdxlExprF),
-   E(RdxlExpr)
+   F(XhtmlExprF),
+   E(XhtmlExpr)
 }
 
-pub struct RdxlTag {
+pub struct XhtmlTag {
    tag: String,
-   attrs: Vec<(String,RdxlAttr)>,
-   inner: Rdxl,
+   attrs: Vec<(String,XhtmlAttr)>,
+   inner: Xhtml,
    span: Span
 }
-impl ToTokens for RdxlTag {
+impl ToTokens for XhtmlTag {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         tokens.append(Ident::new("stream", self.span.clone()));
         tokens.append(Punct::new('.', Spacing::Alone));
@@ -270,18 +270,18 @@ impl ToTokens for RdxlTag {
             let mut ts = proc_macro2::TokenStream::new();
 
             match v {
-               RdxlAttr::S(s) => {
+               XhtmlAttr::S(s) => {
                   ts.append(Literal::string(&format!(" {}={}", k, s)));
                   let gr = Group::new(Delimiter::Parenthesis, ts);
                   tokens.append(gr);
                   tokens.append(Punct::new(';', Spacing::Alone));
-               }, RdxlAttr::F(f) => {
+               }, XhtmlAttr::F(f) => {
                   ts.append(Literal::string(&format!(" {}=", k)));
                   let gr = Group::new(Delimiter::Parenthesis, ts);
                   tokens.append(gr);
                   tokens.append(Punct::new(';', Spacing::Alone));
                   f.to_tokens(tokens);
-               }, RdxlAttr::E(e) => {
+               }, XhtmlAttr::E(e) => {
                   ts.append(Literal::string(&format!(" {}=", k)));
                   let gr = Group::new(Delimiter::Parenthesis, ts);
                   tokens.append(gr);
@@ -323,12 +323,12 @@ impl ToTokens for RdxlTag {
         }
     }
 }
-impl Parse for RdxlTag {
+impl Parse for XhtmlTag {
     fn parse(input: ParseStream) -> Result<Self> {
         let l1: Token![<] = input.parse()?;
         let t: Ident = input.parse()?;
 
-        let mut attrs: Vec<(String,RdxlAttr)> = Vec::new();
+        let mut attrs: Vec<(String,XhtmlAttr)> = Vec::new();
         while input.peek(SynIdent) ||
               input.peek(Token![as]) ||
               input.peek(Token![break]) ||
@@ -399,14 +399,14 @@ impl Parse for RdxlTag {
             } else { let key: Ident = input.parse()?; key.to_string() };
             let _eq: Token![=] = input.parse()?;
             if input.peek(Bracket) {
-               let f: RdxlExprF = RdxlExprF::parse(key.clone(),input)?;
-               attrs.push(( key.clone(), RdxlAttr::F(f) ));
+               let f: XhtmlExprF = XhtmlExprF::parse(key.clone(),input)?;
+               attrs.push(( key.clone(), XhtmlAttr::F(f) ));
             } else if input.peek(Brace) {
-               let e: RdxlExpr = input.parse()?;
-               attrs.push(( key, RdxlAttr::E(e) ));
+               let e: XhtmlExpr = input.parse()?;
+               attrs.push(( key, XhtmlAttr::E(e) ));
             } else {
                let val: Literal = input.parse()?;
-               attrs.push(( key, RdxlAttr::S(val.to_string()) ));
+               attrs.push(( key, XhtmlAttr::S(val.to_string()) ));
             }
         }
 
@@ -414,16 +414,16 @@ impl Parse for RdxlTag {
            let _r1: Token![/] = input.parse()?;
            let _r2: Token![>] = input.parse()?;
 
-           Ok(RdxlTag {
+           Ok(XhtmlTag {
               tag: t.to_string(),
               attrs: attrs,
-              inner: Rdxl { crumbs: vec!() },
+              inner: Xhtml { crumbs: vec!() },
               span: l1.span.clone()
            })
         } else {
            let _l2: Token![>] = input.parse()?;
 
-           let inner: Rdxl = input.parse()?;
+           let inner: Xhtml = input.parse()?;
 
            let _r1: Token![<] = input.parse()?;
            let _r2: Token![/] = input.parse()?;
@@ -435,7 +435,7 @@ impl Parse for RdxlTag {
            }
            let _r3: Token![>] = input.parse()?;
         
-           Ok(RdxlTag {
+           Ok(XhtmlTag {
               tag: t.to_string(),
               attrs: attrs,
               inner: inner,
@@ -445,21 +445,21 @@ impl Parse for RdxlTag {
     }
 }
 
-enum RdxlCrumb {
+enum XhtmlCrumb {
    L(LitStr),
    S(String, Span),
-   T(RdxlTag),
-   E(RdxlExpr),
-   F(RdxlExprF),
+   T(XhtmlTag),
+   E(XhtmlExpr),
+   F(XhtmlExprF),
 }
-impl RdxlCrumb {
+impl XhtmlCrumb {
     fn span(&self) -> Span {
         match self {
-            RdxlCrumb::S(_,sp) => { sp.clone() }
-            RdxlCrumb::T(t) => { t.span.clone() }
-            RdxlCrumb::E(e) => { e.brace_token1.span.clone() }
-            RdxlCrumb::F(_) => { Span::call_site() }
-            RdxlCrumb::L(l) => { l.span() }
+            XhtmlCrumb::S(_,sp) => { sp.clone() }
+            XhtmlCrumb::T(t) => { t.span.clone() }
+            XhtmlCrumb::E(e) => { e.brace_token1.span.clone() }
+            XhtmlCrumb::F(_) => { Span::call_site() }
+            XhtmlCrumb::L(l) => { l.span() }
         }
     }
     fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
@@ -523,192 +523,192 @@ impl RdxlCrumb {
               (input.peek(Token![<]) && !input.peek2(Token![/])) {
 
 
-           let c: RdxlCrumb = input.parse()?;
+           let c: XhtmlCrumb = input.parse()?;
            cs.push(c);
         }
         Ok(cs)
     }
 }
-impl Parse for RdxlCrumb {
+impl Parse for XhtmlCrumb {
     fn parse(input: ParseStream) -> Result<Self> {
         if input.peek(Token![<]) {
-           let t: RdxlTag = input.parse()?;
-           Ok(RdxlCrumb::T(t))
+           let t: XhtmlTag = input.parse()?;
+           Ok(XhtmlCrumb::T(t))
         } else if input.peek(Bracket) {
-           let f: RdxlExprF = RdxlExprF::parse("markup".to_string(),input)?;
-           Ok(RdxlCrumb::F(f))
+           let f: XhtmlExprF = XhtmlExprF::parse("markup".to_string(),input)?;
+           Ok(XhtmlCrumb::F(f))
         } else if input.peek(Brace) {
-           let e: RdxlExpr = input.parse()?;
-           Ok(RdxlCrumb::E(e))
+           let e: XhtmlExpr = input.parse()?;
+           Ok(XhtmlCrumb::E(e))
         } else if input.peek(LitStr) {
            let lit: LitStr = input.parse()?;
-           Ok(RdxlCrumb::L(lit))
+           Ok(XhtmlCrumb::L(lit))
         } else if input.peek(Token![!]) {
            let id: Token![!] = input.parse()?;
-           Ok(RdxlCrumb::S("!".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("!".to_string(), id.span.clone()))
         } else if input.peek(Token![#]) {
            let id: Token![#] = input.parse()?;
-           Ok(RdxlCrumb::S("#".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("#".to_string(), id.span.clone()))
         } else if input.peek(Token![@]) {
            let id: Token![@] = input.parse()?;
-           Ok(RdxlCrumb::S("@".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("@".to_string(), id.span.clone()))
         } else if input.peek(Token![$]) {
            let id: Token![$] = input.parse()?;
-           Ok(RdxlCrumb::S("$".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("$".to_string(), id.span.clone()))
         } else if input.peek(Token![%]) {
            let id: Token![%] = input.parse()?;
-           Ok(RdxlCrumb::S("%".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("%".to_string(), id.span.clone()))
         } else if input.peek(Token![^]) {
            let id: Token![^] = input.parse()?;
-           Ok(RdxlCrumb::S("^".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("^".to_string(), id.span.clone()))
         } else if input.peek(Token![*]) {
            let id: Token![*] = input.parse()?;
-           Ok(RdxlCrumb::S("*".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("*".to_string(), id.span.clone()))
         } else if input.peek(Token![-]) {
            let id: Token![-] = input.parse()?;
-           Ok(RdxlCrumb::S("-".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("-".to_string(), id.span.clone()))
         } else if input.peek(Token![+]) {
            let id: Token![+] = input.parse()?;
-           Ok(RdxlCrumb::S("+".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("+".to_string(), id.span.clone()))
         } else if input.peek(Token![=]) {
            let id: Token![=] = input.parse()?;
-           Ok(RdxlCrumb::S("=".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("=".to_string(), id.span.clone()))
         } else if input.peek(Token![|]) {
            let id: Token![|] = input.parse()?;
-           Ok(RdxlCrumb::S("|".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("|".to_string(), id.span.clone()))
         } else if input.peek(Token![:]) {
            let id: Token![:] = input.parse()?;
-           Ok(RdxlCrumb::S(":".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S(":".to_string(), id.span.clone()))
         } else if input.peek(Token![;]) {
            let id: Token![;] = input.parse()?;
-           Ok(RdxlCrumb::S(";".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S(";".to_string(), id.span.clone()))
         } else if input.peek(Token![,]) {
            let id: Token![,] = input.parse()?;
-           Ok(RdxlCrumb::S(",".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S(",".to_string(), id.span.clone()))
         } else if input.peek(Token![.]) {
            let id: Token![.] = input.parse()?;
-           Ok(RdxlCrumb::S(".".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S(".".to_string(), id.span.clone()))
         } else if input.peek(Token![?]) {
            let id: Token![?] = input.parse()?;
-           Ok(RdxlCrumb::S("?".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("?".to_string(), id.span.clone()))
         } else if input.peek(Token![&]) {
            let id: Token![&] = input.parse()?;
-           Ok(RdxlCrumb::S("&".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("&".to_string(), id.span.clone()))
         } else if input.peek(Token![/]) {
            let id: Token![/] = input.parse()?;
-           Ok(RdxlCrumb::S("/".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("/".to_string(), id.span.clone()))
         } else if input.peek(Token![~]) {
            let id: Token![~] = input.parse()?;
-           Ok(RdxlCrumb::S("~".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("~".to_string(), id.span.clone()))
         } else if input.peek(Token![as]) {
            let id: Token![as] = input.parse()?;
-           Ok(RdxlCrumb::S("as".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("as".to_string(), id.span.clone()))
         } else if input.peek(Token![break]) {
            let id: Token![break] = input.parse()?;
-           Ok(RdxlCrumb::S("break".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("break".to_string(), id.span.clone()))
         } else if input.peek(Token![const]) {
            let id: Token![const] = input.parse()?;
-           Ok(RdxlCrumb::S("const".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("const".to_string(), id.span.clone()))
         } else if input.peek(Token![continue]) {
            let id: Token![continue] = input.parse()?;
-           Ok(RdxlCrumb::S("continue".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("continue".to_string(), id.span.clone()))
         } else if input.peek(Token![crate]) {
            let id: Token![crate] = input.parse()?;
-           Ok(RdxlCrumb::S("crate".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("crate".to_string(), id.span.clone()))
         } else if input.peek(Token![else]) {
            let id: Token![else] = input.parse()?;
-           Ok(RdxlCrumb::S("else".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("else".to_string(), id.span.clone()))
         } else if input.peek(Token![enum]) {
            let id: Token![enum] = input.parse()?;
-           Ok(RdxlCrumb::S("enum".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("enum".to_string(), id.span.clone()))
         } else if input.peek(Token![extern]) {
            let id: Token![extern] = input.parse()?;
-           Ok(RdxlCrumb::S("extern".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("extern".to_string(), id.span.clone()))
         } else if input.peek(Token![fn]) {
            let id: Token![fn] = input.parse()?;
-           Ok(RdxlCrumb::S("fn".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("fn".to_string(), id.span.clone()))
         } else if input.peek(Token![for]) {
            let id: Token![for] = input.parse()?;
-           Ok(RdxlCrumb::S("for".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("for".to_string(), id.span.clone()))
         } else if input.peek(Token![if]) {
            let id: Token![if] = input.parse()?;
-           Ok(RdxlCrumb::S("if".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("if".to_string(), id.span.clone()))
         } else if input.peek(Token![impl]) {
            let id: Token![impl] = input.parse()?;
-           Ok(RdxlCrumb::S("impl".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("impl".to_string(), id.span.clone()))
         } else if input.peek(Token![in]) {
            let id: Token![in] = input.parse()?;
-           Ok(RdxlCrumb::S("in".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("in".to_string(), id.span.clone()))
         } else if input.peek(Token![let]) {
            let id: Token![let] = input.parse()?;
-           Ok(RdxlCrumb::S("let".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("let".to_string(), id.span.clone()))
         } else if input.peek(Token![loop]) {
            let id: Token![loop] = input.parse()?;
-           Ok(RdxlCrumb::S("loop".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("loop".to_string(), id.span.clone()))
         } else if input.peek(Token![match]) {
            let id: Token![match] = input.parse()?;
-           Ok(RdxlCrumb::S("match".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("match".to_string(), id.span.clone()))
         } else if input.peek(Token![mod]) {
            let id: Token![mod] = input.parse()?;
-           Ok(RdxlCrumb::S("mod".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("mod".to_string(), id.span.clone()))
         } else if input.peek(Token![move]) {
            let id: Token![move] = input.parse()?;
-           Ok(RdxlCrumb::S("move".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("move".to_string(), id.span.clone()))
         } else if input.peek(Token![mut]) {
            let id: Token![mut] = input.parse()?;
-           Ok(RdxlCrumb::S("mut".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("mut".to_string(), id.span.clone()))
         } else if input.peek(Token![pub]) {
            let id: Token![pub] = input.parse()?;
-           Ok(RdxlCrumb::S("pub".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("pub".to_string(), id.span.clone()))
         } else if input.peek(Token![ref]) {
            let id: Token![ref] = input.parse()?;
-           Ok(RdxlCrumb::S("ref".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("ref".to_string(), id.span.clone()))
         } else if input.peek(Token![return]) {
            let id: Token![return] = input.parse()?;
-           Ok(RdxlCrumb::S("return".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("return".to_string(), id.span.clone()))
         } else if input.peek(Token![self]) {
            let id: Token![self] = input.parse()?;
-           Ok(RdxlCrumb::S("self".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("self".to_string(), id.span.clone()))
         } else if input.peek(Token![Self]) {
            let id: Token![Self] = input.parse()?;
-           Ok(RdxlCrumb::S("Self".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("Self".to_string(), id.span.clone()))
         } else if input.peek(Token![static]) {
            let id: Token![static] = input.parse()?;
-           Ok(RdxlCrumb::S("static".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("static".to_string(), id.span.clone()))
         } else if input.peek(Token![struct]) {
            let id: Token![struct] = input.parse()?;
-           Ok(RdxlCrumb::S("struct".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("struct".to_string(), id.span.clone()))
         } else if input.peek(Token![super]) {
            let id: Token![super] = input.parse()?;
-           Ok(RdxlCrumb::S("super".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("super".to_string(), id.span.clone()))
         } else if input.peek(Token![trait]) {
            let id: Token![trait] = input.parse()?;
-           Ok(RdxlCrumb::S("trait".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("trait".to_string(), id.span.clone()))
         } else if input.peek(Token![type]) {
            let id: Token![type] = input.parse()?;
-           Ok(RdxlCrumb::S("type".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("type".to_string(), id.span.clone()))
         } else if input.peek(Token![unsafe]) {
            let id: Token![unsafe] = input.parse()?;
-           Ok(RdxlCrumb::S("unsafe".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("unsafe".to_string(), id.span.clone()))
         } else if input.peek(Token![use]) {
            let id: Token![use] = input.parse()?;
-           Ok(RdxlCrumb::S("use".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("use".to_string(), id.span.clone()))
         } else if input.peek(Token![where]) {
            let id: Token![where] = input.parse()?;
-           Ok(RdxlCrumb::S("where".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("where".to_string(), id.span.clone()))
         } else if input.peek(Token![while]) {
            let id: Token![while] = input.parse()?;
-           Ok(RdxlCrumb::S("while".to_string(), id.span.clone()))
+           Ok(XhtmlCrumb::S("while".to_string(), id.span.clone()))
         } else {
            let id: Ident = input.parse()?;
-           Ok(RdxlCrumb::S(id.to_string(), id.span().clone()))
+           Ok(XhtmlCrumb::S(id.to_string(), id.span().clone()))
         }
     }
 }
-impl ToTokens for RdxlCrumb {
+impl ToTokens for XhtmlCrumb {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
-           RdxlCrumb::S(s,ss) => {
+           XhtmlCrumb::S(s,ss) => {
               tokens.append(Ident::new("stream", ss.clone()));
               tokens.append(Punct::new('.', Spacing::Alone));
               tokens.append(Ident::new("push_str", ss.clone()));
@@ -720,7 +720,7 @@ impl ToTokens for RdxlCrumb {
 
               tokens.append(Punct::new(';', Spacing::Alone));
            },
-           RdxlCrumb::L(l) => {
+           XhtmlCrumb::L(l) => {
               let ss = l.span().clone();
               tokens.append(Ident::new("stream", ss.clone()));
               tokens.append(Punct::new('.', Spacing::Alone));
@@ -733,23 +733,23 @@ impl ToTokens for RdxlCrumb {
 
               tokens.append(Punct::new(';', Spacing::Alone));
            },
-           RdxlCrumb::T(t) => {
+           XhtmlCrumb::T(t) => {
               t.to_tokens(tokens);
            }
-           RdxlCrumb::E(e) => {
+           XhtmlCrumb::E(e) => {
               e.to_tokens(tokens);
            }
-           RdxlCrumb::F(e) => {
+           XhtmlCrumb::F(e) => {
               e.to_tokens(tokens);
            }
         }
     }
 }
 
-pub struct Rdxl {
-    crumbs: Vec<RdxlCrumb>
+pub struct Xhtml {
+    crumbs: Vec<XhtmlCrumb>
 }
-impl ToTokens for Rdxl {
+impl ToTokens for Xhtml {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let mut prev: Option<Span> = None;
         for c in self.crumbs.iter() {
@@ -775,11 +775,11 @@ impl ToTokens for Rdxl {
     }
 }
 
-impl Parse for Rdxl {
+impl Parse for Xhtml {
     fn parse(input: ParseStream) -> Result<Self> {
-        let crumbs: Vec<RdxlCrumb> = input.call(RdxlCrumb::parse_outer)?;
+        let crumbs: Vec<XhtmlCrumb> = input.call(XhtmlCrumb::parse_outer)?;
 
-        Ok(Rdxl {
+        Ok(Xhtml {
             crumbs: crumbs
         })
     }

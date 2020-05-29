@@ -68,13 +68,12 @@ use quote::{quote};
 
 #[proc_macro]
 pub fn xhtml(input: TokenStream) -> TokenStream {
-    let rdxls = parse_macro_input!(input as xhtml::Rdxl);
+    let xhtmls = parse_macro_input!(input as xhtml::Xhtml);
 
-    // Build the output, possibly using quasi-quotation
     let expanded = quote! {
         {
             let mut stream = String::new();
-            #rdxls
+            #xhtmls
             stream
         }
     };
