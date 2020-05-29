@@ -14,7 +14,7 @@ xrender!(MyList, <ul>
     {{ if let MyListChildren::MyItem(my_item) = i {{
       <li>MyItem: {{ my_item.my_bool }}</li>
     }} else if let MyListChildren::MyOtherItem(my_other_item) = i {{
-      <li>MyOtherItem: {{ my_other_item.char }}</li>
+      <li>MyOtherItem: {{ my_other_item.my_char }}</li>
     }} }}
   }} }}
 </ul>);

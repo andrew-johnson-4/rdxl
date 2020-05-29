@@ -68,6 +68,28 @@ impl ToTokens for XType {
 
        let gr = Group::new(Delimiter::Brace, ts);
        tokens.append(gr);
+
+       if self.tag_children.len()>1 {
+          tokens.append(Ident::new("enum", span.clone()));
+          tokens.append(Ident::new(&format!("{}Children", self.tag_name.to_string()), span.clone()));
+
+          let mut ts = proc_macro2::TokenStream::new();
+          for child in self.tag_children.iter() {
+             ts.append(Ident::new(&child.tag_name.to_string(), span.clone()));
+             let mut ets = proc_macro2::TokenStream::new();
+             ets.append(Ident::new(&child.tag_name.to_string(), span.clone()));
+             let egr = Group::new(Delimiter::Parenthesis, ets);
+             ts.append(egr);
+             ts.append(Punct::new(',', Spacing::Alone));
+          }
+
+          let gr = Group::new(Delimiter::Brace, ts);
+          tokens.append(gr);
+       }
+
+       for child in self.tag_children.iter() {
+          child.to_tokens(tokens);
+       }
     }
 }
 
