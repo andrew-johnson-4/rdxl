@@ -3,14 +3,15 @@
 // see the LICENSE file or <http://opensource.org/licenses/MIT>
 // also see LICENSE2 file or <https://www.apache.org/licenses/LICENSE-2.0>
 
-use quote::{ToTokens};
-use proc_macro2::Ident;
+use quote::{TokenStreamExt, ToTokens};
+use proc_macro2::{Punct, Ident, Spacing, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent,Type,Token};
+use syn::spanned::Spanned;
 
 pub struct XTypeAttr {
    pub attr_name: Ident,
-   pub eq: Token![=],
+   pub eq: Token![:],
    pub attr_type: Type
 }
 impl Parse for XTypeAttr {
@@ -30,13 +31,32 @@ pub struct XType {
    pub tag_children: Vec<XType>,
    pub close: Token![>],
 }
+
 impl ToTokens for XType {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+       let span = self.open.span.join(self.close.span).unwrap();
+
+       tokens.append(Ident::new("struct", span.clone()));
+       tokens.append(Ident::new(&self.tag_name.to_string(), span.clone()));
+
+       let mut ts = proc_macro2::TokenStream::new();
+       for attr in self.tag_attrs.iter() {
+          let span = attr.attr_name.span().join(attr.attr_type.span()).unwrap();
+          ts.append(Ident::new(&attr.attr_name.to_string(), span.clone()));
+          ts.append(Punct::new(':', Spacing::Alone));
+          attr.attr_type.to_tokens(&mut ts);
+          ts.append(Punct::new(',', Spacing::Alone));
+       }
+
+       let gr = Group::new(Delimiter::Brace, ts);
+       tokens.append(gr);
     }
 }
+
 impl Parse for XType {
     fn parse(input: ParseStream) -> Result<Self> {
         let open: Token![<] = input.parse()?;
+        let _exc: Token![!] = input.parse()?;
         let tag_name: SynIdent = input.parse()?;
 
         let mut tag_attrs = Vec::new();
