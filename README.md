@@ -22,19 +22,17 @@ xtype!(<!MyList my_string:String my_int:u64>
    <!MyOtherItem my_char:char/>
 </MyList>)
 
-xrender!(MyList, |my_list| {
-  <ul>
-    <li>{{ my_list.my_string }}</li>
-    <li>{{ my_list.my_int }}</li>
-    {{ for i in my_list.children.iter() {{
-      {{ if let MyListChildren::MyItem(my_item) = i {{
-        <li>MyItem: {{ my_item.my_bool }}</li>
-      }} else if let MyListChildren::MyOtherItem(my_other_item) = i {{
-        <li>MyOtherItem: {{ my_other_item.char }}</li>
-      }} }}
+xrender!(MyList, <ul>
+  <li>{{ self.my_string }}</li>
+  <li>{{ self.my_int }}</li>
+  {{ for i in self.children.iter() {{
+    {{ if let MyListChildren::MyItem(my_item) = i {{
+      <li>MyItem: {{ my_item.my_bool }}</li>
+    }} else if let MyListChildren::MyOtherItem(my_other_item) = i {{
+      <li>MyOtherItem: {{ my_other_item.char }}</li>
     }} }}
-  </ul>
-})
+  }} }}
+</ul>)
 ```
 
 ## Contribution
