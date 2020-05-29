@@ -1,10 +1,11 @@
 #![feature(proc_macro_hygiene)]
 use rdxl::{xhtml,xtype,xrender};
+use std::fmt;
 
 xtype!(<!MyList my_string:String my_int:u64>
    <!MyItem my_bool:bool/>
    <!MyOtherItem my_char:char/>
-</MyList>)
+</MyList>);
 
 xrender!(MyList, <ul>
   <li>{{ self.my_string }}</li>
@@ -16,7 +17,7 @@ xrender!(MyList, <ul>
       <li>MyOtherItem: {{ my_other_item.char }}</li>
     }} }}
   }} }}
-</ul>)
+</ul>);
 
 fn main(){
    println!("{}", xhtml!(<!MyList my_string="abcdefg" my_int=33>

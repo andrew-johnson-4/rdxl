@@ -61,6 +61,7 @@
 #![crate_type = "proc-macro"]
 
 mod xhtml;
+mod xrender;
 
 use proc_macro::{TokenStream};
 use syn::{parse_macro_input};
@@ -76,6 +77,27 @@ pub fn xhtml(input: TokenStream) -> TokenStream {
             #xhtmls
             stream
         }
+    };
+
+    TokenStream::from(expanded)
+}
+
+#[proc_macro]
+pub fn xrender(input: TokenStream) -> TokenStream {
+    let xrender = parse_macro_input!(input as xrender::XRender);
+
+    let xname = xrender.name;
+    let xxhtml = xrender.xhtml;
+
+    let expanded = quote! {
+       impl std::fmt::Display for #xname {
+          fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+              let mut stream = String::new();
+              #xxhtml
+     
+              f.write_str(&stream)
+          }
+       }
     };
 
     TokenStream::from(expanded)

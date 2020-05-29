@@ -20,7 +20,7 @@ Modularized templating is encouraged through custom XML elements:
 xtype!(<!MyList my_string:String my_int:u64>
    <!MyItem my_bool:bool/>
    <!MyOtherItem my_char:char/>
-</MyList>)
+</MyList>);
 
 xrender!(MyList, <ul>
   <li>{{ self.my_string }}</li>
@@ -32,7 +32,7 @@ xrender!(MyList, <ul>
       <li>MyOtherItem: {{ my_other_item.char }}</li>
     }} }}
   }} }}
-</ul>)
+</ul>);
 ```
 
 ## Contribution
