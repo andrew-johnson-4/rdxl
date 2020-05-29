@@ -25,8 +25,8 @@ fn main(){
    println!("{}", xhtml!(<!MyList my_string="abcdefg" my_int=33>
      <!MyItem my_bool=true/>
      <!MyItem my_bool=false/>
-     <!MyOtherItem='a'/>
+     <!MyOtherItem my_char='a'/>
      <!MyItem my_bool=false/>
-     <!MyOtherItem='c'/>
+     <!MyOtherItem my_char='c'/>
    </MyList>));
 }

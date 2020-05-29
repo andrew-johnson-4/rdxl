@@ -6,7 +6,7 @@
 use quote::{TokenStreamExt, ToTokens};
 use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
-use syn::{Ident as SynIdent, Token, Expr, Pat, LitStr, bracketed, braced};
+use syn::{Ident as SynIdent, Token, Expr, Pat, LitChar, LitBool, LitStr, LitInt, bracketed, braced};
 use syn::token::{Bracket,Brace};
 
 pub struct XhtmlExprF {
@@ -253,15 +253,33 @@ impl XhtmlAttr {
       } else if input.peek(Brace) {
          let e: XhtmlExpr = input.parse()?;
          Ok(XhtmlAttr::E(e))
+      } else if input.peek(LitBool) {
+         let b: LitBool = input.parse()?;
+         Ok(XhtmlAttr::S(format!("{}", b.value)))
+      } else if input.peek(LitInt) {
+         let b: LitInt = input.parse()?;
+         Ok(XhtmlAttr::S(format!("{}", b.base10_digits())))
+      } else if input.peek(LitChar) {
+         let b: LitChar = input.parse()?;
+         Ok(XhtmlAttr::S(format!("'{}'", b.value())))
       } else {
-         let val: Literal = input.parse()?;
-         Ok(XhtmlAttr::S(val.to_string()))
+         let val: LitStr = input.parse()?;
+         Ok(XhtmlAttr::S(val.value()))
       }
    }
 }
 
 
-pub enum XhtmlClassChild {}
+pub enum XhtmlClassChild {
+   C(XhtmlClass)
+}
+impl Parse for XhtmlClassChild {
+    fn parse(input: ParseStream) -> Result<Self> {
+       let c: XhtmlClass = input.parse()?;
+       Ok(XhtmlClassChild::C(c))
+    }
+}
+
 pub struct XhtmlClass {
    open: Token![<],
    name: String,
@@ -296,7 +314,11 @@ impl Parse for XhtmlClass {
        } else {
           let _gt: Token![>] = input.parse()?;
           
-          let children = Vec::new();
+          let mut children = Vec::new();
+          while !(input.peek(Token![<]) && input.peek2(Token![/])) {
+             let c: XhtmlClassChild = input.parse()?;
+             children.push(c);
+          }
 
           let _lt: Token![<] = input.parse()?;
           let _slash: Token![/] = input.parse()?;
