@@ -61,6 +61,7 @@
 #![crate_type = "proc-macro"]
 
 mod xhtml;
+mod xtype;
 mod xrender;
 
 use proc_macro::{TokenStream};
@@ -98,6 +99,16 @@ pub fn xrender(input: TokenStream) -> TokenStream {
               f.write_str(&stream)
           }
        }
+    };
+
+    TokenStream::from(expanded)
+}
+
+#[proc_macro]
+pub fn xtype(input: TokenStream) -> TokenStream {
+    let _xtype = parse_macro_input!(input as xtype::XType);
+
+    let expanded = quote! {
     };
 
     TokenStream::from(expanded)
