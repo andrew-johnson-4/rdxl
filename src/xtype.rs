@@ -3,6 +3,7 @@
 // see the LICENSE file or <http://opensource.org/licenses/MIT>
 // also see LICENSE2 file or <https://www.apache.org/licenses/LICENSE-2.0>
 
+use quote::{ToTokens};
 use proc_macro2::Ident;
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent,Type,Token};
@@ -28,6 +29,10 @@ pub struct XType {
    pub tag_attrs: Vec<XTypeAttr>,
    pub tag_children: Vec<XType>,
    pub close: Token![>],
+}
+impl ToTokens for XType {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+    }
 }
 impl Parse for XType {
     fn parse(input: ParseStream) -> Result<Self> {

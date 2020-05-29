@@ -106,9 +106,10 @@ pub fn xrender(input: TokenStream) -> TokenStream {
 
 #[proc_macro]
 pub fn xtype(input: TokenStream) -> TokenStream {
-    let _xtype = parse_macro_input!(input as xtype::XType);
+    let xtype = parse_macro_input!(input as xtype::XType);
 
     let expanded = quote! {
+       #xtype
     };
 
     TokenStream::from(expanded)
