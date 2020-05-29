@@ -8,7 +8,6 @@ use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent, Token, Expr, Pat, LitStr, bracketed, braced};
 use syn::token::{Bracket,Brace};
-use syn::spanned::Spanned;
 
 pub struct XhtmlExprF {
    context: String,
@@ -254,6 +253,51 @@ pub struct XhtmlClass {
    attrs: Vec<(String,XhtmlAttr)>,
    children: Vec<XhtmlClassChild>,
    close: Token![>]
+}
+impl Parse for XhtmlClass {
+    fn parse(input: ParseStream) -> Result<Self> {
+       let open: Token![<] = input.parse()?;
+       let _ex: Token![!] = input.parse()?;
+       let name: Ident = input.parse()?;
+
+       let attrs = Vec::new();
+
+       if input.peek(Token![/]) {
+          let _slash: Token![/] = input.parse()?;
+          let close: Token![>] = input.parse()?;
+          Ok(XhtmlClass {
+             open: open,
+             name: name.to_string(),
+             attrs: attrs,
+             children: Vec::new(),
+             close: close
+          })
+       } else {
+          let _gt: Token![>] = input.parse()?;
+          
+          let children = Vec::new();
+
+          let _lt: Token![<] = input.parse()?;
+          let _slash: Token![/] = input.parse()?;
+
+          let close_tag: Ident = input.parse()?;
+          if name.to_string() != close_tag.to_string() {
+              let msg = format!("Expected </{}> found </{}>", name, close_tag);
+              let r = Error::new(close_tag.span(), msg);
+              return Err(r)
+           }
+
+          let close: Token![>] = input.parse()?;
+
+          Ok(XhtmlClass {
+             open: open,
+             name: name.to_string(),
+             attrs: attrs,
+             children: children,
+             close: close
+          })
+       }
+    }
 }
 
 pub struct XhtmlTag {
@@ -757,7 +801,7 @@ impl ToTokens for XhtmlCrumb {
            XhtmlCrumb::F(e) => {
               e.to_tokens(tokens);
            }
-           XhtmlCrumb::C(c) => {
+           XhtmlCrumb::C(_c) => {
            }
         }
     }
