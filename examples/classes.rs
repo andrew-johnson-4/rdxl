@@ -23,10 +23,10 @@ xrender!(MyList, <ul>
 
 fn main(){
    println!("{}", xhtml!(<!MyList my_string="abcdefg" my_int=33>
-     <MyItem my_bool=true/>
-     <MyItem my_bool=false/>
-     <MyOtherItem='a'/>
-     <MyItem my_bool=false/>
-     <MyOtherItem='c'/>
+     <!MyItem my_bool=true/>
+     <!MyItem my_bool=false/>
+     <!MyOtherItem='a'/>
+     <!MyItem my_bool=false/>
+     <!MyOtherItem='c'/>
    </MyList>));
 }

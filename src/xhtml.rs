@@ -245,6 +245,21 @@ pub enum XhtmlAttr {
    F(XhtmlExprF),
    E(XhtmlExpr)
 }
+impl XhtmlAttr {
+   fn parse(input: ParseStream, key: String) -> Result<Self> {
+      if input.peek(Bracket) {
+         let f: XhtmlExprF = XhtmlExprF::parse(key.clone(),input)?;
+         Ok(XhtmlAttr::F(f))
+      } else if input.peek(Brace) {
+         let e: XhtmlExpr = input.parse()?;
+         Ok(XhtmlAttr::E(e))
+      } else {
+         let val: Literal = input.parse()?;
+         Ok(XhtmlAttr::S(val.to_string()))
+      }
+   }
+}
+
 
 pub enum XhtmlClassChild {}
 pub struct XhtmlClass {
@@ -260,7 +275,13 @@ impl Parse for XhtmlClass {
        let _ex: Token![!] = input.parse()?;
        let name: Ident = input.parse()?;
 
-       let attrs = Vec::new();
+       let mut attrs = Vec::new();
+       while input.peek(SynIdent) {
+          let attr_name: Ident = input.parse()?;
+          let _eq: Token![=] = input.parse()?;
+          let attr_val: XhtmlAttr = XhtmlAttr::parse(input, attr_name.to_string())?;
+          attrs.push((attr_name.to_string(), attr_val));
+       }
 
        if input.peek(Token![/]) {
           let _slash: Token![/] = input.parse()?;
@@ -452,16 +473,8 @@ impl Parse for XhtmlTag {
             } else if input.peek(Token![while]) { let _:Token![while] = input.parse()?; "while".to_string()
             } else { let key: Ident = input.parse()?; key.to_string() };
             let _eq: Token![=] = input.parse()?;
-            if input.peek(Bracket) {
-               let f: XhtmlExprF = XhtmlExprF::parse(key.clone(),input)?;
-               attrs.push(( key.clone(), XhtmlAttr::F(f) ));
-            } else if input.peek(Brace) {
-               let e: XhtmlExpr = input.parse()?;
-               attrs.push(( key, XhtmlAttr::E(e) ));
-            } else {
-               let val: Literal = input.parse()?;
-               attrs.push(( key, XhtmlAttr::S(val.to_string()) ));
-            }
+            let attr_expr: XhtmlAttr = XhtmlAttr::parse(input, key.clone())?;
+            attrs.push(( key, attr_expr ));
         }
 
         if input.peek(Token![/]) {
