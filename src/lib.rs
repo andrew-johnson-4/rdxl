@@ -73,7 +73,7 @@ use quote::{quote};
 /// <b>xhtml!</b> consumes mixed Rust code and XML markup as input and emits rendered xhtml to a string buffer.
 /// Rust code is usually delimited by {{double braces}} or [[double brackets]]. The <b>syn</b> module is used to
 /// allow most Rust expressions to be used inside the correct delimited contexts. Control flow structures
-/// such as if/else blocks, loops, and let statements to be used inline.
+/// such as if/else blocks, loops, and let statements may be used inline as well.
 ///
 /// Aside from standard XML syntax, custom types may be defined with <b>xtype!</b> and <b>xrender!</b> facilities. This
 /// encourages typesafe modular templates to be created and shared.
@@ -92,6 +92,9 @@ use quote::{quote};
 ///    {{ y }},
 ///    {{ y = 1; }}
 ///    {{ y }}
+///    {{ for i in 0..x {{
+///       <span>{{i}}</span>
+///    }} }}
 /// </div>));
 /// ```
 #[proc_macro]
@@ -110,6 +113,35 @@ pub fn xhtml(input: TokenStream) -> TokenStream {
 }
 
 /// The xtype! macro defines an xml element and subelements
+///
+/// <b>xtype!</b> removes some of the redundancy of defining types having many attribute fields
+/// and many heterogenous children elements. A typical type definition that is a good fit for
+/// this macro would be *coincidentally* most XML elements.
+///
+/// In <b>xtype!</b>, a definition might look like this:
+/// ```no_run
+/// xtype!(<!MyList my_string:String my_int:u64>
+///   <!MyItem my_bool:bool/>
+///   <!MyOtherItem my_char:char/>
+///   <?MyPredefinedType/>
+/// </MyList>);
+/// ```
+///
+/// In sugar-free Rust this would become like this:
+/// ```no_run
+/// type MyItem { my_bool: bool }
+/// type MyOtherItem { my_char: char }
+/// enum MyListChildren {
+///    MyItem(MyItem),
+///    MyOtherItem(MyOtherItem),
+///    MyPredefinedType(MyPredefinedType)
+/// }
+/// struct MyList {
+///    my_string: String,
+///    my_int: u64,
+///    children: Vec<MyListChildren>
+/// }
+/// ```
 #[proc_macro]
 pub fn xtype(input: TokenStream) -> TokenStream {
     let xtype = parse_macro_input!(input as xtype::XType);
@@ -122,6 +154,23 @@ pub fn xtype(input: TokenStream) -> TokenStream {
 }
 
 /// The xrender! macro defines a Display implementation for a type
+///
+/// <b>xrender!</b> implements the <b>Display</b> property for XHtml-like types.
+/// A typical invocation would look like this:
+/// ```no_run
+/// xrender!(MyList, <ul>
+///   <li>{{ self.my_string }}</li>
+///   <li>{{ self.my_int }}</li>
+///   {{ for i in self.children.iter() {{
+///     {{ if let MyListChildren::MyItem(my_item) = i {{
+///       <li>MyItem: {{ my_item.my_bool }}</li>
+///     }} else if let MyListChildren::MyOtherItem(my_other_item) = i {{
+///       <li>MyOtherItem: {{ my_other_item.my_char }}</li>
+///     }} }}
+///   }} }}
+/// </ul>);
+/// ```
+
 #[proc_macro]
 pub fn xrender(input: TokenStream) -> TokenStream {
     let xrender = parse_macro_input!(input as xrender::XRender);
