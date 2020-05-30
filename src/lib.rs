@@ -68,6 +68,32 @@ use proc_macro::{TokenStream};
 use syn::{parse_macro_input};
 use quote::{quote};
 
+/// The xhtml! macro is the primary mechanism for templating in rdxl
+///
+/// <b>xhtml!</b> consumes mixed Rust code and XML markup as input and emits rendered xhtml to a string buffer.
+/// Rust code is usually delimited by {{double braces}} or [[double brackets]]. The <b>syn</b> module is used to
+/// allow most Rust expressions to be used inside the correct delimited contexts. Control flow structures
+/// such as if/else blocks, loops, and let statements to be used inline.
+///
+/// Aside from standard XML syntax, custom types may be defined with <b>xtype!</b> and <b>xrender!</b> facilities. This
+/// encourages typesafe modular templates to be created and shared.
+///
+/// Use of <b>xhtml!</b> usually looks something like this:
+/// ```no_run
+/// let mut x = 5;
+///
+/// println!("{}",xhtml!(<div>
+///    {{ x }},
+///    {{ x = 3; }}
+///    {{ x }},
+///    {{ x = 7; }}
+///    {{ x }},
+///    {{ let mut y = 2 }}
+///    {{ y }},
+///    {{ y = 1; }}
+///    {{ y }}
+/// </div>));
+/// ```
 #[proc_macro]
 pub fn xhtml(input: TokenStream) -> TokenStream {
     let xhtmls = parse_macro_input!(input as xhtml::Xhtml);
@@ -83,6 +109,19 @@ pub fn xhtml(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
+/// The xtype! macro defines an xml element and subelements
+#[proc_macro]
+pub fn xtype(input: TokenStream) -> TokenStream {
+    let xtype = parse_macro_input!(input as xtype::XType);
+
+    let expanded = quote! {
+       #xtype
+    };
+
+    TokenStream::from(expanded)
+}
+
+/// The xrender! macro defines a Display implementation for a type
 #[proc_macro]
 pub fn xrender(input: TokenStream) -> TokenStream {
     let xrender = parse_macro_input!(input as xrender::XRender);
@@ -104,13 +143,3 @@ pub fn xrender(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
-#[proc_macro]
-pub fn xtype(input: TokenStream) -> TokenStream {
-    let xtype = parse_macro_input!(input as xtype::XType);
-
-    let expanded = quote! {
-       #xtype
-    };
-
-    TokenStream::from(expanded)
-}
