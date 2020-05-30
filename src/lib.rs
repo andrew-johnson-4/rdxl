@@ -156,6 +156,9 @@ pub fn xtype(input: TokenStream) -> TokenStream {
 /// The xrender! macro defines a Display implementation for a type
 ///
 /// <b>xrender!</b> implements the <b>Display</b> property for XHtml-like types.
+/// The type definition is separate from the display logic for in the case that
+/// a separate backend is desired
+///
 /// A typical invocation would look like this:
 /// ```no_run
 /// xrender!(MyList, <ul>
