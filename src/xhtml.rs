@@ -485,7 +485,9 @@ impl ToTokens for XhtmlTag {
             }
         }
 
-        if self.inner.crumbs.len()==0 {
+        let self_closing = vec!["area","base","br","embed","hr","iframe","img",
+           "input","link","meta","param","source","track"];
+        if self.inner.crumbs.len()==0 && self_closing.iter().any(|s| (&self.tag)==s) {
            tokens.append(Ident::new("stream", self.span.clone()));
            tokens.append(Punct::new('.', Spacing::Alone));
            tokens.append(Ident::new("push_str", self.span.clone()));
