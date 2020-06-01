@@ -319,7 +319,7 @@ impl XhtmlAttr {
          Ok(XhtmlAttr::S(format!("'{}'", b.value())))
       } else {
          let val: LitStr = input.parse()?;
-         Ok(XhtmlAttr::S(val.value()))
+         Ok(XhtmlAttr::S(format!("{:?}",val.value())))
       }
    }
 }
