@@ -38,6 +38,7 @@ impl ToTokens for XType {
        if self.defined { return; }
        let span = self.open.span.join(self.close.span).unwrap();
 
+       tokens.append(Ident::new("pub", span.clone()));
        tokens.append(Ident::new("struct", span.clone()));
        tokens.append(Ident::new(&self.tag_name.to_string(), span.clone()));
 
@@ -61,6 +62,7 @@ impl ToTokens for XType {
        let gr = Group::new(Delimiter::Brace, ts);
        tokens.append(gr);
 
+       tokens.append(Ident::new("pub", span.clone()));
        tokens.append(Ident::new("enum", span.clone()));
        tokens.append(Ident::new(&format!("{}Children", self.tag_name.to_string()), span.clone()));
 
