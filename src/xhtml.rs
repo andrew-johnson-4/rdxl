@@ -241,6 +241,7 @@ impl ToTokens for XhtmlExpr {
 }
 
 pub enum XhtmlClassAttr {
+   Cl(XhtmlClass),
    S(String),
    B(bool),
    C(char),
@@ -260,6 +261,9 @@ impl XhtmlClassAttr {
       } else if input.peek(LitChar) {
          let b: LitChar = input.parse()?;
          Ok(XhtmlClassAttr::C(b.value()))
+      } else if input.peek(Token![<]) && input.peek2(Token![!]) {
+         let cl: XhtmlClass = input.parse()?;
+         Ok(XhtmlClassAttr::Cl(cl))
       } else {
          let val: LitStr = input.parse()?;
          Ok(XhtmlClassAttr::S(val.value()))
@@ -280,6 +284,8 @@ impl ToTokens for XhtmlClassAttr {
             tokens.append(gr);
          }, XhtmlClassAttr::B(e) => {
             tokens.append(Ident::new(&format!("{}", e), span.clone()));
+         }, XhtmlClassAttr::Cl(cl) => {
+            cl.to_tokens(tokens);
          }, XhtmlClassAttr::C(e) => {
             let l: Literal = Literal::character(*e);
             tokens.append(l);
