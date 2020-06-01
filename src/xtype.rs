@@ -45,12 +45,14 @@ impl ToTokens for XType {
        let mut ts = proc_macro2::TokenStream::new();
        for attr in self.tag_attrs.iter() {
           let span = attr.attr_name.span().join(attr.attr_type.span()).unwrap();
+          ts.append(Ident::new("pub", span.clone()));
           ts.append(Ident::new(&attr.attr_name.to_string(), span.clone()));
           ts.append(Punct::new(':', Spacing::Alone));
           attr.attr_type.to_tokens(&mut ts);
           ts.append(Punct::new(',', Spacing::Alone));
        }
 
+       ts.append(Ident::new("pub", span.clone()));
        ts.append(Ident::new("children", span.clone()));
        ts.append(Punct::new(':', Spacing::Alone));
        ts.append(Ident::new("Vec", span.clone()));
