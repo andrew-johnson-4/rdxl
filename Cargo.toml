@@ -25,6 +25,14 @@ name = "attr"
 file = "examples/attr.rs"
 
 [[example]]
+name = "classes"
+file = "examples/classes.rs"
+
+[[example]]
+name = "class_as_attr"
+file = "examples/class_as_attr.rs"
+
+[[example]]
 name = "cond"
 file = "examples/cond.rs"
 
