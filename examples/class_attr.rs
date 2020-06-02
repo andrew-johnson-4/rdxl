@@ -19,7 +19,12 @@ xrender!(MyType, <div>
 
 fn main(){
    println!("{}", xhtml!(<!MyType
-     field1={{ MyField{x:1} }}
-     field2=[[ MyField{x:2} ]]
+     field1=<!MyField x=1/>
+     field2=<!MyField2 x="2"/>
+   />));
+
+   println!("{}", xhtml!(<!MyType
+     field1={{ MyField{x:3, children:vec![]} }}
+     field2=[[ MyField{x:4, children:vec![]} ]]
    />));
 }

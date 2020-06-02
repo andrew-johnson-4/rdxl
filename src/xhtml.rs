@@ -1,3 +1,4 @@
+
 // Copyright 2020, The rdxl Project Developers.
 // Dual Licensed under the MIT license and the Apache 2.0 license,
 // see the LICENSE file or <http://opensource.org/licenses/MIT>
@@ -250,8 +251,22 @@ pub enum XhtmlClassAttr {
    E(Expr)
 }
 impl XhtmlClassAttr {
-   fn parse(input: ParseStream, _key: String) -> Result<Self> {
-      if input.peek(LitBool) {
+   fn parse(input: ParseStream, key: String) -> Result<Self> {
+      if input.peek(Bracket) {
+         let _content;
+         let content2;
+         let _bracket_token1:Bracket = bracketed!(_content in input);
+         let _bracket_token2:Bracket = bracketed!(content2 in _content);
+         let e: Expr = content2.parse()?;
+         Ok(XhtmlClassAttr::F(key,e))
+      } else if input.peek(Brace) {
+         let _content;
+         let content2;
+         let _brace_token1:Brace = braced!(_content in input);
+         let _brace_token2:Brace = braced!(content2 in _content);
+         let e: Expr = content2.parse()?;
+         Ok(XhtmlClassAttr::E(e))
+      } else if input.peek(LitBool) {
          let b: LitBool = input.parse()?;
          Ok(XhtmlClassAttr::B(b.value))
       } else if input.peek(LitInt) {
@@ -292,10 +307,15 @@ impl ToTokens for XhtmlClassAttr {
          }, XhtmlClassAttr::U(e) => {
             let l: Literal = Literal::u64_unsuffixed(*e);
             tokens.append(l);
-         }, XhtmlClassAttr::F(_f,_e) => {
-            panic!("unimplemented")
-         }, XhtmlClassAttr::E(_e) => {
-            panic!("unimplemented")
+         }, XhtmlClassAttr::F(f,e) => {
+            e.to_tokens(tokens);
+            tokens.append(Punct::new('.', Spacing::Alone));
+            tokens.append(Ident::new(&format!("to_{}", f), span.clone()));
+            let ets = proc_macro2::TokenStream::new();
+            let egr = Group::new(Delimiter::Parenthesis, ets);
+            tokens.append(egr);
+         }, XhtmlClassAttr::E(e) => {
+            e.to_tokens(tokens);
          }
       }
    }
