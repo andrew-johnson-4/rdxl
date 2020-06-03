@@ -21,9 +21,9 @@ xrender!(MyList, <ul>
   }} }}
 </ul>);
 
+/*
 #[test]
 fn complex_classes(){
-   /*
    assert_eq!(xhtml!(<!MyList my_string="abcdefg" my_int=33>
        <!MyItem my_bool=true/>
        <!MyItem my_bool=false/>
@@ -33,5 +33,5 @@ fn complex_classes(){
      </MyList>),
      "<ul> <li>abcdefg</li> <li>33</li> <li>MyItem: true</li> <li>MyItem: false</li> <li>MyOtherItem: a</li> <li>MyItem: false</li> <li>MyOtherItem: c</li> </ul>".to_string()
    );
-   */
 }
+*/
