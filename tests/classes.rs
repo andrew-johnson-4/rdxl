@@ -21,12 +21,15 @@ xrender!(MyList, <ul>
   }} }}
 </ul>);
 
-fn main(){
-   println!("{}", xhtml!(<!MyList my_string="abcdefg" my_int=33>
-     <!MyItem my_bool=true/>
-     <!MyItem my_bool=false/>
-     <!MyOtherItem my_char='a'/>
-     <!MyItem my_bool=false/>
-     <!MyOtherItem my_char='c'/>
-   </MyList>));
+#[test]
+fn complex_classes(){
+   assert_eq!(xhtml!(<!MyList my_string="abcdefg" my_int=33>
+       <!MyItem my_bool=true/>
+       <!MyItem my_bool=false/>
+       <!MyOtherItem my_char='a'/>
+       <!MyItem my_bool=false/>
+       <!MyOtherItem my_char='c'/>
+     </MyList>),
+     "<ul> <li>abcdefg</li> <li>33</li> <li>MyItem: true</li> <li>MyItem: false</li> <li>MyOtherItem: a</li> <li>MyItem: false</li> <li>MyOtherItem: c</li> </ul>".to_string()
+   );
 }
