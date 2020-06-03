@@ -12,15 +12,22 @@
 //!
 //! # Inline Rust expressions
 //!
-//! ```no_run
+//! ```
+//! # #![feature(proc_macro_hygiene)]
+//! # use rdxl::xhtml;
+//! # fn main() {
 //! let x = 5;
 //! let y = "asdf";
 //! xhtml!({{ x }}, {{ y }})
+//! # ;}
 //! ```
 //!
 //! # Conditional expressions
 //!
-//! ```no_run
+//! ```
+//! # #![feature(proc_macro_hygiene)]
+//! # use rdxl::xhtml;
+//! # fn main() {
 //! let x = 5;
 //! let y = "asdf";
 //! xhtml!({{ if x>3 {{
@@ -30,30 +37,43 @@
 //! }} else {{
 //!   Case Three
 //! }} }})
+//! # ;}
 //! ```
 //!
 //! # Loop expressions
 //!
-//! ```no_run
+//! ```
+//! # #![feature(proc_macro_hygiene)]
+//! # use rdxl::xhtml;
+//! # fn main() {
 //! xhtml!(<ul>{{ for i in 0..10 {{
 //!   <li>{{ i }}</li>
 //! }} }}</ul>)
+//! # ;}
 //! ```
 //!
 //! # Miscellaneous expressions
 //!
-//! ```no_run
+//! ```
+//! # #![feature(proc_macro_hygiene)]
+//! # use rdxl::xhtml;
+//! # fn main() {
 //! xhtml!(
 //!   {{ let x = 5; }}
 //!   {{ x }}
 //! )
+//! # ;}
 //! ```
 //!
 //! # Html attributes
-//! ```no_run
+//! ```
+//! # #![feature(proc_macro_hygiene)]
+//! # use rdxl::xhtml;
+//! # fn main() {
 //! xhtml!(<div style={{ "\"color:red;\"" }}>
 //!   inside div
-//! </div>)
+//! </div>);
+//! # ;}
 //! ```
 
 #![recursion_limit = "128"]
@@ -79,7 +99,10 @@ use quote::{quote};
 /// encourages typesafe modular templates to be created and shared.
 ///
 /// Use of <b>xhtml!</b> usually looks something like this:
-/// ```no_run
+/// ```
+/// # #![feature(proc_macro_hygiene)]
+/// # use rdxl::xhtml;
+/// # fn main() {
 /// let mut x = 5;
 ///
 /// println!("{}",xhtml!(<div>
@@ -92,10 +115,11 @@ use quote::{quote};
 ///    {{ y }},
 ///    {{ y = 1; }}
 ///    {{ y }}
-///    {{ for i in 0..x {{
+///    {{ for i in (0..x) {{
 ///       <span>{{i}}</span>
 ///    }} }}
 /// </div>));
+/// # }
 /// ```
 #[proc_macro]
 pub fn xhtml(input: TokenStream) -> TokenStream {
@@ -119,18 +143,22 @@ pub fn xhtml(input: TokenStream) -> TokenStream {
 /// this macro would be *coincidentally* most XML elements.
 ///
 /// In <b>xtype!</b>, a definition might look like this:
-/// ```no_run
+/// ```
+/// # use rdxl::xtype;
+/// # pub struct MyPredefinedType {}
 /// xtype!(<!MyList my_string:String my_int:u64>
 ///   <!MyItem my_bool:bool/>
 ///   <!MyOtherItem my_char:char/>
 ///   <?MyPredefinedType/>
 /// </MyList>);
+/// # fn main() {}
 /// ```
 ///
 /// In sugar-free Rust this would become like this:
-/// ```no_run
-/// type MyItem { my_bool: bool }
-/// type MyOtherItem { my_char: char }
+/// ```
+/// struct MyPredefinedType {}
+/// struct MyItem { my_bool: bool }
+/// struct MyOtherItem { my_char: char }
 /// enum MyListChildren {
 ///    MyItem(MyItem),
 ///    MyOtherItem(MyOtherItem),
@@ -141,6 +169,7 @@ pub fn xhtml(input: TokenStream) -> TokenStream {
 ///    my_int: u64,
 ///    children: Vec<MyListChildren>
 /// }
+/// # fn main() {}
 /// ```
 #[proc_macro]
 pub fn xtype(input: TokenStream) -> TokenStream {
@@ -160,7 +189,16 @@ pub fn xtype(input: TokenStream) -> TokenStream {
 /// a separate backend is desired
 ///
 /// A typical invocation would look like this:
-/// ```no_run
+/// ```
+/// # #![feature(proc_macro_hygiene)]
+/// # use rdxl::{xtype,xrender};
+/// # use std::fmt;
+/// # pub struct MyPredefinedType {}
+/// # xtype!(<!MyList my_string:String my_int:u64>
+/// #   <!MyItem my_bool:bool/>
+/// #   <!MyOtherItem my_char:char/>
+/// #   <?MyPredefinedType/>
+/// # </MyList>);
 /// xrender!(MyList, <ul>
 ///   <li>{{ self.my_string }}</li>
 ///   <li>{{ self.my_int }}</li>
@@ -172,6 +210,7 @@ pub fn xtype(input: TokenStream) -> TokenStream {
 ///     }} }}
 ///   }} }}
 /// </ul>);
+/// # fn main() {}
 /// ```
 
 #[proc_macro]

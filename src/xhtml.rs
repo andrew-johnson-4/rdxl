@@ -206,6 +206,9 @@ impl Parse for XhtmlExprE {
           let pat: Pat = input.parse()?;
           let _eq: Token![=] = input.parse()?;
           let expr: Expr = input.parse()?;
+          if input.peek(Token![;]) {
+             let _: Token![;] = input.parse()?;
+          }
           Ok(XhtmlExprE::L(_let,pat,expr))
        } else {
           let e: Expr = input.parse()?;
