@@ -10,10 +10,22 @@ impl MyMarkup {
    }
 }
 
-fn main(){
+#[test]
+fn context_test1(){
    let x = MyMarkup { a:22 };
-   println!("{}", xhtml!([[ x ]]) );
-
-   //fails due to no method "to_markup" on integer
-   //println!("{}", xhtml!([[ 5 ]]) );
+   assert_eq!(
+      xhtml!([[ x ]]),
+      "{a:22}".to_string()
+   );
 }
+
+/* fails during compilation due to no method "to_markup" on integer
+#[test]
+#[should_panic]
+fn context_test2(){
+   assert_eq!(
+      xhtml!([[ 5 ]]),
+      "5".to_string()
+   );
+}
+*/
