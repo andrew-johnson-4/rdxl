@@ -24,7 +24,7 @@ fn class_complex_some_spaces1(){
        field1=<!MyField x=1/>
        field2=<!MyField2 x="2"/>
      />),
-     "<div><b>field1:</b> 1 <br/> <b>field2:</b> 2 </div>".to_string()
+     "<div> <b>field1:</b> 1 <br/> <b>field2:</b> 2 </div>".to_string()
    );
 }
 
@@ -35,6 +35,6 @@ fn class_complex_some_spaces2(){
        field1={{ MyField{x:3, children:vec![]} }}
        field2=[[ MyField{x:4, children:vec![]} ]]
      />),
-     "<div><b>field1:</b> 3 <br/> <b>field2:</b> 4 </div>".to_string()
+     "<div> <b>field1:</b> 3 <br/> <b>field2:</b> 4 </div>".to_string()
    );
 }

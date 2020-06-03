@@ -558,6 +558,17 @@ impl ToTokens for XhtmlTag {
            tokens.append(gr);
            tokens.append(Punct::new(';', Spacing::Alone));
 
+           if self.inner.gen_span().start() != self.inner_span_start.end() {
+              tokens.append(Ident::new("stream", self.outer_span.clone()));
+              tokens.append(Punct::new('.', Spacing::Alone));
+              tokens.append(Ident::new("push_str", self.outer_span.clone()));
+              let mut ts = proc_macro2::TokenStream::new();
+              ts.append(Literal::string(&format!(" ")));
+              let gr = Group::new(Delimiter::Parenthesis, ts);
+              tokens.append(gr);
+              tokens.append(Punct::new(';', Spacing::Alone));
+           }
+
            self.inner.to_tokens(tokens);
 
            if self.inner.gen_span().end() != self.inner_span_end.start() {
