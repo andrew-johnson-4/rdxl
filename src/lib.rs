@@ -77,7 +77,6 @@
 //! ```
 
 #![recursion_limit = "128"]
-#![feature(type_ascription)]
 #![crate_type = "proc-macro"]
 
 mod xhtml;
