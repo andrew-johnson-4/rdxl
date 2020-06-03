@@ -14,7 +14,9 @@ println!("{}",xhtml!(<ul>
 </ul>));
 ```
 
-Modularized templating is encouraged through custom XML elements:
+Modularized templating is encouraged through custom XML elements that implement the Display property.
+Foreign xhtml snippets or miscellaneous content can be inserted inline as long as it also implements
+the Display property.
 
 ```rust
 xtype!(<!MyList my_string:String my_int:u64>
