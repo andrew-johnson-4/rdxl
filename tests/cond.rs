@@ -1,11 +1,12 @@
 #![feature(proc_macro_hygiene)]
 use rdxl::xhtml;
 
-fn main(){
+#[test]
+fn conditional1(){
    let x = 5;
    let y = Some(2);
 
-   println!("{}",xhtml!(<div>
+   assert_eq!(xhtml!(<div>
       {{ if x > 2 {{
          {{ x }}
       }} }}
@@ -26,5 +27,6 @@ fn main(){
       }} else if let Some(yy) = y {{
          {{ yy }}
       }} }}
-   </div>));
+   </div>), 
+   "<div> 5 2 7 2 </div>".to_string());
 }
