@@ -61,6 +61,18 @@ enum XhtmlExprE {
    L(Token![let],Pat,Expr),
    I(Token![if],Expr,Vec<XhtmlCrumb>,Vec<(Expr,Vec<XhtmlCrumb>)>,Vec<XhtmlCrumb>)
 }
+impl XhtmlExprE {
+    fn does_emit(&self) -> bool {
+       match self {
+          XhtmlExprE::S(_) => { false },
+          XhtmlExprE::E(_) => { true },
+          XhtmlExprE::F(_,_,_,_) => { true },
+          XhtmlExprE::W(_,_,_) => { true },
+          XhtmlExprE::L(_,_,_) => { false },
+          XhtmlExprE::I(_,_,_,_,_) => { true },
+       }
+    }
+}
 impl ToTokens for XhtmlExprE {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
@@ -231,6 +243,11 @@ pub struct XhtmlExpr {
    brace_token1: Brace,
    _brace_token2: Brace,
    expr: XhtmlExprE
+}
+impl XhtmlExpr {
+    fn does_emit(&self) -> bool {
+       self.expr.does_emit()
+    }
 }
 impl Parse for XhtmlExpr {
     fn parse(input: ParseStream) -> Result<Self> {
@@ -720,6 +737,16 @@ enum XhtmlCrumb {
    C(XhtmlClass)
 }
 impl XhtmlCrumb {
+    fn does_emit(&self) -> bool {
+       match self {
+          XhtmlCrumb::L(_) => { true },
+          XhtmlCrumb::S(_,_) => { true },
+          XhtmlCrumb::T(_) => { true },
+          XhtmlCrumb::E(e) => { e.does_emit() },
+          XhtmlCrumb::F(_) => { true },
+          XhtmlCrumb::C(_) => { true },
+       }
+    }
     fn span(&self) -> Span {
         match self {
             XhtmlCrumb::S(_,sp) => { sp.clone() }
@@ -1060,7 +1087,7 @@ impl ToTokens for Xhtml {
         for c in self.crumbs.iter() {
             let span = c.span();
             if let Some(sp) = prev {
-            if sp.end() != span.start() {
+            if c.does_emit() && sp.end() != span.start() {
 
                tokens.append(Ident::new("stream", span.clone()));
                tokens.append(Punct::new('.', Spacing::Alone));
