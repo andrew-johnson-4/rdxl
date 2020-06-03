@@ -27,7 +27,7 @@ impl Parse for XTypeAttr {
 pub struct XType {
    pub open: Token![<],
    pub defined: bool,
-   pub tag_name: SynIdent,
+   pub tag_name: String,
    pub tag_attrs: Vec<XTypeAttr>,
    pub tag_children: Vec<XType>,
    pub close: Token![>],
@@ -57,7 +57,7 @@ impl ToTokens for XType {
        ts.append(Punct::new(':', Spacing::Alone));
        ts.append(Ident::new("Vec", span.clone()));
        ts.append(Punct::new('<', Spacing::Alone));
-       ts.append(Ident::new(&format!("{}Children", self.tag_name.to_string()), span.clone()));
+       ts.append(Ident::new(&format!("{}Children", self.tag_name), span.clone()));
        ts.append(Punct::new('>', Spacing::Alone));
        ts.append(Punct::new(',', Spacing::Alone));
 
@@ -66,16 +66,29 @@ impl ToTokens for XType {
 
        tokens.append(Ident::new("pub", span.clone()));
        tokens.append(Ident::new("enum", span.clone()));
-       tokens.append(Ident::new(&format!("{}Children", self.tag_name.to_string()), span.clone()));
+       tokens.append(Ident::new(&format!("{}Children", self.tag_name), span.clone()));
 
        let mut ts = proc_macro2::TokenStream::new();
        for child in self.tag_children.iter() {
-          ts.append(Ident::new(&child.tag_name.to_string(), span.clone()));
-          let mut ets = proc_macro2::TokenStream::new();
-          ets.append(Ident::new(&child.tag_name.to_string(), span.clone()));
-          let egr = Group::new(Delimiter::Parenthesis, ets);
-          ts.append(egr);
-          ts.append(Punct::new(',', Spacing::Alone));
+          if child.tag_name == "Display" {
+             ts.append(Ident::new("Display", span.clone()));
+             let mut ets = proc_macro2::TokenStream::new();
+             ets.append(Ident::new("Box", span.clone()));
+             ets.append(Punct::new('<', Spacing::Alone));
+             ets.append(Ident::new("dyn", span.clone()));
+             ets.append(Ident::new("Display", span.clone()));
+             ets.append(Punct::new('>', Spacing::Alone));
+             let egr = Group::new(Delimiter::Parenthesis, ets);
+             ts.append(egr);
+             ts.append(Punct::new(',', Spacing::Alone));
+          } else {
+             ts.append(Ident::new(&child.tag_name, span.clone()));
+             let mut ets = proc_macro2::TokenStream::new();
+             ets.append(Ident::new(&child.tag_name, span.clone()));
+             let egr = Group::new(Delimiter::Parenthesis, ets);
+             ts.append(egr);
+             ts.append(Punct::new(',', Spacing::Alone));
+          }
        }
 
        let gr = Group::new(Delimiter::Brace, ts);
@@ -91,9 +104,23 @@ impl Parse for XType {
     fn parse(input: ParseStream) -> Result<Self> {
         let open: Token![<] = input.parse()?;
 
-        if input.peek(Token![?]) {
+        if input.peek(Token![?]) && input.peek2(Token![/]) {
+           let _q: Token![?] = input.parse()?;
+           let _s: Token![/] = input.parse()?;
+           let close: Token![>] = input.parse()?;
+
+           return Ok(XType {
+              open: open,
+              defined: true,
+              tag_name: "Display".to_string(),
+              tag_attrs: Vec::new(),
+              tag_children: Vec::new(),
+              close: close
+           })
+        } else if input.peek(Token![?]) {
            let _q: Token![?] = input.parse()?;
            let tag_name: SynIdent = input.parse()?;
+           let tag_name = tag_name.to_string();
            let _s: Token![/] = input.parse()?;
            let close: Token![>] = input.parse()?;
 
@@ -109,6 +136,7 @@ impl Parse for XType {
 
         let _exc: Token![!] = input.parse()?;
         let tag_name: SynIdent = input.parse()?;
+        let tag_name = tag_name.to_string();
 
         let mut tag_attrs = Vec::new();
         while input.peek(SynIdent) {
