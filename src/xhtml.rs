@@ -11,6 +11,46 @@ use syn::{Ident as SynIdent, Token, Expr, Pat, LitChar, LitBool, LitStr, LitInt,
 use syn::token::{Bracket,Brace};
 use syn::spanned::Spanned;
 
+pub struct XhtmlDisplayExpr {
+   open: Token![<],
+   expr: Expr,
+   close: Token![>],
+}
+impl XhtmlDisplayExpr {
+    pub fn gen_span(&self) -> Span {
+       self.open.span.join(self.close.span).unwrap()
+    }
+}
+impl Parse for XhtmlDisplayExpr {
+    fn parse(input: ParseStream) -> Result<Self> {
+       let open: Token![<] = input.parse()?;
+       let _: Token![?] = input.parse()?;
+       let _: Token![>] = input.parse()?;
+
+       let content;
+       let content2;
+       let _ = braced!(content in input);
+       let _ = braced!(content2 in content);
+       let expr: Expr = content2.parse()?;
+
+       let _: Token![<] = input.parse()?;
+       let _: Token![/] = input.parse()?;
+       let _: Token![?] = input.parse()?;
+       let close: Token![>] = input.parse()?;
+
+       Ok(XhtmlDisplayExpr {
+          open: open,
+          expr: expr,
+          close: close,
+       })
+    }
+}
+impl ToTokens for XhtmlDisplayExpr {
+    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+       self.expr.to_tokens(tokens);
+    }
+}
+
 pub struct XhtmlExprF {
    bracket: Bracket,
    context: String,
@@ -388,12 +428,18 @@ impl XhtmlAttr {
 
 
 pub enum XhtmlClassChild {
-   C(XhtmlClass)
+   C(XhtmlClass),
+   D(XhtmlDisplayExpr)
 }
 impl Parse for XhtmlClassChild {
     fn parse(input: ParseStream) -> Result<Self> {
-       let c: XhtmlClass = input.parse()?;
-       Ok(XhtmlClassChild::C(c))
+       if input.peek(Token![<]) && input.peek2(Token![?]) {
+          let d: XhtmlDisplayExpr = input.parse()?;
+          Ok(XhtmlClassChild::D(d))
+       } else {
+          let c: XhtmlClass = input.parse()?;
+          Ok(XhtmlClassChild::C(c))
+       }
     }
 }
 
@@ -431,12 +477,32 @@ impl ToTokens for XhtmlClass {
        for c in self.children.iter() {
           match c {
              XhtmlClassChild::C(c) => {
+                let span = c.gen_span();
                 cs.append(Ident::new(&format!("{}Children", self.name), span));
                 cs.append(Punct::new(':', Spacing::Joint));
                 cs.append(Punct::new(':', Spacing::Joint));
                 cs.append(Ident::new(&c.name, span));
                 let mut ecs = proc_macro2::TokenStream::new();
                 c.to_tokens(&mut ecs);
+                let cgr = Group::new(Delimiter::Parenthesis, ecs);
+                cs.append(cgr);
+                cs.append(Punct::new(',', Spacing::Alone));
+             },
+             XhtmlClassChild::D(d) => {
+                let span = d.gen_span();
+                cs.append(Ident::new(&format!("{}Children", self.name), span));
+                cs.append(Punct::new(':', Spacing::Joint));
+                cs.append(Punct::new(':', Spacing::Joint));
+                cs.append(Ident::new("Display", span));
+                let mut ecs = proc_macro2::TokenStream::new();
+                ecs.append(Ident::new("Box", span));
+                ecs.append(Punct::new(':', Spacing::Joint));
+                ecs.append(Punct::new(':', Spacing::Joint));
+                ecs.append(Ident::new("new", span));
+                let mut ccs = proc_macro2::TokenStream::new();
+                d.to_tokens(&mut ccs);
+                let ccgr = Group::new(Delimiter::Parenthesis, ccs);
+                ecs.append(ccgr);
                 let cgr = Group::new(Delimiter::Parenthesis, ecs);
                 cs.append(cgr);
                 cs.append(Punct::new(',', Spacing::Alone));
