@@ -9,25 +9,27 @@ use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent, Token, Expr, Pat, LitChar, LitBool, LitStr, LitInt, bracketed, braced};
 use syn::token::{Bracket,Brace};
+use syn::spanned::Spanned;
 
 pub struct XhtmlExprF {
+   bracket: Bracket,
    context: String,
    expr: Expr
 }
 impl ToTokens for XhtmlExprF {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-       let ss = Span::call_site();
+       let span = self.bracket.span;
 
-       tokens.append(Ident::new("stream", ss.clone()));
+       tokens.append(Ident::new("stream", span.clone()));
        tokens.append(Punct::new('.', Spacing::Alone));
-       tokens.append(Ident::new("push_str", ss.clone()));
+       tokens.append(Ident::new("push_str", span.clone()));
 
        let mut ts = proc_macro2::TokenStream::new();
 
        ts.append(Punct::new('&', Spacing::Alone));
        self.expr.to_tokens(&mut ts);
        ts.append(Punct::new('.', Spacing::Alone));
-       ts.append(Ident::new(&format!("to_{}", self.context), ss.clone()));
+       ts.append(Ident::new(&format!("to_{}", self.context), span.clone()));
        let ets = proc_macro2::TokenStream::new();
        let egr = Group::new(Delimiter::Parenthesis, ets);
        ts.append(egr);
@@ -38,13 +40,16 @@ impl ToTokens for XhtmlExprF {
     }
 }
 impl XhtmlExprF {
+    fn gen_span(&self) -> Span {
+       self.bracket.span
+    }
     fn parse(context: String, input: ParseStream) -> Result<Self> {
        let content;
        let content2;
-       let _bracket1 = bracketed!(content in input);
+       let bracket1 = bracketed!(content in input);
        let _bracket2 = bracketed!(content2 in content);
        let expr: Expr = content2.parse()?;
-       Ok(XhtmlExprF{ context:context, expr:expr })
+       Ok(XhtmlExprF{ bracket:bracket1, context:context, expr:expr })
     }
 }
 
@@ -60,18 +65,18 @@ impl ToTokens for XhtmlExprE {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
            XhtmlExprE::E(e) => {
-              let ss = Span::call_site();
+              let span = e.span();
 
-              tokens.append(Ident::new("stream", ss.clone()));
+              tokens.append(Ident::new("stream", span.clone()));
               tokens.append(Punct::new('.', Spacing::Alone));
-              tokens.append(Ident::new("push_str", ss.clone()));
+              tokens.append(Ident::new("push_str", span.clone()));
 
               let mut ts = proc_macro2::TokenStream::new();
 
               ts.append(Punct::new('&', Spacing::Alone));
               e.to_tokens(&mut ts);
               ts.append(Punct::new('.', Spacing::Alone));
-              ts.append(Ident::new("to_string", ss.clone()));
+              ts.append(Ident::new("to_string", span.clone()));
               let ets = proc_macro2::TokenStream::new();
               let egr = Group::new(Delimiter::Parenthesis, ets);
               ts.append(egr);
@@ -246,53 +251,64 @@ impl ToTokens for XhtmlExpr {
 
 pub enum XhtmlClassAttr {
    Cl(XhtmlClass),
-   S(String),
-   B(bool),
-   C(char),
-   U(u64),
-   F(String,Expr),
-   E(Expr)
+   F(Bracket,String,Expr),
+   E(Brace,Expr),
+   B(LitBool,bool),
+   C(LitChar,char),
+   U(LitInt,u64),
+   S(LitStr,String),
 }
 impl XhtmlClassAttr {
+   fn gen_span(&self) -> Span {
+      match self {
+         XhtmlClassAttr::Cl(cl) => { cl.span() },
+         XhtmlClassAttr::F(b,_,_) => { b.span },
+         XhtmlClassAttr::E(b,_) => { b.span },
+         XhtmlClassAttr::B(v,_) => { v.span() },
+         XhtmlClassAttr::C(v,_) => { v.span() },
+         XhtmlClassAttr::U(v,_) => { v.span() },
+         XhtmlClassAttr::S(v,_) => { v.span() },
+      }
+   }
    fn parse(input: ParseStream, key: String) -> Result<Self> {
       if input.peek(Bracket) {
          let _content;
          let content2;
-         let _bracket_token1:Bracket = bracketed!(_content in input);
+         let bracket_token1:Bracket = bracketed!(_content in input);
          let _bracket_token2:Bracket = bracketed!(content2 in _content);
          let e: Expr = content2.parse()?;
-         Ok(XhtmlClassAttr::F(key,e))
+         Ok(XhtmlClassAttr::F(bracket_token1,key,e))
       } else if input.peek(Brace) {
          let _content;
          let content2;
-         let _brace_token1:Brace = braced!(_content in input);
+         let brace_token1:Brace = braced!(_content in input);
          let _brace_token2:Brace = braced!(content2 in _content);
          let e: Expr = content2.parse()?;
-         Ok(XhtmlClassAttr::E(e))
+         Ok(XhtmlClassAttr::E(brace_token1,e))
       } else if input.peek(LitBool) {
          let b: LitBool = input.parse()?;
-         Ok(XhtmlClassAttr::B(b.value))
+         Ok(XhtmlClassAttr::B(b.clone(),b.value))
       } else if input.peek(LitInt) {
          let b: LitInt = input.parse()?;
          let u: u64 = b.base10_parse()?;
-         Ok(XhtmlClassAttr::U(u))
+         Ok(XhtmlClassAttr::U(b.clone(),u))
       } else if input.peek(LitChar) {
          let b: LitChar = input.parse()?;
-         Ok(XhtmlClassAttr::C(b.value()))
+         Ok(XhtmlClassAttr::C(b.clone(),b.value()))
       } else if input.peek(Token![<]) && input.peek2(Token![!]) {
          let cl: XhtmlClass = input.parse()?;
          Ok(XhtmlClassAttr::Cl(cl))
       } else {
          let val: LitStr = input.parse()?;
-         Ok(XhtmlClassAttr::S(val.value()))
+         Ok(XhtmlClassAttr::S(val.clone(),val.value()))
       }
    }
 }
 impl ToTokens for XhtmlClassAttr {
    fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-      let span = Span::call_site();
+      let span = self.gen_span();
       match self {
-         XhtmlClassAttr::S(s) => {
+         XhtmlClassAttr::S(_,s) => {
             let l: Literal = Literal::string(&s);
             tokens.append(l);
             tokens.append(Punct::new('.', Spacing::Alone));
@@ -300,24 +316,24 @@ impl ToTokens for XhtmlClassAttr {
             let ts = proc_macro2::TokenStream::new();
             let gr = Group::new(Delimiter::Parenthesis, ts);
             tokens.append(gr);
-         }, XhtmlClassAttr::B(e) => {
+         }, XhtmlClassAttr::B(_,e) => {
             tokens.append(Ident::new(&format!("{}", e), span.clone()));
          }, XhtmlClassAttr::Cl(cl) => {
             cl.to_tokens(tokens);
-         }, XhtmlClassAttr::C(e) => {
+         }, XhtmlClassAttr::C(_,e) => {
             let l: Literal = Literal::character(*e);
             tokens.append(l);
-         }, XhtmlClassAttr::U(e) => {
+         }, XhtmlClassAttr::U(_,e) => {
             let l: Literal = Literal::u64_unsuffixed(*e);
             tokens.append(l);
-         }, XhtmlClassAttr::F(f,e) => {
+         }, XhtmlClassAttr::F(_,f,e) => {
             e.to_tokens(tokens);
             tokens.append(Punct::new('.', Spacing::Alone));
             tokens.append(Ident::new(&format!("to_{}", f), span.clone()));
             let ets = proc_macro2::TokenStream::new();
             let egr = Group::new(Delimiter::Parenthesis, ets);
             tokens.append(egr);
-         }, XhtmlClassAttr::E(e) => {
+         }, XhtmlClassAttr::E(_,e) => {
             e.to_tokens(tokens);
          }
       }
@@ -371,9 +387,14 @@ pub struct XhtmlClass {
    children: Vec<XhtmlClassChild>,
    close: Token![>]
 }
+impl XhtmlClass {
+    fn gen_span(&self) -> Span {
+       self.open.span.join(self.close.span).unwrap()
+    }
+}
 impl ToTokens for XhtmlClass {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-       let span = Span::call_site();
+       let span = self.gen_span();
        tokens.append(Ident::new(&self.name, span));
        let mut ts = proc_macro2::TokenStream::new();
 
@@ -676,7 +697,7 @@ impl XhtmlCrumb {
             XhtmlCrumb::S(_,sp) => { sp.clone() }
             XhtmlCrumb::T(t) => { t.span.clone() }
             XhtmlCrumb::E(e) => { e.brace_token1.span.clone() }
-            XhtmlCrumb::F(_) => { Span::call_site() }
+            XhtmlCrumb::F(f) => { f.gen_span() }
             XhtmlCrumb::L(l) => { l.span() }
             XhtmlCrumb::C(c) => { c.open.span.join(c.close.span).unwrap() }
         }
@@ -943,10 +964,10 @@ impl ToTokens for XhtmlCrumb {
               tokens.append(Punct::new(';', Spacing::Alone));
            },
            XhtmlCrumb::L(l) => {
-              let ss = l.span().clone();
-              tokens.append(Ident::new("stream", ss.clone()));
+              let span = l.span().clone();
+              tokens.append(Ident::new("stream", span.clone()));
               tokens.append(Punct::new('.', Spacing::Alone));
-              tokens.append(Ident::new("push_str", ss.clone()));
+              tokens.append(Ident::new("push_str", span.clone()));
 
               let mut ts = proc_macro2::TokenStream::new();
               l.to_tokens(&mut ts);
@@ -965,7 +986,7 @@ impl ToTokens for XhtmlCrumb {
               e.to_tokens(tokens);
            }
            XhtmlCrumb::C(c) => {
-              let span = Span::call_site();
+              let span = c.gen_span();
 
               tokens.append(Ident::new("stream", span.clone()));
               tokens.append(Punct::new('.', Spacing::Alone));
@@ -996,13 +1017,13 @@ impl ToTokens for Xhtml {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         let mut prev: Option<Span> = None;
         for c in self.crumbs.iter() {
-            let ss = c.span();
+            let span = c.span();
             if let Some(sp) = prev {
-            if sp.end() != ss.start() {
+            if sp.end() != span.start() {
 
-              tokens.append(Ident::new("stream", ss.clone()));
+              tokens.append(Ident::new("stream", span.clone()));
               tokens.append(Punct::new('.', Spacing::Alone));
-              tokens.append(Ident::new("push_str", ss.clone()));
+              tokens.append(Ident::new("push_str", span.clone()));
 
               let mut ts = proc_macro2::TokenStream::new();
               ts.append(Literal::string(" "));
@@ -1012,7 +1033,7 @@ impl ToTokens for Xhtml {
               tokens.append(Punct::new(';', Spacing::Alone));
                 
             }}
-            prev = Some(ss.clone());
+            prev = Some(span.clone());
             c.to_tokens(tokens);
         }
     }
