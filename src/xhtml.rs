@@ -494,13 +494,15 @@ pub struct XhtmlTag {
    tag: String,
    attrs: Vec<(String,XhtmlAttr)>,
    inner: Xhtml,
-   span: Span
+   outer_span: Span,
+   inner_span_start: Span,
+   inner_span_end: Span,
 }
 impl ToTokens for XhtmlTag {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        tokens.append(Ident::new("stream", self.span.clone()));
+        tokens.append(Ident::new("stream", self.outer_span.clone()));
         tokens.append(Punct::new('.', Spacing::Alone));
-        tokens.append(Ident::new("push_str", self.span.clone()));
+        tokens.append(Ident::new("push_str", self.outer_span.clone()));
         let mut ts = proc_macro2::TokenStream::new();
         ts.append(Literal::string(&format!("<{}", self.tag)));
         let gr = Group::new(Delimiter::Parenthesis, ts);
@@ -508,9 +510,9 @@ impl ToTokens for XhtmlTag {
         tokens.append(Punct::new(';', Spacing::Alone));
 
         for (k,v) in self.attrs.iter() {
-            tokens.append(Ident::new("stream", self.span.clone()));
+            tokens.append(Ident::new("stream", self.outer_span.clone()));
             tokens.append(Punct::new('.', Spacing::Alone));
-            tokens.append(Ident::new("push_str", self.span.clone()));
+            tokens.append(Ident::new("push_str", self.outer_span.clone()));
             let mut ts = proc_macro2::TokenStream::new();
 
             match v {
@@ -538,18 +540,18 @@ impl ToTokens for XhtmlTag {
         let self_closing = vec!["area","base","br","embed","hr","iframe","img",
            "input","link","meta","param","source","track"];
         if self.inner.crumbs.len()==0 && self_closing.iter().any(|s| (&self.tag)==s) {
-           tokens.append(Ident::new("stream", self.span.clone()));
+           tokens.append(Ident::new("stream", self.outer_span.clone()));
            tokens.append(Punct::new('.', Spacing::Alone));
-           tokens.append(Ident::new("push_str", self.span.clone()));
+           tokens.append(Ident::new("push_str", self.outer_span.clone()));
            let mut ts = proc_macro2::TokenStream::new();
            ts.append(Literal::string("/>"));
            let gr = Group::new(Delimiter::Parenthesis, ts);
            tokens.append(gr);
            tokens.append(Punct::new(';', Spacing::Alone));
         } else {
-           tokens.append(Ident::new("stream", self.span.clone()));
+           tokens.append(Ident::new("stream", self.outer_span.clone()));
            tokens.append(Punct::new('.', Spacing::Alone));
-           tokens.append(Ident::new("push_str", self.span.clone()));
+           tokens.append(Ident::new("push_str", self.outer_span.clone()));
            let mut ts = proc_macro2::TokenStream::new();
            ts.append(Literal::string(">"));
            let gr = Group::new(Delimiter::Parenthesis, ts);
@@ -558,9 +560,9 @@ impl ToTokens for XhtmlTag {
 
            self.inner.to_tokens(tokens);
 
-           tokens.append(Ident::new("stream", self.span.clone()));
+           tokens.append(Ident::new("stream", self.outer_span.clone()));
            tokens.append(Punct::new('.', Spacing::Alone));
-           tokens.append(Ident::new("push_str", self.span.clone()));
+           tokens.append(Ident::new("push_str", self.outer_span.clone()));
            let mut ts = proc_macro2::TokenStream::new();
            ts.append(Literal::string(&format!("</{}>", self.tag)));
            let gr = Group::new(Delimiter::Parenthesis, ts);
@@ -649,21 +651,23 @@ impl Parse for XhtmlTag {
         }
 
         if input.peek(Token![/]) {
-           let _r1: Token![/] = input.parse()?;
-           let _r2: Token![>] = input.parse()?;
+           let r1: Token![/] = input.parse()?;
+           let r2: Token![>] = input.parse()?;
 
            Ok(XhtmlTag {
               tag: t.to_string(),
               attrs: attrs,
               inner: Xhtml { crumbs: vec!() },
-              span: l1.span.clone()
+              outer_span: l1.span.join(r2.span).unwrap(),
+              inner_span_start: r1.span.clone(),
+              inner_span_end: r2.span.clone(),
            })
         } else {
-           let _l2: Token![>] = input.parse()?;
+           let l2: Token![>] = input.parse()?;
 
            let inner: Xhtml = input.parse()?;
 
-           let _r1: Token![<] = input.parse()?;
+           let r1: Token![<] = input.parse()?;
            let _r2: Token![/] = input.parse()?;
            let t2: Ident = input.parse()?;
            if t.to_string() != t2.to_string() {
@@ -671,13 +675,15 @@ impl Parse for XhtmlTag {
               let r = Error::new(t2.span(), msg);
               return Err(r)
            }
-           let _r3: Token![>] = input.parse()?;
+           let r3: Token![>] = input.parse()?;
         
            Ok(XhtmlTag {
               tag: t.to_string(),
               attrs: attrs,
               inner: inner,
-              span: l1.span.clone()
+              outer_span: l1.span.join(r3.span).unwrap(),
+              inner_span_start: l2.span.clone(),
+              inner_span_end: r1.span.clone(),
            })
        }
     }
@@ -695,7 +701,7 @@ impl XhtmlCrumb {
     fn span(&self) -> Span {
         match self {
             XhtmlCrumb::S(_,sp) => { sp.clone() }
-            XhtmlCrumb::T(t) => { t.span.clone() }
+            XhtmlCrumb::T(t) => { t.outer_span.clone() }
             XhtmlCrumb::E(e) => { e.brace_token1.span.clone() }
             XhtmlCrumb::F(f) => { f.gen_span() }
             XhtmlCrumb::L(l) => { l.span() }
