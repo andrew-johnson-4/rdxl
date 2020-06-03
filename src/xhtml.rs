@@ -1062,18 +1062,18 @@ impl ToTokens for Xhtml {
             if let Some(sp) = prev {
             if sp.end() != span.start() {
 
-              tokens.append(Ident::new("stream", span.clone()));
-              tokens.append(Punct::new('.', Spacing::Alone));
-              tokens.append(Ident::new("push_str", span.clone()));
+               tokens.append(Ident::new("stream", span.clone()));
+               tokens.append(Punct::new('.', Spacing::Alone));
+               tokens.append(Ident::new("push_str", span.clone()));
 
-              let mut ts = proc_macro2::TokenStream::new();
-              ts.append(Literal::string(" "));
-              let gr = Group::new(Delimiter::Parenthesis, ts);
-              tokens.append(gr);
+               let mut ts = proc_macro2::TokenStream::new();
+               ts.append(Literal::string(" "));
+               let gr = Group::new(Delimiter::Parenthesis, ts);
+               tokens.append(gr);
 
-              tokens.append(Punct::new(';', Spacing::Alone));
-                
-            }}
+               tokens.append(Punct::new(';', Spacing::Alone));
+            }}   
+
             prev = Some(span.clone());
             c.to_tokens(tokens);
         }
