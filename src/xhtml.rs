@@ -560,6 +560,17 @@ impl ToTokens for XhtmlTag {
 
            self.inner.to_tokens(tokens);
 
+           if self.inner.gen_span().end() != self.inner_span_end.start() {
+              tokens.append(Ident::new("stream", self.outer_span.clone()));
+              tokens.append(Punct::new('.', Spacing::Alone));
+              tokens.append(Ident::new("push_str", self.outer_span.clone()));
+              let mut ts = proc_macro2::TokenStream::new();
+              ts.append(Literal::string(&format!(" ")));
+              let gr = Group::new(Delimiter::Parenthesis, ts);
+              tokens.append(gr);
+              tokens.append(Punct::new(';', Spacing::Alone));
+           }
+
            tokens.append(Ident::new("stream", self.outer_span.clone()));
            tokens.append(Punct::new('.', Spacing::Alone));
            tokens.append(Ident::new("push_str", self.outer_span.clone()));
@@ -1018,6 +1029,19 @@ impl ToTokens for XhtmlCrumb {
 
 pub struct Xhtml {
     crumbs: Vec<XhtmlCrumb>
+}
+impl Xhtml {
+    fn gen_span(&self) -> Span {
+       if self.crumbs.len() > 0 {
+          let mut span = self.crumbs[0].span();
+          for c in self.crumbs.iter() {
+             span = span.join(c.span()).unwrap();
+          }
+          span
+       } else {
+          Span::call_site()
+       }
+    }
 }
 impl ToTokens for Xhtml {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
