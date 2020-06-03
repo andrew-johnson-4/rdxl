@@ -191,7 +191,6 @@ pub fn xtype(input: TokenStream) -> TokenStream {
 /// ```
 /// # #![feature(proc_macro_hygiene)]
 /// # use rdxl::{xtype,xrender};
-/// # use std::fmt;
 /// # pub struct MyPredefinedType {}
 /// # xtype!(<!MyList my_string:String my_int:u64>
 /// #   <!MyItem my_bool:bool/>
@@ -221,7 +220,7 @@ pub fn xrender(input: TokenStream) -> TokenStream {
 
     let expanded = quote! {
        impl std::fmt::Display for #xname {
-          fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+          fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
               let mut stream = String::new();
               #xxhtml
      

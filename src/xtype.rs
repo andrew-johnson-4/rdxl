@@ -76,6 +76,12 @@ impl ToTokens for XType {
              ets.append(Ident::new("Box", span.clone()));
              ets.append(Punct::new('<', Spacing::Alone));
              ets.append(Ident::new("dyn", span.clone()));
+             ets.append(Ident::new("std", span.clone()));
+             ets.append(Punct::new(':', Spacing::Joint));
+             ets.append(Punct::new(':', Spacing::Joint));
+             ets.append(Ident::new("fmt", span.clone()));
+             ets.append(Punct::new(':', Spacing::Joint));
+             ets.append(Punct::new(':', Spacing::Joint));
              ets.append(Ident::new("Display", span.clone()));
              ets.append(Punct::new('>', Spacing::Alone));
              let egr = Group::new(Delimiter::Parenthesis, ets);

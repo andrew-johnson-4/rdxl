@@ -1,6 +1,5 @@
 #![feature(proc_macro_hygiene)]
 use rdxl::{xhtml,xtype,xrender};
-use std::fmt;
 
 xtype!(<!MyAttr field:u64><!MyAttrChild field:u64/></MyAttr>);
 xtype!(<!MyType attr:MyAttr/>);

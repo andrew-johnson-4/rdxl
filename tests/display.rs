@@ -1,7 +1,5 @@
 #![feature(proc_macro_hygiene)]
 use rdxl::{xhtml,xtype,xrender};
-use std::fmt;
-use std::fmt::Display;
 
 xtype!(<!MyDisplayList><?/></MyDisplayList>);
 xrender!(MyDisplayList, <ul>

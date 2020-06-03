@@ -1,6 +1,5 @@
 #![feature(proc_macro_hygiene)]
 use rdxl::{xhtml,xtype,xrender};
-use std::fmt;
 
 xtype!(<!MyType field1:MyField field2:MyField2/>);
 xtype!(<!MyField x:u64/>);

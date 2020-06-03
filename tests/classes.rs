@@ -1,6 +1,5 @@
 #![feature(proc_macro_hygiene)]
 use rdxl::{xhtml,xtype,xrender};
-use std::fmt;
 
 xtype!(<!MyPredefinedType/>);
 xtype!(<!MyList my_string:String my_int:u64>
