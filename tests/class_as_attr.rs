@@ -10,14 +10,12 @@ xrender!(MyType, <ul>
   }} }}
 </ul>);
 
-/*
 #[test]
 fn complex_classes_as_attr(){
    assert_eq!(xhtml!(<!MyType attr=<!MyAttr field=3>
        <!MyAttrChild field=2/>
        <!MyAttrChild field=1/>
      </MyAttr>/>),
-     "<ul> <li>3:2</li> <li>3:1</li> </ul>".to_string()
+     "<ul> <li>3:2</li><li>3:1</li> </ul>".to_string()
    );
 }
-*/
