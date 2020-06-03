@@ -22,3 +22,13 @@ fn display1() {
      "<ul> <li>a:2</li><li>b:4</li> </ul>"
    );
 }
+
+#[test]
+fn display2() {
+   assert_eq!(
+     xhtml!(<!MyDisplayList>
+       <?><h2>nested</h2></?>
+     </MyDisplayList>),
+     "<ul> <li><h2>nested</h2></li> </ul>"
+   );
+}

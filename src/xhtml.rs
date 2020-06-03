@@ -4,16 +4,38 @@
 // see the LICENSE file or <http://opensource.org/licenses/MIT>
 // also see LICENSE2 file or <https://www.apache.org/licenses/LICENSE-2.0>
 
-use quote::{TokenStreamExt, ToTokens};
+use quote::{quote, TokenStreamExt, ToTokens};
 use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent, Token, Expr, Pat, LitChar, LitBool, LitStr, LitInt, bracketed, braced};
 use syn::token::{Bracket,Brace};
 use syn::spanned::Spanned;
 
+pub enum XhtmlDisplay {
+   E(Expr),
+   X(Xhtml)
+}
+impl ToTokens for XhtmlDisplay {
+   fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
+      match self {
+         XhtmlDisplay::E(e) => { e.to_tokens(tokens); }
+         XhtmlDisplay::X(xhtmls) => {
+            let expanded = quote! {
+               {
+                  let mut stream = String::new();
+                  #xhtmls
+                  stream
+               }
+            };
+            expanded.to_tokens(tokens);
+         }
+      }
+   }
+}
+
 pub struct XhtmlDisplayExpr {
    open: Token![<],
-   expr: Expr,
+   expr: XhtmlDisplay,
    close: Token![>],
 }
 impl XhtmlDisplayExpr {
@@ -27,11 +49,17 @@ impl Parse for XhtmlDisplayExpr {
        let _: Token![?] = input.parse()?;
        let _: Token![>] = input.parse()?;
 
-       let content;
-       let content2;
-       let _ = braced!(content in input);
-       let _ = braced!(content2 in content);
-       let expr: Expr = content2.parse()?;
+       let expr = if input.peek(Brace) {
+          let content;
+          let content2;
+          let _ = braced!(content in input);
+          let _ = braced!(content2 in content);
+          let expr: Expr = content2.parse()?;
+          XhtmlDisplay::E(expr)
+       } else {
+          let xhtml: Xhtml = input.parse()?;
+          XhtmlDisplay::X(xhtml)
+       };
 
        let _: Token![<] = input.parse()?;
        let _: Token![/] = input.parse()?;
