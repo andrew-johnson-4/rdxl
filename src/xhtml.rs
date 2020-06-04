@@ -4,7 +4,7 @@
 // see the LICENSE file or <http://opensource.org/licenses/MIT>
 // also see LICENSE2 file or <https://www.apache.org/licenses/LICENSE-2.0>
 
-use quote::{quote_spanned, TokenStreamExt, ToTokens};
+use quote::{format_ident, quote_spanned, TokenStreamExt, ToTokens};
 use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent, Token, Expr, Pat, LitChar, LitBool, LitStr, LitInt, bracketed, braced};
@@ -86,25 +86,12 @@ pub struct XhtmlExprF {
 }
 impl ToTokens for XhtmlExprF {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-       let span = self.bracket.span;
+       let ref expr = self.expr;
+       let coerce = format_ident!("to_{}", self.context, span=self.bracket.span);
 
-       tokens.append(Ident::new("stream", span.clone()));
-       tokens.append(Punct::new('.', Spacing::Alone));
-       tokens.append(Ident::new("push_str", span.clone()));
-
-       let mut ts = proc_macro2::TokenStream::new();
-
-       ts.append(Punct::new('&', Spacing::Alone));
-       self.expr.to_tokens(&mut ts);
-       ts.append(Punct::new('.', Spacing::Alone));
-       ts.append(Ident::new(&format!("to_{}", self.context), span.clone()));
-       let ets = proc_macro2::TokenStream::new();
-       let egr = Group::new(Delimiter::Parenthesis, ets);
-       ts.append(egr);
-
-       let gr = Group::new(Delimiter::Parenthesis, ts);
-       tokens.append(gr);
-       tokens.append(Punct::new(';', Spacing::Alone));
+       (quote_spanned! {self.bracket.span=>
+          stream.push_str(&#expr.#coerce());
+       }).to_tokens(tokens);
     }
 }
 impl XhtmlExprF {
