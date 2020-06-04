@@ -5,9 +5,9 @@
 // also see LICENSE2 file or <https://www.apache.org/licenses/LICENSE-2.0>
 
 use quote::{format_ident, quote_spanned, TokenStreamExt, ToTokens};
-use proc_macro2::{Span, Literal, Ident};
+use proc_macro2::{Span, Literal};
 use syn::parse::{Parse, ParseStream, Result, Error};
-use syn::{Ident as SynIdent, Token, Expr, Pat, LitChar, LitBool, LitStr, LitInt, bracketed, braced};
+use syn::{Ident, Token, Expr, Pat, LitChar, LitBool, LitStr, LitInt, bracketed, braced};
 use syn::token::{Bracket,Brace};
 use syn::spanned::Spanned;
 
@@ -339,7 +339,8 @@ impl ToTokens for XhtmlClassAttr {
                #l.to_string()
             }).to_tokens(tokens);
          }, XhtmlClassAttr::B(_,e) => {
-            tokens.append(Ident::new(&format!("{}", e), span.clone()));
+            let e = format_ident!("{}", e, span=span);
+            e.to_tokens(tokens);
          }, XhtmlClassAttr::Cl(cl) => {
             cl.to_tokens(tokens);
          }, XhtmlClassAttr::C(_,e) => {
@@ -421,7 +422,9 @@ impl XhtmlClass {
 impl ToTokens for XhtmlClass {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
        let span = self.gen_span();
-       tokens.append(Ident::new(&self.name, span));
+
+       let name = format_ident!("{}", self.name, span=span);
+       name.to_tokens(tokens);
 
        let mut ts = proc_macro2::TokenStream::new();
        for (k,v) in self.attrs.iter() {
@@ -471,7 +474,7 @@ impl Parse for XhtmlClass {
        let name: Ident = input.parse()?;
 
        let mut attrs = Vec::new();
-       while input.peek(SynIdent) {
+       while input.peek(Ident) {
           let attr_name: Ident = input.parse()?;
           let _eq: Token![=] = input.parse()?;
           let attr_val = XhtmlClassAttr::parse(input, attr_name.to_string())?;
@@ -602,7 +605,7 @@ impl Parse for XhtmlTag {
         let t: Ident = input.parse()?;
 
         let mut attrs: Vec<(String,XhtmlAttr)> = Vec::new();
-        while input.peek(SynIdent) ||
+        while input.peek(Ident) ||
               input.peek(Token![as]) ||
               input.peek(Token![break]) ||
               input.peek(Token![const]) ||
@@ -745,7 +748,7 @@ impl XhtmlCrumb {
     }
     fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
         let mut cs = vec!();
-        while input.peek(SynIdent) ||
+        while input.peek(Ident) ||
               input.peek(LitStr) ||
               input.peek(Brace) ||
               input.peek(Bracket) ||
