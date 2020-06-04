@@ -1,6 +1,9 @@
-# Rusty Domain Extensible Language
+Rusty Domain Extensible Language
+================================
 
 Domain specific language macros for Rust to generate xhtml.
+
+[![Crates.IO](https://img.shields.io/crates/v/rdxl.svg)](https://crates.rs/crates/rdxl)
 
 ```rust
 let my_int = 3;
