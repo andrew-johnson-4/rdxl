@@ -425,50 +425,33 @@ impl ToTokens for XhtmlClass {
        let mut ts = proc_macro2::TokenStream::new();
 
        for (k,v) in self.attrs.iter() {
-          ts.append(Ident::new(k, span));
-          ts.append(Punct::new(':', Spacing::Alone));
-          v.to_tokens(&mut ts);
-          ts.append(Punct::new(',', Spacing::Alone));
+          let k = format_ident!("{}", k, span=span);
+          (quote_spanned!{span=>
+               #k: #v,
+          }).to_tokens(&mut ts);
        }
 
-       ts.append(Ident::new("children", span));
-       ts.append(Punct::new(':', Spacing::Alone));
-       ts.append(Ident::new("vec", span));
-       ts.append(Punct::new('!', Spacing::Alone));
+       (quote_spanned!{span=>
+          children: vec!
+       }).to_tokens(&mut ts);
 
        let mut cs = proc_macro2::TokenStream::new();
        for c in self.children.iter() {
           match c {
              XhtmlClassChild::C(c) => {
                 let span = c.gen_span();
-                cs.append(Ident::new(&format!("{}Children", self.name), span));
-                cs.append(Punct::new(':', Spacing::Joint));
-                cs.append(Punct::new(':', Spacing::Joint));
-                cs.append(Ident::new(&c.name, span));
-                let mut ecs = proc_macro2::TokenStream::new();
-                c.to_tokens(&mut ecs);
-                let cgr = Group::new(Delimiter::Parenthesis, ecs);
-                cs.append(cgr);
-                cs.append(Punct::new(',', Spacing::Alone));
+                let child_enum = format_ident!("{}Children", self.name, span=span);
+                let child_tag = format_ident!("{}", c.name, span=span);
+                (quote_spanned!{span=>
+                   #child_enum::#child_tag(#c),
+                }).to_tokens(&mut cs);
              },
              XhtmlClassChild::D(d) => {
                 let span = d.gen_span();
-                cs.append(Ident::new(&format!("{}Children", self.name), span));
-                cs.append(Punct::new(':', Spacing::Joint));
-                cs.append(Punct::new(':', Spacing::Joint));
-                cs.append(Ident::new("Display", span));
-                let mut ecs = proc_macro2::TokenStream::new();
-                ecs.append(Ident::new("Box", span));
-                ecs.append(Punct::new(':', Spacing::Joint));
-                ecs.append(Punct::new(':', Spacing::Joint));
-                ecs.append(Ident::new("new", span));
-                let mut ccs = proc_macro2::TokenStream::new();
-                d.to_tokens(&mut ccs);
-                let ccgr = Group::new(Delimiter::Parenthesis, ccs);
-                ecs.append(ccgr);
-                let cgr = Group::new(Delimiter::Parenthesis, ecs);
-                cs.append(cgr);
-                cs.append(Punct::new(',', Spacing::Alone));
+                let child_enum = format_ident!("{}Children", self.name, span=span);
+                (quote_spanned!{span=>
+                   #child_enum::Display(Box::new(#d)),
+                }).to_tokens(&mut cs);
              }
           }
        }
