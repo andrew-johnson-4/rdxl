@@ -224,6 +224,7 @@ pub fn xrender(input: TokenStream) -> TokenStream {
               let mut stream = String::new();
               #xxhtml
      
+              //buffering to a String is faster than many writes to the Formatter
               f.write_str(&stream)
           }
        }
