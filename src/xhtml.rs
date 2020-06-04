@@ -4,7 +4,7 @@
 // see the LICENSE file or <http://opensource.org/licenses/MIT>
 // also see LICENSE2 file or <https://www.apache.org/licenses/LICENSE-2.0>
 
-use quote::{quote, TokenStreamExt, ToTokens};
+use quote::{quote_spanned, TokenStreamExt, ToTokens};
 use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent, Token, Expr, Pat, LitChar, LitBool, LitStr, LitInt, bracketed, braced};
@@ -20,7 +20,7 @@ impl ToTokens for XhtmlDisplay {
       match self {
          XhtmlDisplay::E(e) => { e.to_tokens(tokens); }
          XhtmlDisplay::X(xhtmls) => {
-            let expanded = quote! {
+            let expanded = quote_spanned! { xhtmls.gen_span() =>
                {
                   let mut stream = String::new();
                   #xhtmls
