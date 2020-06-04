@@ -335,12 +335,9 @@ impl ToTokens for XhtmlClassAttr {
       match self {
          XhtmlClassAttr::S(_,s) => {
             let l: Literal = Literal::string(&s);
-            tokens.append(l);
-            tokens.append(Punct::new('.', Spacing::Alone));
-            tokens.append(Ident::new("to_string", span.clone()));
-            let ts = proc_macro2::TokenStream::new();
-            let gr = Group::new(Delimiter::Parenthesis, ts);
-            tokens.append(gr);
+            (quote_spanned!{span=>
+               #l.to_string()
+            }).to_tokens(tokens);
          }, XhtmlClassAttr::B(_,e) => {
             tokens.append(Ident::new(&format!("{}", e), span.clone()));
          }, XhtmlClassAttr::Cl(cl) => {
@@ -352,12 +349,10 @@ impl ToTokens for XhtmlClassAttr {
             let l: Literal = Literal::u64_unsuffixed(*e);
             tokens.append(l);
          }, XhtmlClassAttr::F(_,f,e) => {
-            e.to_tokens(tokens);
-            tokens.append(Punct::new('.', Spacing::Alone));
-            tokens.append(Ident::new(&format!("to_{}", f), span.clone()));
-            let ets = proc_macro2::TokenStream::new();
-            let egr = Group::new(Delimiter::Parenthesis, ets);
-            tokens.append(egr);
+            let coerce = format_ident!("to_{}", f, span=span);
+            (quote_spanned!{span=>
+               #e.#coerce()
+            }).to_tokens(tokens);
          }, XhtmlClassAttr::E(_,e) => {
             e.to_tokens(tokens);
          }
