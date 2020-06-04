@@ -132,71 +132,32 @@ impl ToTokens for XhtmlExprE {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
            XhtmlExprE::E(e) => {
-              let span = e.span();
-
-              tokens.append(Ident::new("stream", span.clone()));
-              tokens.append(Punct::new('.', Spacing::Alone));
-              tokens.append(Ident::new("push_str", span.clone()));
-
-              let mut ts = proc_macro2::TokenStream::new();
-
-              ts.append(Punct::new('&', Spacing::Alone));
-              e.to_tokens(&mut ts);
-              ts.append(Punct::new('.', Spacing::Alone));
-              ts.append(Ident::new("to_string", span.clone()));
-              let ets = proc_macro2::TokenStream::new();
-              let egr = Group::new(Delimiter::Parenthesis, ets);
-              ts.append(egr);
-
-              let gr = Group::new(Delimiter::Parenthesis, ts);
-              tokens.append(gr);
-              tokens.append(Punct::new(';', Spacing::Alone));
+              (quote_spanned!{e.span()=>
+                 stream.push_str(&#e.to_string());
+              }).to_tokens(tokens);
            }, XhtmlExprE::S(e) => {
-              e.to_tokens(tokens);
-              tokens.append(Punct::new(';', Spacing::Alone));
+              (quote_spanned!{e.span()=>
+                 #e;
+              }).to_tokens(tokens);
            }, XhtmlExprE::F(f,p,i,cs) => {
-              tokens.append(Ident::new("for", f.span.clone()));
-              p.to_tokens(tokens);
-              tokens.append(Ident::new("in", f.span.clone())); 
-              i.to_tokens(tokens);
-
-              let mut ets = proc_macro2::TokenStream::new();
-              for c in cs.iter() {
-                 c.to_tokens(&mut ets);
-              }
-              let egr = Group::new(Delimiter::Brace, ets);
-              tokens.append(egr);
+              (quote_spanned!{f.span=>
+                 for #p in #i { #(#cs)* }
+              }).to_tokens(tokens);
            }, XhtmlExprE::I(i,c,bs,es,e) => {
-              tokens.append(Ident::new("if", i.span.clone()));
-              c.to_tokens(tokens);
-
-              let mut ets = proc_macro2::TokenStream::new();
-              for b in bs.iter() {
-                 b.to_tokens(&mut ets);
-              }
-              let egr = Group::new(Delimiter::Brace, ets);
-              tokens.append(egr);
+              (quote_spanned!{i.span=>
+                if #c { #(#bs)* }
+              }).to_tokens(tokens);
 
               for (c,e) in es.iter() {
-                 tokens.append(Ident::new("else", i.span.clone()));
-                 tokens.append(Ident::new("if", i.span.clone()));
-                 c.to_tokens(tokens);
-                 let mut ets = proc_macro2::TokenStream::new();
-                 for b in e.iter() {
-                    b.to_tokens(&mut ets);
-                 }
-                 let egr = Group::new(Delimiter::Brace, ets);
-                 tokens.append(egr);
+                 (quote_spanned!{i.span=>
+                    else if #c { #(#e)* }
+                 }).to_tokens(tokens);
               }
 
               if e.len() > 0 {
-                 tokens.append(Ident::new("else", i.span.clone()));
-                 let mut ets = proc_macro2::TokenStream::new();
-                 for b in e.iter() {
-                    b.to_tokens(&mut ets);
-                 }
-                 let egr = Group::new(Delimiter::Brace, ets);
-                 tokens.append(egr);
+                 (quote_spanned!{i.span=>
+                    else { #(#e)* }
+                 }).to_tokens(tokens);
               }
            }, XhtmlExprE::W(w,i,cs) => {
               tokens.append(Ident::new("while", w.span.clone()));
