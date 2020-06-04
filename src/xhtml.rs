@@ -160,21 +160,13 @@ impl ToTokens for XhtmlExprE {
                  }).to_tokens(tokens);
               }
            }, XhtmlExprE::W(w,i,cs) => {
-              tokens.append(Ident::new("while", w.span.clone()));
-              i.to_tokens(tokens);
-
-              let mut ets = proc_macro2::TokenStream::new();
-              for c in cs.iter() {
-                 c.to_tokens(&mut ets);
-              }
-              let egr = Group::new(Delimiter::Brace, ets);
-              tokens.append(egr);
+              (quote_spanned!{w.span=>
+                 while #i { #(#cs)* }
+              }).to_tokens(tokens);
            }, XhtmlExprE::L(t,l,e) => {
-              tokens.append(Ident::new("let", t.span.clone()));
-              l.to_tokens(tokens);
-              tokens.append(Punct::new('=', Spacing::Alone));
-              e.to_tokens(tokens);
-              tokens.append(Punct::new(';', Spacing::Alone));
+              (quote_spanned!{t.span=>
+                 let #l = #e;
+              }).to_tokens(tokens);
            }
         }
     }
