@@ -992,30 +992,17 @@ impl Parse for XhtmlCrumb {
 impl ToTokens for XhtmlCrumb {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
         match self {
-           XhtmlCrumb::S(s,ss) => {
-              tokens.append(Ident::new("stream", ss.clone()));
-              tokens.append(Punct::new('.', Spacing::Alone));
-              tokens.append(Ident::new("push_str", ss.clone()));
-
-              let mut ts = proc_macro2::TokenStream::new();
-              ts.append(Literal::string(&s));
-              let gr = Group::new(Delimiter::Parenthesis, ts);
-              tokens.append(gr);
-
-              tokens.append(Punct::new(';', Spacing::Alone));
+           XhtmlCrumb::S(s,span) => {
+              let l = Literal::string(&s);
+              (quote_spanned!{span.clone()=>
+                 stream.push_str(#l);
+              }).to_tokens(tokens);
            },
            XhtmlCrumb::L(l) => {
               let span = l.span().clone();
-              tokens.append(Ident::new("stream", span.clone()));
-              tokens.append(Punct::new('.', Spacing::Alone));
-              tokens.append(Ident::new("push_str", span.clone()));
-
-              let mut ts = proc_macro2::TokenStream::new();
-              l.to_tokens(&mut ts);
-              let gr = Group::new(Delimiter::Parenthesis, ts);
-              tokens.append(gr);
-
-              tokens.append(Punct::new(';', Spacing::Alone));
+              (quote_spanned!{span=>
+                 stream.push_str(#l);
+              }).to_tokens(tokens);
            },
            XhtmlCrumb::T(t) => {
               t.to_tokens(tokens);
@@ -1028,24 +1015,9 @@ impl ToTokens for XhtmlCrumb {
            }
            XhtmlCrumb::C(c) => {
               let span = c.gen_span();
-
-              tokens.append(Ident::new("stream", span.clone()));
-              tokens.append(Punct::new('.', Spacing::Alone));
-              tokens.append(Ident::new("push_str", span.clone()));
-
-              let mut ts = proc_macro2::TokenStream::new();
-              ts.append(Punct::new('&', Spacing::Alone));
-              c.to_tokens(&mut ts);
-              ts.append(Punct::new('.', Spacing::Alone));
-              ts.append(Ident::new("to_string", span.clone()));
-
-              let ets = proc_macro2::TokenStream::new();
-              let egr = Group::new(Delimiter::Parenthesis, ets);
-              ts.append(egr);
-
-              let gr = Group::new(Delimiter::Parenthesis, ts);
-              tokens.append(gr);
-              tokens.append(Punct::new(';', Spacing::Alone));
+              (quote_spanned!{span=>
+                 stream.push_str(&#c.to_string());
+              }).to_tokens(tokens);
            }
         }
     }
