@@ -40,7 +40,7 @@ pub struct XhtmlDisplayExpr {
 }
 impl XhtmlDisplayExpr {
     pub fn gen_span(&self) -> Span {
-       self.open.span.join(self.close.span).unwrap()
+       self.open.span.join(self.close.span).unwrap_or(self.open.span)
     }
 }
 impl Parse for XhtmlDisplayExpr {
@@ -416,7 +416,7 @@ pub struct XhtmlClass {
 }
 impl XhtmlClass {
     fn gen_span(&self) -> Span {
-       self.open.span.join(self.close.span).unwrap()
+       self.open.span.join(self.close.span).unwrap_or(self.open.span)
     }
 }
 impl ToTokens for XhtmlClass {
@@ -686,7 +686,7 @@ impl Parse for XhtmlTag {
               tag: t.to_string(),
               attrs: attrs,
               inner: Xhtml { crumbs: vec!() },
-              outer_span: l1.span.join(r2.span).unwrap(),
+              outer_span: l1.span.join(r2.span).unwrap_or(l1.span),
               inner_span_start: r1.span.clone(),
               inner_span_end: r2.span.clone(),
            })
@@ -709,7 +709,7 @@ impl Parse for XhtmlTag {
               tag: t.to_string(),
               attrs: attrs,
               inner: inner,
-              outer_span: l1.span.join(r3.span).unwrap(),
+              outer_span: l1.span.join(r3.span).unwrap_or(l1.span),
               inner_span_start: l2.span.clone(),
               inner_span_end: r1.span.clone(),
            })
@@ -743,7 +743,7 @@ impl XhtmlCrumb {
             XhtmlCrumb::E(e) => { e.brace_token1.span.clone() }
             XhtmlCrumb::F(f) => { f.gen_span() }
             XhtmlCrumb::L(l) => { l.span() }
-            XhtmlCrumb::C(c) => { c.open.span.join(c.close.span).unwrap() }
+            XhtmlCrumb::C(c) => { c.open.span.join(c.close.span).unwrap_or(c.open.span) }
         }
     }
     fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
@@ -1034,7 +1034,7 @@ impl Xhtml {
        if self.crumbs.len() > 0 {
           let mut span = self.crumbs[0].span();
           for c in self.crumbs.iter() {
-             span = span.join(c.span()).unwrap();
+             span = span.join(c.span()).unwrap_or(c.span());
           }
           span
        } else {

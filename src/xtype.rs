@@ -36,7 +36,7 @@ pub struct XType {
 impl ToTokens for XType {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
        if self.defined { return; }
-       let span = self.open.span.join(self.close.span).unwrap();
+       let span = self.open.span.join(self.close.span).unwrap_or(self.open.span);
 
        let tag_name = format_ident!("{}", self.tag_name, span=span);
        (quote_spanned! {span=>
@@ -45,7 +45,7 @@ impl ToTokens for XType {
 
        let mut ts = proc_macro2::TokenStream::new();
        for XTypeAttr { attr_name, attr_type, .. } in self.tag_attrs.iter() {
-          let span = attr_name.span().join(attr_type.span()).unwrap();
+          let span = attr_name.span().join(attr_type.span()).unwrap_or(attr_name.span());
           (quote_spanned! {span=>
              pub #attr_name : #attr_type,
           }).to_tokens(&mut ts);
