@@ -3,8 +3,8 @@
 // see the LICENSE file or <http://opensource.org/licenses/MIT>
 // also see LICENSE2 file or <https://www.apache.org/licenses/LICENSE-2.0>
 
-use quote::{TokenStreamExt, ToTokens};
-use proc_macro2::{Punct, Ident, Spacing, Group, Delimiter};
+use quote::{format_ident, quote_spanned,TokenStreamExt, ToTokens};
+use proc_macro2::{Ident, Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent,Type,Token};
 use syn::spanned::Spanned;
@@ -38,62 +38,35 @@ impl ToTokens for XType {
        if self.defined { return; }
        let span = self.open.span.join(self.close.span).unwrap();
 
-       tokens.append(Ident::new("pub", span.clone()));
-       tokens.append(Ident::new("struct", span.clone()));
-       tokens.append(Ident::new(&self.tag_name.to_string(), span.clone()));
+       let tag_name = format_ident!("{}", self.tag_name, span=span);
+       (quote_spanned! {span=>
+          pub struct #tag_name
+       }).to_tokens(tokens);
 
        let mut ts = proc_macro2::TokenStream::new();
-       for attr in self.tag_attrs.iter() {
-          let span = attr.attr_name.span().join(attr.attr_type.span()).unwrap();
-          ts.append(Ident::new("pub", span.clone()));
-          ts.append(Ident::new(&attr.attr_name.to_string(), span.clone()));
-          ts.append(Punct::new(':', Spacing::Alone));
-          attr.attr_type.to_tokens(&mut ts);
-          ts.append(Punct::new(',', Spacing::Alone));
+       for XTypeAttr { attr_name, attr_type, .. } in self.tag_attrs.iter() {
+          let span = attr_name.span().join(attr_type.span()).unwrap();
+          (quote_spanned! {span=>
+             pub #attr_name : #attr_type,
+          }).to_tokens(&mut ts);
        }
 
-       ts.append(Ident::new("pub", span.clone()));
-       ts.append(Ident::new("children", span.clone()));
-       ts.append(Punct::new(':', Spacing::Alone));
-       ts.append(Ident::new("Vec", span.clone()));
-       ts.append(Punct::new('<', Spacing::Alone));
-       ts.append(Ident::new(&format!("{}Children", self.tag_name), span.clone()));
-       ts.append(Punct::new('>', Spacing::Alone));
-       ts.append(Punct::new(',', Spacing::Alone));
+       let child_type = format_ident!("{}Children", self.tag_name, span=span);
+       (quote_spanned! {span=>
+          pub children : Vec<#child_type>,
+       }).to_tokens(&mut ts);
 
-       let gr = Group::new(Delimiter::Brace, ts);
-       tokens.append(gr);
+       (quote_spanned! {span=> {#ts}}).to_tokens(tokens);
 
-       tokens.append(Ident::new("pub", span.clone()));
-       tokens.append(Ident::new("enum", span.clone()));
-       tokens.append(Ident::new(&format!("{}Children", self.tag_name), span.clone()));
+       (quote_spanned! {span=> pub enum #child_type}).to_tokens(tokens);
 
        let mut ts = proc_macro2::TokenStream::new();
        for child in self.tag_children.iter() {
           if child.tag_name == "Display" {
-             ts.append(Ident::new("Display", span.clone()));
-             let mut ets = proc_macro2::TokenStream::new();
-             ets.append(Ident::new("Box", span.clone()));
-             ets.append(Punct::new('<', Spacing::Alone));
-             ets.append(Ident::new("dyn", span.clone()));
-             ets.append(Ident::new("std", span.clone()));
-             ets.append(Punct::new(':', Spacing::Joint));
-             ets.append(Punct::new(':', Spacing::Joint));
-             ets.append(Ident::new("fmt", span.clone()));
-             ets.append(Punct::new(':', Spacing::Joint));
-             ets.append(Punct::new(':', Spacing::Joint));
-             ets.append(Ident::new("Display", span.clone()));
-             ets.append(Punct::new('>', Spacing::Alone));
-             let egr = Group::new(Delimiter::Parenthesis, ets);
-             ts.append(egr);
-             ts.append(Punct::new(',', Spacing::Alone));
+             (quote_spanned! {span=> Display(Box<dyn std::fmt::Display>),}).to_tokens(&mut ts);
           } else {
-             ts.append(Ident::new(&child.tag_name, span.clone()));
-             let mut ets = proc_macro2::TokenStream::new();
-             ets.append(Ident::new(&child.tag_name, span.clone()));
-             let egr = Group::new(Delimiter::Parenthesis, ets);
-             ts.append(egr);
-             ts.append(Punct::new(',', Spacing::Alone));
+             let child_tag = format_ident!("{}", child.tag_name, span=span);
+             (quote_spanned! {span=> #child_tag(#child_tag),}).to_tokens(&mut ts);
           }
        }
 
