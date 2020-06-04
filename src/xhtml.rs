@@ -5,7 +5,7 @@
 // also see LICENSE2 file or <https://www.apache.org/licenses/LICENSE-2.0>
 
 use quote::{format_ident, quote_spanned, TokenStreamExt, ToTokens};
-use proc_macro2::{Spacing, Span, Punct, Literal, Ident, Group, Delimiter};
+use proc_macro2::{Span, Literal, Ident};
 use syn::parse::{Parse, ParseStream, Result, Error};
 use syn::{Ident as SynIdent, Token, Expr, Pat, LitChar, LitBool, LitStr, LitInt, bracketed, braced};
 use syn::token::{Bracket,Brace};
@@ -1046,17 +1046,10 @@ impl ToTokens for Xhtml {
             let span = c.span();
             if let Some(sp) = prev {
             if c.does_emit() && sp.end() != span.start() {
-
-               tokens.append(Ident::new("stream", span.clone()));
-               tokens.append(Punct::new('.', Spacing::Alone));
-               tokens.append(Ident::new("push_str", span.clone()));
-
-               let mut ts = proc_macro2::TokenStream::new();
-               ts.append(Literal::string(" "));
-               let gr = Group::new(Delimiter::Parenthesis, ts);
-               tokens.append(gr);
-
-               tokens.append(Punct::new(';', Spacing::Alone));
+               let l = Literal::string(" ");
+               (quote_spanned!{span.clone()=>
+                  stream.push_str(#l);
+               }).to_tokens(tokens);
             }}   
 
             prev = Some(span.clone());
