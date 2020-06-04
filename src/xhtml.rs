@@ -529,39 +529,32 @@ pub struct XhtmlTag {
 }
 impl ToTokens for XhtmlTag {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
-        tokens.append(Ident::new("stream", self.outer_span.clone()));
-        tokens.append(Punct::new('.', Spacing::Alone));
-        tokens.append(Ident::new("push_str", self.outer_span.clone()));
-        let mut ts = proc_macro2::TokenStream::new();
-        ts.append(Literal::string(&format!("<{}", self.tag)));
-        let gr = Group::new(Delimiter::Parenthesis, ts);
-        tokens.append(gr);
-        tokens.append(Punct::new(';', Spacing::Alone));
+        let open_tag = Literal::string(&format!("<{}", self.tag));
+        (quote_spanned!{self.outer_span=>
+           stream.push_str(#open_tag);
+        }).to_tokens(tokens);
 
         for (k,v) in self.attrs.iter() {
-            tokens.append(Ident::new("stream", self.outer_span.clone()));
-            tokens.append(Punct::new('.', Spacing::Alone));
-            tokens.append(Ident::new("push_str", self.outer_span.clone()));
-            let mut ts = proc_macro2::TokenStream::new();
+            (quote_spanned!{self.outer_span=>
+               stream.push_str
+            }).to_tokens(tokens);
 
             match v {
                XhtmlAttr::S(s) => {
-                  ts.append(Literal::string(&format!(" {}={}", k, s)));
-                  let gr = Group::new(Delimiter::Parenthesis, ts);
-                  tokens.append(gr);
-                  tokens.append(Punct::new(';', Spacing::Alone));
+                  let l = Literal::string(&format!(" {}={}", k, s));
+                  (quote_spanned!{self.outer_span=>
+                     (#l);
+                  }).to_tokens(tokens);
                }, XhtmlAttr::F(f) => {
-                  ts.append(Literal::string(&format!(" {}=", k)));
-                  let gr = Group::new(Delimiter::Parenthesis, ts);
-                  tokens.append(gr);
-                  tokens.append(Punct::new(';', Spacing::Alone));
-                  f.to_tokens(tokens);
+                  let l = Literal::string(&format!(" {}=", k));
+                  (quote_spanned!{self.outer_span=>
+                     (#l); #f
+                  }).to_tokens(tokens);
                }, XhtmlAttr::E(e) => {
-                  ts.append(Literal::string(&format!(" {}=", k)));
-                  let gr = Group::new(Delimiter::Parenthesis, ts);
-                  tokens.append(gr);
-                  tokens.append(Punct::new(';', Spacing::Alone));
-                  e.to_tokens(tokens);
+                  let l = Literal::string(&format!(" {}=", k));
+                  (quote_spanned!{self.outer_span=>
+                     (#l); #e
+                  }).to_tokens(tokens);
                }
             }
         }
