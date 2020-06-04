@@ -563,56 +563,36 @@ impl ToTokens for XhtmlTag {
         let self_closing = vec!["area","base","br","embed","hr","iframe","img",
            "input","link","meta","param","source","track"];
         if self.inner.crumbs.len()==0 && self_closing.iter().any(|s| (&self.tag)==s) {
-           tokens.append(Ident::new("stream", self.outer_span.clone()));
-           tokens.append(Punct::new('.', Spacing::Alone));
-           tokens.append(Ident::new("push_str", self.outer_span.clone()));
-           let mut ts = proc_macro2::TokenStream::new();
-           ts.append(Literal::string("/>"));
-           let gr = Group::new(Delimiter::Parenthesis, ts);
-           tokens.append(gr);
-           tokens.append(Punct::new(';', Spacing::Alone));
+           let l = Literal::string("/>");
+           (quote_spanned!{self.outer_span=>
+              stream.push_str(#l);
+           }).to_tokens(tokens);
         } else {
-           tokens.append(Ident::new("stream", self.outer_span.clone()));
-           tokens.append(Punct::new('.', Spacing::Alone));
-           tokens.append(Ident::new("push_str", self.outer_span.clone()));
-           let mut ts = proc_macro2::TokenStream::new();
-           ts.append(Literal::string(">"));
-           let gr = Group::new(Delimiter::Parenthesis, ts);
-           tokens.append(gr);
-           tokens.append(Punct::new(';', Spacing::Alone));
+           let l = Literal::string(">");
+           (quote_spanned!{self.outer_span=>
+              stream.push_str(#l);
+           }).to_tokens(tokens);
 
            if self.inner.gen_span().start() != self.inner_span_start.end() {
-              tokens.append(Ident::new("stream", self.outer_span.clone()));
-              tokens.append(Punct::new('.', Spacing::Alone));
-              tokens.append(Ident::new("push_str", self.outer_span.clone()));
-              let mut ts = proc_macro2::TokenStream::new();
-              ts.append(Literal::string(&format!(" ")));
-              let gr = Group::new(Delimiter::Parenthesis, ts);
-              tokens.append(gr);
-              tokens.append(Punct::new(';', Spacing::Alone));
+              let l = Literal::string(" ");
+              (quote_spanned!{self.outer_span=>
+                 stream.push_str(#l);
+              }).to_tokens(tokens);
            }
 
            self.inner.to_tokens(tokens);
 
            if self.inner.gen_span().end() != self.inner_span_end.start() {
-              tokens.append(Ident::new("stream", self.outer_span.clone()));
-              tokens.append(Punct::new('.', Spacing::Alone));
-              tokens.append(Ident::new("push_str", self.outer_span.clone()));
-              let mut ts = proc_macro2::TokenStream::new();
-              ts.append(Literal::string(&format!(" ")));
-              let gr = Group::new(Delimiter::Parenthesis, ts);
-              tokens.append(gr);
-              tokens.append(Punct::new(';', Spacing::Alone));
+              let l = Literal::string(" ");
+              (quote_spanned!{self.outer_span=>
+                 stream.push_str(#l);
+              }).to_tokens(tokens);
            }
 
-           tokens.append(Ident::new("stream", self.outer_span.clone()));
-           tokens.append(Punct::new('.', Spacing::Alone));
-           tokens.append(Ident::new("push_str", self.outer_span.clone()));
-           let mut ts = proc_macro2::TokenStream::new();
-           ts.append(Literal::string(&format!("</{}>", self.tag)));
-           let gr = Group::new(Delimiter::Parenthesis, ts);
-           tokens.append(gr);
-           tokens.append(Punct::new(';', Spacing::Alone));
+           let l = Literal::string(&format!("</{}>", self.tag));
+           (quote_spanned!{self.outer_span=>
+              stream.push_str(#l);
+           }).to_tokens(tokens);
         }
     }
 }
