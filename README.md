@@ -5,6 +5,8 @@ Rusty Domain Extensible Language
 [![Build Nightly](https://github.com/andrew-johnson-4/rdxl/workflows/BuildNightly/badge.svg)](https://github.com/andrew-johnson-4/rdxl)
 [![Build](https://github.com/andrew-johnson-4/rdxl/workflows/Build/badge.svg)](https://github.com/andrew-johnson-4/rdxl)
 
+Domain specific language macros for Rust to generate xhtml.
+
 ```rust
 let my_int = 3;
 let my_str = "asdf";
