@@ -2,9 +2,7 @@ Rusty Domain Extensible Language
 ================================
 
 [![Crates.IO](https://img.shields.io/crates/v/rdxl.svg)](https://crates.rs/crates/rdxl)
-https://github.com/andrew-johnson-4/rdxl/workflows/Build/badge.svg
-
-![Build](https://github.com/andrew-johnson-4/rdxl/workflows/Build/badge.svg)
+[![Build](https://github.com/andrew-johnson-4/rdxl/workflows/Build/badge.svg)](https://github.com/andrew-johnson-4/rdxl)
 
 ```rust
 let my_int = 3;
