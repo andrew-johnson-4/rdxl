@@ -10,8 +10,7 @@ env:
   CARGO_TERM_COLOR: always
 
 jobs:
-  check:
-    name: Build nightly
+  build:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
@@ -20,7 +19,7 @@ jobs:
         with:
             toolchain: nightly
             override: true
-            components: rustfmt, clippy
+            components: rustc
 
       - name: Run cargo build
         uses: actions-rs/cargo@v1
