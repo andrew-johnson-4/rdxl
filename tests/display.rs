@@ -4,9 +4,8 @@ use rdxl::{xhtml,xtype,xrender};
 xtype!(<!MyDisplayList><?/></MyDisplayList>);
 xrender!(MyDisplayList, <ul>
   {{ for d in self.children.iter() {{
-    {{ if let MyDisplayListChildren::Display(d) = d {{
-      <li>{{ d }}</li>
-    }} }}
+    {{ let MyDisplayListChildren::Display(d) = d; }}
+    <li>{{ d }}</li>
   }} }}
 </ul>);
 
