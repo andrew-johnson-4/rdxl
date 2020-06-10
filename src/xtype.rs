@@ -4,9 +4,9 @@
 // also see LICENSE2 file or <https://www.apache.org/licenses/LICENSE-2.0>
 
 use quote::{format_ident, quote_spanned,TokenStreamExt, ToTokens};
-use proc_macro2::{Ident, Group, Delimiter};
+use proc_macro2::{Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
-use syn::{Ident as SynIdent,Type,Token};
+use syn::{Ident,Type,Token,Attribute};
 use syn::spanned::Spanned;
 
 pub struct XTypeAttr {
@@ -25,6 +25,7 @@ impl Parse for XTypeAttr {
 }
 
 pub struct XType {
+   pub comms: Vec<Attribute>,
    pub open: Token![<],
    pub defined: bool,
    pub tag_name: String,
@@ -36,6 +37,11 @@ pub struct XType {
 impl ToTokens for XType {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
        if self.defined { return; }
+
+       for ci in self.comms.iter() {
+          ci.to_tokens(tokens);
+       }
+
        let span = self.open.span.join(self.close.span).unwrap_or(self.open.span);
 
        let tag_name = format_ident!("{}", self.tag_name, span=span);
@@ -81,6 +87,7 @@ impl ToTokens for XType {
 
 impl Parse for XType {
     fn parse(input: ParseStream) -> Result<Self> {
+        let comms: Vec<Attribute>  = input.call(Attribute::parse_outer)?;
         let open: Token![<] = input.parse()?;
 
         if input.peek(Token![?]) && input.peek2(Token![/]) {
@@ -89,6 +96,7 @@ impl Parse for XType {
            let close: Token![>] = input.parse()?;
 
            return Ok(XType {
+              comms: comms,
               open: open,
               defined: true,
               tag_name: "Display".to_string(),
@@ -98,12 +106,13 @@ impl Parse for XType {
            })
         } else if input.peek(Token![?]) {
            let _q: Token![?] = input.parse()?;
-           let tag_name: SynIdent = input.parse()?;
+           let tag_name: Ident = input.parse()?;
            let tag_name = tag_name.to_string();
            let _s: Token![/] = input.parse()?;
            let close: Token![>] = input.parse()?;
 
            return Ok(XType {
+              comms: comms,
               open: open,
               defined: true,
               tag_name: tag_name,
@@ -114,11 +123,11 @@ impl Parse for XType {
         }
 
         let _exc: Token![!] = input.parse()?;
-        let tag_name: SynIdent = input.parse()?;
+        let tag_name: Ident = input.parse()?;
         let tag_name = tag_name.to_string();
 
         let mut tag_attrs = Vec::new();
-        while input.peek(SynIdent) {
+        while input.peek(Ident) {
            let attr: XTypeAttr = input.parse()?;
            tag_attrs.push(attr);
         }
@@ -127,6 +136,7 @@ impl Parse for XType {
            let _backslash: Token![/] = input.parse()?;
            let close: Token![>] = input.parse()?;
            Ok(XType {
+              comms: comms,
               open: open,
               defined: false,
               tag_name: tag_name,
@@ -155,6 +165,7 @@ impl Parse for XType {
 
            let close: Token![>] = input.parse()?;
            Ok(XType {
+              comms: comms,
               open: open,
               defined: false,
               tag_name: tag_name,
