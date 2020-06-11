@@ -1,6 +1,10 @@
 #![feature(proc_macro_hygiene)]
 use rdxl::{xhtml,xtype,xrender};
 
+fn bs(s: String) -> String {
+   s.split_whitespace().collect::<Vec<&str>>().join(" ")
+}
+
 xtype!(<!MyPredefinedType/>);
 xtype!(<!MyList my_string:String my_int:u64>
    <!MyItem my_bool:bool/>
@@ -23,34 +27,30 @@ xrender!(MyList, <ul>
 xrender!(MyItem, <span>my_bool: {{ self.my_bool }}</span>);
 xrender!(MyOtherItem, <span>my_char: {{ self.my_char }}</span>);
 
-fn bs(s: String) -> String {
-   s.split_whitespace().collect::<Vec<&str>>().join(" ")
-}
-
 #[test]
 fn simple_class1() {
    assert_eq!(
-      &bs(xhtml!(<!MyItem my_bool=true/>)),
-      "<span>my_bool: true</span>"
+      bs(xhtml!(<!MyItem my_bool=true/>)),
+      "<span>my_bool: true</span>".to_string()
    );
 }
 
 #[test]
 fn simple_class2() {
    assert_eq!(
-      &bs(xhtml!(<!MyOtherItem my_char='c'></MyOtherItem>)),
-      "<span>my_char: c</span>"
+      bs(xhtml!(<!MyOtherItem my_char='c'></MyOtherItem>)),
+      "<span>my_char: c</span>".to_string()
    );
 }
 
 #[test]
 fn complex_class1(){
    assert_eq!(
-     &bs(xhtml!(<!MyList my_string="abcdefg" my_int=33>
+     bs(xhtml!(<!MyList my_string="abcdefg" my_int=33>
        <!MyItem my_bool=true/>
        <!MyItem my_bool=false/>
        <!MyOtherItem my_char='a'/>
      </MyList>)),
-     "<ul> <li>abcdefg</li> <li>33</li> <li>MyItem: true</li> <li>MyItem: false</li> <li>MyOtherItem: a</li> </ul>"
+     "<ul> <li>abcdefg</li> <li>33</li> <li>MyItem: true</li> <li>MyItem: false</li> <li>MyOtherItem: a</li> </ul>".to_string()
    );
 }
