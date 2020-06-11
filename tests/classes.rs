@@ -23,29 +23,34 @@ xrender!(MyList, <ul>
 xrender!(MyItem, <span>my_bool: {{ self.my_bool }}</span>);
 xrender!(MyOtherItem, <span>my_char: {{ self.my_char }}</span>);
 
+fn bs(s: String) -> String {
+   s.split_whitespace().collect::<Vec<&str>>().join(" ")
+}
+
 #[test]
 fn simple_class1() {
    assert_eq!(
-      xhtml!(<!MyItem my_bool=true/>),
-      "<span>my_bool: true</span>".to_string()
+      &bs(xhtml!(<!MyItem my_bool=true/>)),
+      "<span>my_bool: true</span>"
    );
 }
 
 #[test]
 fn simple_class2() {
    assert_eq!(
-      xhtml!(<!MyOtherItem my_char='c'></MyOtherItem>),
-      "<span>my_char: c</span>".to_string()
+      &bs(xhtml!(<!MyOtherItem my_char='c'></MyOtherItem>)),
+      "<span>my_char: c</span>"
    );
 }
 
 #[test]
 fn complex_class1(){
-   assert_eq!(xhtml!(<!MyList my_string="abcdefg" my_int=33>
+   assert_eq!(
+     &bs(xhtml!(<!MyList my_string="abcdefg" my_int=33>
        <!MyItem my_bool=true/>
        <!MyItem my_bool=false/>
        <!MyOtherItem my_char='a'/>
-     </MyList>),
-     "<ul> <li>abcdefg</li> <li>33</li> <li>MyItem: true</li><li>MyItem: false</li><li>MyOtherItem: a</li> </ul>".to_string()
+     </MyList>)),
+     "<ul> <li>abcdefg</li> <li>33</li> <li>MyItem: true</li><li>MyItem: false</li><li>MyOtherItem: a</li> </ul>"
    );
 }

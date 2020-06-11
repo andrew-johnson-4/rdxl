@@ -1049,9 +1049,8 @@ impl ToTokens for Xhtml {
             let span = c.span();
             if let Some(sp) = prev {
             if c.does_emit() && sp.end() != span.start() {
-               let l = Literal::string(" ");
                (quote_spanned!{span.clone()=>
-                  stream.push_str(#l);
+                  stream.push_str(" ");
                }).to_tokens(tokens);
             }}   
 
