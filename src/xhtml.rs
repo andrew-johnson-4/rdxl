@@ -141,27 +141,27 @@ impl ToTokens for XhtmlExprE {
               }).to_tokens(tokens);
            }, XhtmlExprE::F(f,p,i,cs) => {
               (quote_spanned!{f.span=>
-                 for #p in #i { #(#cs)* }
+                 for #p in #i { #(#cs)* stream.push_str(" "); }
               }).to_tokens(tokens);
            }, XhtmlExprE::I(i,c,bs,es,e) => {
               (quote_spanned!{i.span=>
-                if #c { #(#bs)* }
+                if #c { #(#bs)* stream.push_str(" "); }
               }).to_tokens(tokens);
 
               for (c,e) in es.iter() {
                  (quote_spanned!{i.span=>
-                    else if #c { #(#e)* }
+                    else if #c { #(#e)* stream.push_str(" "); }
                  }).to_tokens(tokens);
               }
 
               if e.len() > 0 {
                  (quote_spanned!{i.span=>
-                    else { #(#e)* }
+                    else { #(#e)* stream.push_str(" "); }
                  }).to_tokens(tokens);
               }
            }, XhtmlExprE::W(w,i,cs) => {
               (quote_spanned!{w.span=>
-                 while #i { #(#cs)* }
+                 while #i { #(#cs)* stream.push_str(" "); }
               }).to_tokens(tokens);
            }, XhtmlExprE::L(t,l,e) => {
               (quote_spanned!{t.span=>
@@ -749,6 +749,9 @@ impl XhtmlCrumb {
     fn parse_outer(input: ParseStream) -> Result<Vec<Self>> {
         let mut cs = vec!();
         while input.peek(Ident) ||
+              input.peek(LitBool) ||
+              input.peek(LitChar) ||
+              input.peek(LitInt) ||
               input.peek(LitStr) ||
               input.peek(Brace) ||
               input.peek(Bracket) ||
@@ -818,6 +821,18 @@ impl Parse for XhtmlCrumb {
         if input.peek(Token![<]) && input.peek2(Token![!]) {
            let c: XhtmlClass = input.parse()?;
            Ok(XhtmlCrumb::C(c))
+        } else if input.peek(LitBool) {
+           let b: LitBool = input.parse()?;
+           Ok(XhtmlCrumb::S(format!("{}",b.value), b.span()))
+        } else if input.peek(LitInt) {
+           let b: LitInt = input.parse()?;
+           Ok(XhtmlCrumb::S(b.base10_digits().to_string(), b.span()))
+        } else if input.peek(LitChar) {
+           let b: LitChar = input.parse()?;
+           Ok(XhtmlCrumb::S(format!("{}",b.value()), b.span()))
+        } else if input.peek(LitStr) {
+           let lit: LitStr = input.parse()?;
+           Ok(XhtmlCrumb::L(lit))
         } else if input.peek(Token![<]) {
            let t: XhtmlTag = input.parse()?;
            Ok(XhtmlCrumb::T(t))
@@ -827,9 +842,6 @@ impl Parse for XhtmlCrumb {
         } else if input.peek(Brace) {
            let e: XhtmlExpr = input.parse()?;
            Ok(XhtmlCrumb::E(e))
-        } else if input.peek(LitStr) {
-           let lit: LitStr = input.parse()?;
-           Ok(XhtmlCrumb::L(lit))
         } else if input.peek(Token![!]) {
            let id: Token![!] = input.parse()?;
            Ok(XhtmlCrumb::S("!".to_string(), id.span.clone()))
