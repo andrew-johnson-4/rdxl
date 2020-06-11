@@ -51,6 +51,6 @@ fn complex_class1(){
        <!MyItem my_bool=false/>
        <!MyOtherItem my_char='a'/>
      </MyList>)),
-     "<ul> <li>abcdefg</li> <li>33</li> <li>MyItem: true</li><li>MyItem: false</li><li>MyOtherItem: a</li> </ul>"
+     "<ul> <li>abcdefg</li> <li>33</li> <li>MyItem: true</li> <li>MyItem: false</li> <li>MyOtherItem: a</li> </ul>"
    );
 }
