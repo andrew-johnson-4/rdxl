@@ -25,7 +25,8 @@ impl Parse for XTypeAttr {
 }
 
 pub struct XType {
-   pub comms: Vec<Attribute>,
+   pub comms_outer: Vec<Attribute>,
+   pub comms_inner: Vec<Attribute>,
    pub open: Token![<],
    pub defined: bool,
    pub tag_name: String,
@@ -38,7 +39,10 @@ impl ToTokens for XType {
     fn to_tokens(&self, tokens: &mut proc_macro2::TokenStream) {
        if self.defined { return; }
 
-       for ci in self.comms.iter() {
+       for ci in self.comms_outer.iter() {
+          ci.to_tokens(tokens);
+       }
+       for ci in self.comms_inner.iter() {
           ci.to_tokens(tokens);
        }
 
@@ -87,7 +91,8 @@ impl ToTokens for XType {
 
 impl Parse for XType {
     fn parse(input: ParseStream) -> Result<Self> {
-        let comms: Vec<Attribute>  = input.call(Attribute::parse_outer)?;
+        let comms_outer: Vec<Attribute>  = input.call(Attribute::parse_outer)?;
+        let comms_inner: Vec<Attribute>  = input.call(Attribute::parse_inner)?;
         let open: Token![<] = input.parse()?;
 
         if input.peek(Token![?]) && input.peek2(Token![/]) {
@@ -96,7 +101,8 @@ impl Parse for XType {
            let close: Token![>] = input.parse()?;
 
            return Ok(XType {
-              comms: comms,
+              comms_outer: comms_outer,
+              comms_inner: comms_inner,
               open: open,
               defined: true,
               tag_name: "Display".to_string(),
@@ -112,7 +118,8 @@ impl Parse for XType {
            let close: Token![>] = input.parse()?;
 
            return Ok(XType {
-              comms: comms,
+              comms_outer: comms_outer,
+              comms_inner: comms_inner,
               open: open,
               defined: true,
               tag_name: tag_name,
@@ -136,7 +143,8 @@ impl Parse for XType {
            let _backslash: Token![/] = input.parse()?;
            let close: Token![>] = input.parse()?;
            Ok(XType {
-              comms: comms,
+              comms_outer: comms_outer,
+              comms_inner: comms_inner,
               open: open,
               defined: false,
               tag_name: tag_name,
@@ -165,7 +173,8 @@ impl Parse for XType {
 
            let close: Token![>] = input.parse()?;
            Ok(XType {
-              comms: comms,
+              comms_outer: comms_outer,
+              comms_inner: comms_inner,
               open: open,
               defined: false,
               tag_name: tag_name,
