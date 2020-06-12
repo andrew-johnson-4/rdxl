@@ -43,6 +43,19 @@ xrender!(MyList, <ul>
 </ul>);
 ```
 
+Foreign syntaxes, like Javascript, may be quoted inline or inserted as CDATA.
+
+```rust
+xrender!(BarGraph,
+  <script src="https://d3js.org/d3.v4.min.js"></script>
+  <script>
+    "var margin = {top: 20, right: 20, bottom: 30, left: 40},"
+        "width = 960 - margin.left - margin.right,"
+        "height = 500 - margin.top - margin.bottom;"
+    ...
+  </script>
+```
+
 ## Contribution
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in rdxl by you,
 shall be dual licensed under the MIT and Apache 2.0 license without any additional terms or conditions.
