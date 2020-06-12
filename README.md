@@ -54,6 +54,7 @@ xrender!(BarGraph,
         "height = 500 - margin.top - margin.bottom;"
     ...
   </script>
+);
 ```
 
 ## Contribution
