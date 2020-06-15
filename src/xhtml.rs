@@ -606,6 +606,7 @@ impl Parse for XhtmlTag {
 
         let mut attrs: Vec<(String,XhtmlAttr)> = Vec::new();
         while input.peek(Ident) ||
+              input.peek(LitStr) ||
               input.peek(Token![as]) ||
               input.peek(Token![break]) ||
               input.peek(Token![const]) ||
@@ -672,6 +673,7 @@ impl Parse for XhtmlTag {
             } else if input.peek(Token![use]) { let _:Token![use] = input.parse()?; "use".to_string()
             } else if input.peek(Token![where]) { let _:Token![where] = input.parse()?; "where".to_string()
             } else if input.peek(Token![while]) { let _:Token![while] = input.parse()?; "while".to_string()
+            } else if input.peek(LitStr) { let s:LitStr = input.parse()?; s.value()
             } else { let key: Ident = input.parse()?; key.to_string() };
             let _eq: Token![=] = input.parse()?;
             let attr_expr: XhtmlAttr = XhtmlAttr::parse(input, key.clone())?;
