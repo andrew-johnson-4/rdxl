@@ -23,3 +23,11 @@ fn formatter2(){
       "<div an_attr=\"2\">dave</div>".to_string()
    );
 }
+
+#[test]
+fn formatter3(){
+   assert_eq!(
+      xhtml!(<div an_attr={{ "\"" }}>dave</div>),
+      r#"<div an_attr="\"">dave</div>"#.to_string()
+   );
+}
