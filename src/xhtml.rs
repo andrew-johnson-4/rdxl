@@ -552,12 +552,26 @@ impl ToTokens for XhtmlTag {
                }, XhtmlAttr::F(f) => {
                   let l = Literal::string(&format!(" {}=", k));
                   (quote_spanned!{self.outer_span=>
-                     (#l); #f
+                     (#l);
+                     stream.push_str("\""); 
+                     stream.push_str(&{
+                       let mut stream = String::new();
+                       #f
+                       stream.replace("\"", "\\\"")
+                     });
+                     stream.push_str("\""); 
                   }).to_tokens(tokens);
                }, XhtmlAttr::E(e) => {
                   let l = Literal::string(&format!(" {}=", k));
                   (quote_spanned!{self.outer_span=>
-                     (#l); #e
+                     (#l);
+                     stream.push_str("\""); 
+                     stream.push_str(&{
+                       let mut stream = String::new();
+                       #e
+                       stream.replace("\"", "\\\"")
+                     });
+                     stream.push_str("\""); 
                   }).to_tokens(tokens);
                }
             }
