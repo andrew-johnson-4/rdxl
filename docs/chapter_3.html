@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> HTML Markup</a></li><li class="chapter-item expanded "><a href="chapter_3.html" class="active"><strong aria-hidden="true">3.</strong> Rust Code</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> HTML Markup</a></li><li class="chapter-item expanded "><a href="chapter_3.html" class="active"><strong aria-hidden="true">3.</strong> Rust Code</a></li><li class="chapter-item expanded "><a href="chapter_4.html"><strong aria-hidden="true">4.</strong> Markup Reference</a></li><li class="chapter-item expanded "><a href="chapter_5.html"><strong aria-hidden="true">5.</strong> Expression Reference</a></li><li class="chapter-item expanded "><a href="chapter_6.html"><strong aria-hidden="true">6.</strong> Statement Reference</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -151,9 +151,40 @@
 <p>Rust code greatly enhances the generative capabilities of the Rdxl macro rules.
 Most rust expressions and statements may be placed inside of Rdxl markup and
 generate code nearly identical to what is stated. This is very helpful not
-only for creating new powerful abstractions, but also for fixing bugs; error
+only for creating new powerful abstractions, but also for fixing bugs: error
 messages for syntax or type errors are correctly tracked and blamed with the
 same helpful error formatting that Rust is so well known for.</p>
+<p>In Rdxl, Rust code is divided into two kinds of syntax expressions: Rust statements
+and Rust expressions. The difference between a statement or expression is always
+determined by syntax rather than inference. Expressions always emit a value that
+implements the Display trait as the return value of the expression. Statements
+may emit data directly to the string buffer but never as the return value of the
+statement.</p>
+<p>Both expressions and statements are surrounded by double braces to signify that
+they should be interpreted as Rust code rather than XHTML.</p>
+<p>A simple example of a rust expression is a variable interpolated into the markup:</p>
+<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+
+fn main() {
+   let x = 5;
+   println!(&quot;{}&quot;, xhtml!(
+      These strings are literals, but {{x}} is a variable.
+   ));
+}
+</code></pre></pre>
+<p>For a complete reference of all expressions, see <a href="./chapter_5.html">Chapter 5: Expression Reference</a>.</p>
+<p>A simple statement would be a for loop:</p>
+<pre><pre class="playpen"><code class="language-rust">
+<span class="boring">#![allow(unused_variables)]
+</span><span class="boring">fn main() {
+</span>   println!(&quot;{}&quot;, xhtml!(
+      {{ for x in 0..10 {{
+         These strings are literals, but {{x}} is a variable.
+      }} }}
+   ));
+<span class="boring">}
+</span></code></pre></pre>
+<p>For a complete reference of all statements, see <a href="./chapter_6.html">Chapter 6: Statement Reference</a>.</p>
 
                     </main>
 
@@ -165,6 +196,10 @@ same helpful error formatting that Rust is so well known for.</p>
                             </a>
                         
 
+                        
+                            <a rel="next" href="chapter_4.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                                <i class="fa fa-angle-right"></i>
+                            </a>
                         
 
                         <div style="clear: both"></div>
@@ -179,6 +214,10 @@ same helpful error formatting that Rust is so well known for.</p>
                     </a>
                 
 
+                
+                    <a rel="next" href="chapter_4.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
+                        <i class="fa fa-angle-right"></i>
+                    </a>
                 
             </nav>
 
