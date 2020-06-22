@@ -3,9 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title></title>
-        
-        <meta name="robots" content="noindex" />
+        <title>Rust Code</title>
         
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
@@ -83,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> HTML Markup</a></li><li class="chapter-item expanded "><a href="chapter_3.html"><strong aria-hidden="true">3.</strong> Rust Code</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> HTML Markup</a></li><li class="chapter-item expanded "><a href="chapter_3.html" class="active"><strong aria-hidden="true">3.</strong> Rust Code</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -149,67 +147,7 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#introduction" id="introduction">Introduction</a></h1>
-<p>Rdxl is a set of macros for generating xhtml from Rust. By using rdxl
-it is possible to intermix xhtml and Rust code to generate interactive documents.</p>
-<p>In this book we will document the exact grammar of each rdxl macro and
-provide many motivating examples and several cheat sheets.</p>
-<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
-
-fn main() {
-  println!(&quot;{}&quot;,rdxl::xhtml!(
-    &lt;p&gt;This copy, version {{rdxl::version}}, is the latest copy of this document&lt;/p&gt;
-    &lt;p&gt;We hope that this will satisfy all your web templating needs&lt;/p&gt;
-  ));
-}
-</code></pre></pre>
-<h1><a class="header" href="#html-markup" id="html-markup">HTML Markup</a></h1>
-<p>When generating markup the most common macro to be used is xhtml!. This macro
-takes mixed markup and rust code to output markup formatted as a String.</p>
-<p>Inside xhtml! there are several possible types of markup that can be sent to
-the formatter:</p>
-<ol>
-<li>XHTML Tags</li>
-<li>Unquoted Text Data</li>
-<li>Quoted Text Data</li>
-</ol>
-<p>To generate XHTML Tags, place the tags in angle brackets like normal markup. The
-tags can be self-closing or contain inner HTML.</p>
-<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
-
-fn main() {
-  println!(&quot;{}&quot;,rdxl::xhtml!(
-    &lt;br/&gt;
-  ));
-}
-</code></pre></pre>
-<p>To generate Unquoted Text Data it is usually sufficient to place the text
-directly in the markup. Note that macros are lexed as Rust code before being
-sent to the macro procedure. This means that not all XHTML can be placed directly
-inline.</p>
-<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
-
-fn main() {
-  println!(&quot;{}&quot;,rdxl::xhtml!(
-    &lt;p&gt;This paragraph is formatted normally. The breaking spaces are recognized
-       as part of the macro rules.&lt;/p&gt;
-  ));
-}
-</code></pre></pre>
-<p>For Text Data that does not work well with the Rust lexer, the text may be placed
-inside a rust quoted string literal. This string will be placed directly into the
-formatted output. It should be noted that raw strings are very a good way to fit
-even more text data into one quote without the need for escape characters.</p>
-<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
-
-fn main() {
-  println!(&quot;{}&quot;,rdxl::xhtml!(
-    r#&quot;((((( the lexer expects closing braces, brackets, and parentheses [[[[
-       but what do we care. {{&quot;#
-  ));
-}
-</code></pre></pre>
-<h1><a class="header" href="#rust-code" id="rust-code">Rust Code</a></h1>
+                        <h1><a class="header" href="#rust-code" id="rust-code">Rust Code</a></h1>
 <p>Rust code greatly enhances the generative capabilities of the Rdxl macro rules.
 Most rust expressions and statements may be placed inside of Rdxl markup and
 generate code nearly identical to what is stated. This is very helpful not
@@ -222,6 +160,10 @@ same helpful error formatting that Rust is so well known for.</p>
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
+                            <a rel="prev" href="chapter_2.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
+                            </a>
+                        
 
                         
 
@@ -231,6 +173,10 @@ same helpful error formatting that Rust is so well known for.</p>
             </div>
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
+                
+                    <a rel="prev" href="chapter_2.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
+                    </a>
                 
 
                 
@@ -265,14 +211,6 @@ same helpful error formatting that Rust is so well known for.</p>
         <!-- Custom JS scripts -->
         
 
-        
-        
-        <script type="text/javascript">
-        window.addEventListener('load', function() {
-            window.setTimeout(window.print, 100);
-        });
-        </script>
-        
         
 
     </body>
