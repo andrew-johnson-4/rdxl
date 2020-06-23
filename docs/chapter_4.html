@@ -148,6 +148,34 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#markup-reference" id="markup-reference">Markup Reference</a></h1>
+<p>All html tags may be used directly in the body of the macro invocation.
+Most tag attributes may be used normally as well. Some tag attribute
+names, for example those with dashes in them, confuse the Rust
+lexer and therefore should be quoted. All strings are valid attribute
+names as long as they are quoted as a string literal.</p>
+<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+
+fn main() {
+   println!(&quot;{}&quot;, xhtml!(
+      &lt;a href=&quot;/this_is_ok&quot; &quot;this-must-be-quoted&quot;=&quot;abcd&quot;&gt;body of link&lt;/a&gt;
+   ));
+}
+</code></pre></pre>
+<p>Rust expressions may be interpolated as attribute values. To insert a
+Rust expression in attribute position, use the double braces format.
+When rust expressions are used as attributes, the string value is
+quoted and escape characters are inserted in place of double quotes
+etc.</p>
+<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+
+fn main() {
+   let a_class = &quot;my_class&quot;;
+   let a_style = &quot;position:absolute; top:0; left:0;&quot;;
+   println!(&quot;{}&quot;, xhtml!(
+      &lt;div class={{a_class}} style={{a_style}}&gt;inner html&lt;/div&gt;
+   ));
+}
+</code></pre></pre>
 
                     </main>
 
