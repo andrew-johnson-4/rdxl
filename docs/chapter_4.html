@@ -156,7 +156,7 @@ names as long as they are quoted as a string literal.</p>
 <pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
 
 fn main() {
-   println!(&quot;{}&quot;, xhtml!(
+   println!(&quot;{}&quot;, rdxl::xhtml!(
       &lt;a href=&quot;/this_is_ok&quot; &quot;this-must-be-quoted&quot;=&quot;abcd&quot;&gt;body of link&lt;/a&gt;
    ));
 }
@@ -171,7 +171,7 @@ etc.</p>
 fn main() {
    let a_class = &quot;my_class&quot;;
    let a_style = &quot;position:absolute; top:0; left:0;&quot;;
-   println!(&quot;{}&quot;, xhtml!(
+   println!(&quot;{}&quot;, rdxl::xhtml!(
       &lt;div class={{a_class}} style={{a_style}}&gt;inner html&lt;/div&gt;
    ));
 }

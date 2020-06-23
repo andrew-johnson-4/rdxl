@@ -159,7 +159,7 @@ provided that</p>
 
 fn main() {
    let a_flag = true;
-   println!(&quot;{}&quot;, xhtml!(
+   println!(&quot;{}&quot;, rdxl::xhtml!(
       {{ if a_flag {{ this is a statement }} }}
       {{ (if a_flag { &quot;this is&quot; } else { &quot;an expression&quot; }) }}
    ));
@@ -171,7 +171,7 @@ Display trait.</p>
 <pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
 
 fn main() {
-   println!(&quot;{}&quot;, xhtml!(
+   println!(&quot;{}&quot;, rdxl::xhtml!(
      {{ &quot;ab&quot; }}
      {{ 'c' }}
      {{ format!(&quot;{} {}&quot;, 2, 3) }}

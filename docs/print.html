@@ -223,13 +223,13 @@ implements the Display trait as the return value of the expression. Statements
 may emit data directly to the string buffer but never as the return value of the
 statement.</p>
 <p>Both expressions and statements are surrounded by double braces to signify that
-they should be interpreted as Rust code rather than XHTML.</p>
+they should be interpreted as Rust code rather than xhtml.</p>
 <p>A simple example of a rust expression is a variable interpolated into the markup:</p>
 <pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
 
 fn main() {
    let x = 5;
-   println!(&quot;{}&quot;, xhtml!(
+   println!(&quot;{}&quot;, rdxl::xhtml!(
       These strings are literals, but {{x}} is a variable.
    ));
 }
@@ -239,7 +239,7 @@ fn main() {
 <pre><pre class="playpen"><code class="language-rust">
 <span class="boring">#![allow(unused_variables)]
 </span><span class="boring">fn main() {
-</span>   println!(&quot;{}&quot;, xhtml!(
+</span>   println!(&quot;{}&quot;, rdxl::xhtml!(
       {{ for x in 0..10 {{
          These strings are literals, but {{x}} is a variable.
       }} }}
@@ -256,7 +256,7 @@ names as long as they are quoted as a string literal.</p>
 <pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
 
 fn main() {
-   println!(&quot;{}&quot;, xhtml!(
+   println!(&quot;{}&quot;, rdxl::xhtml!(
       &lt;a href=&quot;/this_is_ok&quot; &quot;this-must-be-quoted&quot;=&quot;abcd&quot;&gt;body of link&lt;/a&gt;
    ));
 }
@@ -271,7 +271,7 @@ etc.</p>
 fn main() {
    let a_class = &quot;my_class&quot;;
    let a_style = &quot;position:absolute; top:0; left:0;&quot;;
-   println!(&quot;{}&quot;, xhtml!(
+   println!(&quot;{}&quot;, rdxl::xhtml!(
       &lt;div class={{a_class}} style={{a_style}}&gt;inner html&lt;/div&gt;
    ));
 }
@@ -288,7 +288,7 @@ provided that</p>
 
 fn main() {
    let a_flag = true;
-   println!(&quot;{}&quot;, xhtml!(
+   println!(&quot;{}&quot;, rdxl::xhtml!(
       {{ if a_flag {{ this is a statement }} }}
       {{ (if a_flag { &quot;this is&quot; } else { &quot;an expression&quot; }) }}
    ));
@@ -300,7 +300,7 @@ Display trait.</p>
 <pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
 
 fn main() {
-   println!(&quot;{}&quot;, xhtml!(
+   println!(&quot;{}&quot;, rdxl::xhtml!(
      {{ &quot;ab&quot; }}
      {{ 'c' }}
      {{ format!(&quot;{} {}&quot;, 2, 3) }}
@@ -309,6 +309,97 @@ fn main() {
 }
 </code></pre></pre>
 <h1><a class="header" href="#statement-reference" id="statement-reference">Statement Reference</a></h1>
+<p>The statement forms are: if, let, for, while, loop, and match. Also, if
+an expression ends with a semicolon its value will be discarded.</p>
+<h2><a class="header" href="#semicolon" id="semicolon">Semicolon</a></h2>
+<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+
+fn main() {
+   let mux x = 3;
+   println!(&quot;{}&quot;, rdxl::xhtml!(
+      {{ x += 2; }}
+   ));
+}
+</code></pre></pre>
+<h2><a class="header" href="#if" id="if">If</a></h2>
+<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+
+fn main() {
+   let x = 3;
+   println!(&quot;{}&quot;, rdxl::xhtml!(
+      {{ if x&lt;2 {{
+         Case 1
+      }} else if x&lt;5 {{
+         Case 2
+      }} else {{
+         Case 3
+      }}
+   ));
+}
+</code></pre></pre>
+<h2><a class="header" href="#let" id="let">Let</a></h2>
+<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+
+fn main() {
+   println!(&quot;{}&quot;, rdxl::xhtml!(
+      {{ let mut x = 5; }}
+      {{ x }}
+      {{ x += 2; }}
+      {{ x }}
+   ));
+}
+</code></pre></pre>
+<h2><a class="header" href="#for" id="for">For</a></h2>
+<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+
+fn main() {
+   println!(&quot;{}&quot;, rdxl::xhtml!(
+      {{ for x in 0..10 {{
+         {{x}}
+      }} }}
+   ));
+}
+</code></pre></pre>
+<h2><a class="header" href="#while" id="while">While</a></h2>
+<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+
+fn main() {
+   let mut x = 3;
+   println!(&quot;{}&quot;, rdxl::xhtml!(
+      {{ while x&gt;0 {{
+         {{ x }}
+         {{ x -= 1; }}
+      }} }}
+   ));
+}
+</code></pre></pre>
+<h2><a class="header" href="#loop" id="loop">Loop</a></h2>
+<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+
+fn main() {
+   println!(&quot;{}&quot;, rdxl::xhtml!(
+      {{ loop {{
+         &lt;p&gt;inside loop&lt;/p&gt;
+         {{ break; }}
+      }} }}
+   ));
+}
+</code></pre></pre>
+<h2><a class="header" href="#match" id="match">Match</a></h2>
+<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+
+fn main() {
+   let x = 2;
+   println!(&quot;{}&quot;, rdxl::xhtml!(
+      {{ match x {{
+         1 =&gt; {{ &lt;h1&gt;One&lt;/h1&gt; }}
+         2 | 3 | 5 | 7 | 9 | 11 =&gt; {{ &lt;h1&gt;This is a prime&lt;/h1&gt; }}
+         13..=19 =&gt; {{ &lt;h1&gt;A teen&lt;/h1&gt; }}
+         _ =&gt; {{ &lt;h1&gt;&quot;Ain't Special&quot;&lt;/h1&gt; }}
+      }} }}
+   ));
+}
+</code></pre></pre>
 
                     </main>
 

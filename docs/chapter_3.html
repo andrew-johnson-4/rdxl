@@ -161,13 +161,13 @@ implements the Display trait as the return value of the expression. Statements
 may emit data directly to the string buffer but never as the return value of the
 statement.</p>
 <p>Both expressions and statements are surrounded by double braces to signify that
-they should be interpreted as Rust code rather than XHTML.</p>
+they should be interpreted as Rust code rather than xhtml.</p>
 <p>A simple example of a rust expression is a variable interpolated into the markup:</p>
 <pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
 
 fn main() {
    let x = 5;
-   println!(&quot;{}&quot;, xhtml!(
+   println!(&quot;{}&quot;, rdxl::xhtml!(
       These strings are literals, but {{x}} is a variable.
    ));
 }
@@ -177,7 +177,7 @@ fn main() {
 <pre><pre class="playpen"><code class="language-rust">
 <span class="boring">#![allow(unused_variables)]
 </span><span class="boring">fn main() {
-</span>   println!(&quot;{}&quot;, xhtml!(
+</span>   println!(&quot;{}&quot;, rdxl::xhtml!(
       {{ for x in 0..10 {{
          These strings are literals, but {{x}} is a variable.
       }} }}
