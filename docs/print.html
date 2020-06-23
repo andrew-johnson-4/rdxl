@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> HTML Markup</a></li><li class="chapter-item expanded "><a href="chapter_3.html"><strong aria-hidden="true">3.</strong> Rust Code</a></li><li class="chapter-item expanded "><a href="chapter_4.html"><strong aria-hidden="true">4.</strong> Markup Reference</a></li><li class="chapter-item expanded "><a href="chapter_5.html"><strong aria-hidden="true">5.</strong> Expression Reference</a></li><li class="chapter-item expanded "><a href="chapter_6.html"><strong aria-hidden="true">6.</strong> Statement Reference</a></li><li class="chapter-item expanded "><a href="chapter_7.html"><strong aria-hidden="true">7.</strong> Breaking Spaces</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> HTML Markup</a></li><li class="chapter-item expanded "><a href="chapter_3.html"><strong aria-hidden="true">3.</strong> Rust Code</a></li><li class="chapter-item expanded "><a href="chapter_4.html"><strong aria-hidden="true">4.</strong> Markup Reference</a></li><li class="chapter-item expanded "><a href="chapter_5.html"><strong aria-hidden="true">5.</strong> Expression Reference</a></li><li class="chapter-item expanded "><a href="chapter_6.html"><strong aria-hidden="true">6.</strong> Statement Reference</a></li><li class="chapter-item expanded "><a href="chapter_7.html"><strong aria-hidden="true">7.</strong> Breaking Spaces</a></li><li class="chapter-item expanded "><a href="chapter_8.html"><strong aria-hidden="true">8.</strong> xrender</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -396,6 +396,32 @@ reliant on the <a href="https://doc.rust-lang.org/proc_macro/struct.Span.html">s
 information provided to procedural macros. This
 feature has been under ongoing development, so
 there may be quirks from Rust version to version.</p>
+<h1><a class="header" href="#xrender" id="xrender">xrender</a></h1>
+<p>The xrender! macro defines a Display trait for a
+type. The type is supplied as the first argument,
+and the rest of the macro defines the XHTML that
+is to be formatted as output.</p>
+<p>All fields of the type can be accessed through the
+<em>self</em> value which is defined over the body of
+the macro invocation.</p>
+<pre><pre class="playpen"><code class="language-rust">
+<span class="boring">#![allow(unused_variables)]
+</span><span class="boring">fn main() {
+</span>extern crate rdxl;
+
+xrender!(MyList, &lt;ul&gt;
+  &lt;li&gt;{{ self.my_string }}&lt;/li&gt;
+  &lt;li&gt;{{ self.my_int }}&lt;/li&gt;
+  {{ for i in self.children.iter() {{
+    {{ if let MyListChildren::MyItem(my_item) = i {{
+      &lt;li&gt;MyItem: {{ my_item.my_bool }}&lt;/li&gt;
+    }} else if let MyListChildren::MyOtherItem(my_other_item) = i {{
+      &lt;li&gt;MyOtherItem: {{ my_other_item.my_char }}&lt;/li&gt;
+    }} }}
+  }} }}
+&lt;/ul&gt;);
+<span class="boring">}
+</span></code></pre></pre>
 
                     </main>
 
