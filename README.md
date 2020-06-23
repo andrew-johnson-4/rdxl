@@ -49,9 +49,9 @@ Foreign syntaxes, like Javascript, may be quoted inline or inserted as CDATA.
 xrender!(BarGraph,
   <script src="https://d3js.org/d3.v4.min.js"></script>
   <script>
-    "var margin = {top: 20, right: 20, bottom: 30, left: 40},"
-        "width = 960 - margin.left - margin.right,"
-        "height = 500 - margin.top - margin.bottom;"
+    r#"var margin = {top: 20, right: 20, bottom: 30, left: 40},
+           width = 960 - margin.left - margin.right,
+           height = 500 - margin.top - margin.bottom;"#
     ...
   </script>
 );
