@@ -83,7 +83,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> HTML Markup</a></li><li class="chapter-item expanded "><a href="chapter_3.html"><strong aria-hidden="true">3.</strong> Rust Code</a></li><li class="chapter-item expanded "><a href="chapter_4.html"><strong aria-hidden="true">4.</strong> Markup Reference</a></li><li class="chapter-item expanded "><a href="chapter_5.html"><strong aria-hidden="true">5.</strong> Expression Reference</a></li><li class="chapter-item expanded "><a href="chapter_6.html"><strong aria-hidden="true">6.</strong> Statement Reference</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> HTML Markup</a></li><li class="chapter-item expanded "><a href="chapter_3.html"><strong aria-hidden="true">3.</strong> Rust Code</a></li><li class="chapter-item expanded "><a href="chapter_4.html"><strong aria-hidden="true">4.</strong> Markup Reference</a></li><li class="chapter-item expanded "><a href="chapter_5.html"><strong aria-hidden="true">5.</strong> Expression Reference</a></li><li class="chapter-item expanded "><a href="chapter_6.html"><strong aria-hidden="true">6.</strong> Statement Reference</a></li><li class="chapter-item expanded "><a href="chapter_7.html"><strong aria-hidden="true">7.</strong> Breaking Spaces</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -385,6 +385,17 @@ fn main() {
    ));
 }
 </code></pre></pre>
+<h1><a class="header" href="#breaking-spaces" id="breaking-spaces">Breaking Spaces</a></h1>
+<p>Rdxl macros try to guess when inserting breaking spaces
+would be appropriate. This is quite difficult and 
+absurd when it comes to statements. For that reason,
+most statements just emit breaking spaces regardless
+of whether there are any spaces in the input.</p>
+<p>The implementation of breaking space detection is
+reliant on the <a href="https://doc.rust-lang.org/proc_macro/struct.Span.html">span location</a>
+information provided to procedural macros. This
+feature has been under ongoing development, so
+there may be quirks from Rust version to version.</p>
 
                     </main>
 

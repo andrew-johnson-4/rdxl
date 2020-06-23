@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Introduction</title>
+        <title>Breaking Spaces</title>
         
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> HTML Markup</a></li><li class="chapter-item expanded "><a href="chapter_3.html"><strong aria-hidden="true">3.</strong> Rust Code</a></li><li class="chapter-item expanded "><a href="chapter_4.html"><strong aria-hidden="true">4.</strong> Markup Reference</a></li><li class="chapter-item expanded "><a href="chapter_5.html"><strong aria-hidden="true">5.</strong> Expression Reference</a></li><li class="chapter-item expanded "><a href="chapter_6.html"><strong aria-hidden="true">6.</strong> Statement Reference</a></li><li class="chapter-item expanded "><a href="chapter_7.html"><strong aria-hidden="true">7.</strong> Breaking Spaces</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> HTML Markup</a></li><li class="chapter-item expanded "><a href="chapter_3.html"><strong aria-hidden="true">3.</strong> Rust Code</a></li><li class="chapter-item expanded "><a href="chapter_4.html"><strong aria-hidden="true">4.</strong> Markup Reference</a></li><li class="chapter-item expanded "><a href="chapter_5.html"><strong aria-hidden="true">5.</strong> Expression Reference</a></li><li class="chapter-item expanded "><a href="chapter_6.html"><strong aria-hidden="true">6.</strong> Statement Reference</a></li><li class="chapter-item expanded "><a href="chapter_7.html" class="active"><strong aria-hidden="true">7.</strong> Breaking Spaces</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -147,31 +147,28 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#introduction" id="introduction">Introduction</a></h1>
-<p>Rdxl is a set of macros for generating xhtml from Rust. By using rdxl
-it is possible to intermix xhtml and Rust code to generate interactive documents.</p>
-<p>In this book we will document the exact grammar of each rdxl macro and
-provide many motivating examples and several cheat sheets.</p>
-<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
-
-fn main() {
-  println!(&quot;{}&quot;,rdxl::xhtml!(
-    &lt;p&gt;This copy, version {{rdxl::version}}, is the latest copy of this document&lt;/p&gt;
-    &lt;p&gt;We hope that this will satisfy all your web templating needs&lt;/p&gt;
-  ));
-}
-</code></pre></pre>
+                        <h1><a class="header" href="#breaking-spaces" id="breaking-spaces">Breaking Spaces</a></h1>
+<p>Rdxl macros try to guess when inserting breaking spaces
+would be appropriate. This is quite difficult and 
+absurd when it comes to statements. For that reason,
+most statements just emit breaking spaces regardless
+of whether there are any spaces in the input.</p>
+<p>The implementation of breaking space detection is
+reliant on the <a href="https://doc.rust-lang.org/proc_macro/struct.Span.html">span location</a>
+information provided to procedural macros. This
+feature has been under ongoing development, so
+there may be quirks from Rust version to version.</p>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
-
-                        
-                            <a rel="next" href="chapter_2.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
+                            <a rel="prev" href="chapter_6.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                                <i class="fa fa-angle-left"></i>
                             </a>
+                        
+
                         
 
                         <div style="clear: both"></div>
@@ -181,11 +178,11 @@ fn main() {
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
-
-                
-                    <a rel="next" href="chapter_2.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
+                    <a rel="prev" href="chapter_6.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                        <i class="fa fa-angle-left"></i>
                     </a>
+                
+
                 
             </nav>
 
