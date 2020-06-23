@@ -148,7 +148,7 @@
                 <div id="content" class="content">
                     <main>
                         <h1><a class="header" href="#statement-reference" id="statement-reference">Statement Reference</a></h1>
-<p>The statement forms are: if, let, for, while, loop, and match. Also, if
+<p>The statement forms are: if, let, for, while, and loop. Also, if
 an expression ends with a semicolon its value will be discarded.</p>
 <h2><a class="header" href="#semicolon" id="semicolon">Semicolon</a></h2>
 <pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
@@ -220,21 +220,6 @@ fn main() {
       {{ loop {{
          &lt;p&gt;inside loop&lt;/p&gt;
          {{ break; }}
-      }} }}
-   ));
-}
-</code></pre></pre>
-<h2><a class="header" href="#match" id="match">Match</a></h2>
-<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
-
-fn main() {
-   let x = 2;
-   println!(&quot;{}&quot;, rdxl::xhtml!(
-      {{ match x {{
-         1 =&gt; {{ &lt;h1&gt;One&lt;/h1&gt; }}
-         2 | 3 | 5 | 7 | 9 | 11 =&gt; {{ &lt;h1&gt;This is a prime&lt;/h1&gt; }}
-         13..=19 =&gt; {{ &lt;h1&gt;A teen&lt;/h1&gt; }}
-         _ =&gt; {{ &lt;h1&gt;&quot;Ain't Special&quot;&lt;/h1&gt; }}
       }} }}
    ));
 }
