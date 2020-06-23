@@ -43,3 +43,15 @@ fn loops3(){
    </div>)),
    "<div> <span>23</span> </div>".to_string());
 }
+
+#[allow(unreachable_code)]
+#[test]
+fn loops4(){
+   assert_eq!(bs(xhtml!(<div>
+      {{ loop {{
+         <p>inside loop</p>
+         {{ break; }}
+      }} }}
+   </div>)),
+   "<div> <p>inside loop</p> </div>");
+}
