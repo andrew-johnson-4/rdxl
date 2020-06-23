@@ -277,6 +277,37 @@ fn main() {
 }
 </code></pre></pre>
 <h1><a class="header" href="#expression-reference" id="expression-reference">Expression Reference</a></h1>
+<p>All interpolated Rust code is interpreted as an expression
+provided that</p>
+<ol>
+<li>The snippet does not start with a reserved statement keyword</li>
+<li>The snippet does not end with a semicolon</li>
+</ol>
+<p>The statement keywords are: if, let, for, while, loop, and match.</p>
+<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+
+fn main() {
+   let a_flag = true;
+   println!(&quot;{}&quot;, xhtml!(
+      {{ if a_flag {{ this is a statement }} }}
+      {{ (if a_flag { &quot;this is&quot; } else { &quot;an expression&quot; }) }}
+   ));
+}
+</code></pre></pre>
+<p>Aside from these reservations, all Rust code may be used as
+expressions as long as they return a value that implements the
+Display trait.</p>
+<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+
+fn main() {
+   println!(&quot;{}&quot;, xhtml!(
+     {{ &quot;ab&quot; }}
+     {{ 'c' }}
+     {{ format!(&quot;{} {}&quot;, 2, 3) }}
+     {{ true }}
+   ));
+}
+</code></pre></pre>
 <h1><a class="header" href="#statement-reference" id="statement-reference">Statement Reference</a></h1>
 
                     </main>
