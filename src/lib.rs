@@ -5,7 +5,7 @@
 
 //! # HTML Templating Macros
 //!
-//! This library contains JSX style inline HTML macros for Rust. The only
+//! [Rdxl](https://andrew-johnson-4.github.io/rdxl) provides JSX style inline HTML macros for Rust. The only
 //! dependencies are the ubiquitous proc-macro2, syn, and quote.
 //!
 //! The library is semantic versioned, so expect small fixes and many additions until a 1.0 release is reached.
@@ -87,7 +87,7 @@ use proc_macro::{TokenStream};
 use syn::{parse_macro_input};
 use quote::{quote};
 
-/// The xhtml! macro is the primary mechanism for templating in rdxl
+/// The [xhtml!](https://andrew-johnson-4.github.io/rdxl) macro is the primary mechanism for templating in rdxl
 ///
 /// <b>xhtml!</b> consumes mixed Rust code and XML markup as input and emits rendered xhtml to a string buffer.
 /// Rust code is usually delimited by {{double braces}} or [[double brackets]]. The <b>syn</b> module is used to
@@ -135,7 +135,7 @@ pub fn xhtml(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
-/// The xtype! macro defines an xml element and subelements
+/// The [xtype!](https://andrew-johnson-4.github.io/rdxl) macro defines an xml element and subelements
 ///
 /// <b>xtype!</b> removes some of the redundancy of defining types having many attribute fields
 /// and many heterogenous children elements. A typical type definition that is a good fit for
@@ -181,7 +181,7 @@ pub fn xtype(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
-/// The xrender! macro defines a Display implementation for a type
+/// The [xrender!](https://andrew-johnson-4.github.io/rdxl) macro defines a Display implementation for a type
 ///
 /// <b>xrender!</b> implements the <b>Display</b> property for XHtml-like types.
 /// The type definition is separate from the display logic for in the case that
