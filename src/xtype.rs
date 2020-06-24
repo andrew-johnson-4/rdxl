@@ -85,6 +85,12 @@ impl ToTokens for XType {
 
        let mut ds = proc_macro2::TokenStream::new();
        let mut ss = proc_macro2::TokenStream::new();
+       (quote_spanned! {span=>
+          pub fn set_children(mut self, v: Vec<#child_type>) -> #tag_name {
+             self.children = v;
+             self
+          }
+       }).to_tokens(&mut ss);
        for XTypeAttr { attr_name, attr_type, .. } in self.tag_attrs.iter() {
           let span = attr_name.span().join(attr_type.span()).unwrap_or(attr_name.span());
           (quote_spanned! {span=>

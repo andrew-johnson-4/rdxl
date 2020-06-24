@@ -4,6 +4,22 @@ use rdxl::{xhtml,xtype,xrender};
 xtype!(<!MyType field1:MyField field2:MyField2/>);
 xtype!(<!MyField x:u64/>);
 xtype!(<!MyField2 x:String/>);
+impl std::default::Default for MyField {
+   fn default() -> MyField {
+      MyField {
+         x:0,
+         children:Vec::new()
+      }
+   }
+}
+impl std::default::Default for MyField2 {
+   fn default() -> MyField2 {
+      MyField2 {
+         x:"".to_string(),
+         children:Vec::new()
+      }
+   }
+}
 
 impl MyField {
    fn to_field2(&self) -> MyField2 {

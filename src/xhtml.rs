@@ -449,19 +449,6 @@ impl ToTokens for XhtmlClass {
           }).to_tokens(tokens);
        }
 
-       /*
-       let mut ts = proc_macro2::TokenStream::new();
-       for (k,v) in self.attrs.iter() {
-          let k = format_ident!("{}", k, span=span);
-          (quote_spanned!{span=>
-               #k: #v,
-          }).to_tokens(&mut ts);
-       }
-
-       (quote_spanned!{span=>
-          children: vec!
-       }).to_tokens(&mut ts);
-
        let mut cs = proc_macro2::TokenStream::new();
        for c in self.children.iter() {
           match c {
@@ -484,12 +471,8 @@ impl ToTokens for XhtmlClass {
        }
 
        (quote_spanned!{span=>
-         [#cs],
-       }).to_tokens(&mut ts);
-       (quote_spanned!{span=>
-         {#ts}
+         .set_children(vec![#cs])
        }).to_tokens(tokens);
-       */
     }
 }
 impl Parse for XhtmlClass {
