@@ -31,3 +31,19 @@ fn default4() {
    ),"0");
 }
 
+xtype!(<!B c:u64={{3}}/>);
+xrender!(B,{{self.c}});
+
+#[test]
+fn default5() {
+   assert_eq!(xhtml!(
+     <!B/>
+   ),"3");
+}
+
+#[test]
+fn default6() {
+   assert_eq!(xhtml!(
+     <!B c=5/>
+   ),"5");
+}
