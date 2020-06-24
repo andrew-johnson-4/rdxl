@@ -6,20 +6,41 @@
 use quote::{format_ident, quote_spanned,TokenStreamExt, ToTokens};
 use proc_macro2::{Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
-use syn::{Ident,Type,Token,Attribute};
+use syn::{braced,Ident,Type,Token,Attribute,Expr,token};
 use syn::spanned::Spanned;
+
+pub struct XTypeAttrDefault {
+   pub eq: Token![=],
+   pub brace1: token::Brace,
+   pub brace2: token::Brace,
+   pub expr: Expr
+}
+impl Parse for XTypeAttrDefault {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let content1;
+        let content2;
+        Ok(XTypeAttrDefault {
+            eq: input.parse()?,
+            brace1: braced!(content1 in input),
+            brace2: braced!(content2 in content1),
+            expr: content2.parse()?
+        })
+    }
+}
 
 pub struct XTypeAttr {
    pub attr_name: Ident,
    pub eq: Token![:],
-   pub attr_type: Type
+   pub attr_type: Type,
+   pub attr_expr: Option<XTypeAttrDefault>
 }
 impl Parse for XTypeAttr {
     fn parse(input: ParseStream) -> Result<Self> {
         Ok(XTypeAttr {
             attr_name: input.parse()?,
             eq: input.parse()?,
-            attr_type: input.parse()?
+            attr_type: input.parse()?,
+            attr_expr: (if input.peek(Token![=]) {Some(input.parse()?)} else {None})
         })
     }
 }
@@ -82,6 +103,50 @@ impl ToTokens for XType {
 
        let gr = Group::new(Delimiter::Brace, ts);
        tokens.append(gr);
+
+       let mut ds = proc_macro2::TokenStream::new();
+       let mut ss = proc_macro2::TokenStream::new();
+       (quote_spanned! {span=>
+          pub fn set_children(mut self, v: Vec<#child_type>) -> #tag_name {
+             self.children = v;
+             self
+          }
+       }).to_tokens(&mut ss);
+       for XTypeAttr { attr_name, attr_type, attr_expr, .. } in self.tag_attrs.iter() {
+          let span = attr_name.span().join(attr_type.span()).unwrap_or(attr_name.span());
+
+          if let Some(ae) = attr_expr {
+             let ref e = ae.expr;
+             (quote_spanned! {span=>
+                #attr_name : #e,
+             }).to_tokens(&mut ds);
+          } else {
+             (quote_spanned! {span=>
+                #attr_name : std::default::Default::default(),
+             }).to_tokens(&mut ds);
+          }
+
+          let setter = format_ident!("set_{}", attr_name, span=span);
+          (quote_spanned! {span=>
+             pub fn #setter(mut self, v: #attr_type) -> #tag_name {
+                self.#attr_name = v;
+                self
+             }
+          }).to_tokens(&mut ss);
+       }
+
+
+       (quote_spanned! {span=>
+          impl #tag_name {
+             pub fn new() -> #tag_name {
+                #tag_name {
+                   #ds
+                   children: Vec::new()
+                }
+             }
+             #ss
+          }
+       }).to_tokens(tokens);
 
        for child in self.tag_children.iter() {
           child.to_tokens(tokens);
