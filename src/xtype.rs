@@ -112,11 +112,19 @@ impl ToTokens for XType {
              self
           }
        }).to_tokens(&mut ss);
-       for XTypeAttr { attr_name, attr_type, .. } in self.tag_attrs.iter() {
+       for XTypeAttr { attr_name, attr_type, attr_expr, .. } in self.tag_attrs.iter() {
           let span = attr_name.span().join(attr_type.span()).unwrap_or(attr_name.span());
-          (quote_spanned! {span=>
-             #attr_name : std::default::Default::default(),
-          }).to_tokens(&mut ds);
+
+          if let Some(ae) = attr_expr {
+             let ref e = ae.expr;
+             (quote_spanned! {span=>
+                #attr_name : #e,
+             }).to_tokens(&mut ds);
+          } else {
+             (quote_spanned! {span=>
+                #attr_name : std::default::Default::default(),
+             }).to_tokens(&mut ds);
+          }
 
           let setter = format_ident!("set_{}", attr_name, span=span);
           (quote_spanned! {span=>
