@@ -6,20 +6,41 @@
 use quote::{format_ident, quote_spanned,TokenStreamExt, ToTokens};
 use proc_macro2::{Group, Delimiter};
 use syn::parse::{Parse, ParseStream, Result, Error};
-use syn::{Ident,Type,Token,Attribute};
+use syn::{braced,Ident,Type,Token,Attribute,Expr,token};
 use syn::spanned::Spanned;
+
+pub struct XTypeAttrDefault {
+   pub eq: Token![=],
+   pub brace1: token::Brace,
+   pub brace2: token::Brace,
+   pub expr: Expr
+}
+impl Parse for XTypeAttrDefault {
+    fn parse(input: ParseStream) -> Result<Self> {
+        let content1;
+        let content2;
+        Ok(XTypeAttrDefault {
+            eq: input.parse()?,
+            brace1: braced!(content1 in input),
+            brace2: braced!(content2 in content1),
+            expr: content2.parse()?
+        })
+    }
+}
 
 pub struct XTypeAttr {
    pub attr_name: Ident,
    pub eq: Token![:],
-   pub attr_type: Type
+   pub attr_type: Type,
+   pub attr_expr: Option<XTypeAttrDefault>
 }
 impl Parse for XTypeAttr {
     fn parse(input: ParseStream) -> Result<Self> {
         Ok(XTypeAttr {
             attr_name: input.parse()?,
             eq: input.parse()?,
-            attr_type: input.parse()?
+            attr_type: input.parse()?,
+            attr_expr: (if input.peek(Token![=]) {Some(input.parse()?)} else {None})
         })
     }
 }
