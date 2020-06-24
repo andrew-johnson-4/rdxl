@@ -25,7 +25,7 @@ fn default2() {
 fn default3() {
    assert_eq!(xhtml!(
      <!A b="bb"/>
-   ),"12");
+   ),"bb0");
 }
 
 #[test]
