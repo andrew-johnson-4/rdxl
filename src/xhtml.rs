@@ -442,6 +442,13 @@ impl ToTokens for XhtmlClass {
           #name::new()
        }).to_tokens(tokens);
 
+       for (k,v) in self.attrs.iter() {
+          let setter = format_ident!("set_{}", k, span=span);
+          (quote_spanned!{span=>
+               .#setter(#v)
+          }).to_tokens(tokens);
+       }
+
        /*
        let mut ts = proc_macro2::TokenStream::new();
        for (k,v) in self.attrs.iter() {

@@ -84,12 +84,22 @@ impl ToTokens for XType {
        tokens.append(gr);
 
        let mut ds = proc_macro2::TokenStream::new();
+       let mut ss = proc_macro2::TokenStream::new();
        for XTypeAttr { attr_name, attr_type, .. } in self.tag_attrs.iter() {
           let span = attr_name.span().join(attr_type.span()).unwrap_or(attr_name.span());
           (quote_spanned! {span=>
              #attr_name : std::default::Default::default(),
           }).to_tokens(&mut ds);
+
+          let setter = format_ident!("set_{}", attr_name, span=span);
+          (quote_spanned! {span=>
+             pub fn #setter(mut self, v: #attr_type) -> #tag_name {
+                self.#attr_name = v;
+                self
+             }
+          }).to_tokens(&mut ss);
        }
+
 
        (quote_spanned! {span=>
           impl #tag_name {
@@ -99,6 +109,7 @@ impl ToTokens for XType {
                    children: Vec::new()
                 }
              }
+             #ss
           }
        }).to_tokens(tokens);
 
