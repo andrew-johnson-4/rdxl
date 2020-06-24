@@ -438,8 +438,11 @@ impl ToTokens for XhtmlClass {
        let span = self.gen_span();
 
        let name = format_ident!("{}", self.name, span=span);
-       name.to_tokens(tokens);
+       (quote_spanned!{span=>
+          #name::new()
+       }).to_tokens(tokens);
 
+       /*
        let mut ts = proc_macro2::TokenStream::new();
        for (k,v) in self.attrs.iter() {
           let k = format_ident!("{}", k, span=span);
@@ -479,6 +482,7 @@ impl ToTokens for XhtmlClass {
        (quote_spanned!{span=>
          {#ts}
        }).to_tokens(tokens);
+       */
     }
 }
 impl Parse for XhtmlClass {

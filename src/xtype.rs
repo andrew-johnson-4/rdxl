@@ -83,6 +83,25 @@ impl ToTokens for XType {
        let gr = Group::new(Delimiter::Brace, ts);
        tokens.append(gr);
 
+       let mut ds = proc_macro2::TokenStream::new();
+       for XTypeAttr { attr_name, attr_type, .. } in self.tag_attrs.iter() {
+          let span = attr_name.span().join(attr_type.span()).unwrap_or(attr_name.span());
+          (quote_spanned! {span=>
+             #attr_name : std::default::Default::default(),
+          }).to_tokens(&mut ds);
+       }
+
+       (quote_spanned! {span=>
+          impl #tag_name {
+             pub fn new() -> #tag_name {
+                #tag_name {
+                   #ds
+                   children: Vec::new()
+                }
+             }
+          }
+       }).to_tokens(tokens);
+
        for child in self.tag_children.iter() {
           child.to_tokens(tokens);
        }
