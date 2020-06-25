@@ -3,7 +3,7 @@
     <head>
         <!-- Book generated using mdBook -->
         <meta charset="UTF-8">
-        <title>Expression Reference</title>
+        <title>xtype</title>
         
 
         <meta content="text/html; charset=utf-8" http-equiv="Content-Type">
@@ -81,7 +81,7 @@
 
         <nav id="sidebar" class="sidebar" aria-label="Table of contents">
             <div class="sidebar-scrollbox">
-                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> HTML Markup</a></li><li class="chapter-item expanded "><a href="chapter_3.html"><strong aria-hidden="true">3.</strong> Rust Code</a></li><li class="chapter-item expanded "><a href="chapter_4.html"><strong aria-hidden="true">4.</strong> Markup Reference</a></li><li class="chapter-item expanded "><a href="chapter_5.html" class="active"><strong aria-hidden="true">5.</strong> Expression Reference</a></li><li class="chapter-item expanded "><a href="chapter_6.html"><strong aria-hidden="true">6.</strong> Statement Reference</a></li><li class="chapter-item expanded "><a href="chapter_7.html"><strong aria-hidden="true">7.</strong> Breaking Spaces</a></li><li class="chapter-item expanded "><a href="chapter_8.html"><strong aria-hidden="true">8.</strong> xrender</a></li><li class="chapter-item expanded "><a href="chapter_9.html"><strong aria-hidden="true">9.</strong> xtype</a></li></ol>
+                <ol class="chapter"><li class="chapter-item expanded "><a href="chapter_1.html"><strong aria-hidden="true">1.</strong> Introduction</a></li><li class="chapter-item expanded "><a href="chapter_2.html"><strong aria-hidden="true">2.</strong> HTML Markup</a></li><li class="chapter-item expanded "><a href="chapter_3.html"><strong aria-hidden="true">3.</strong> Rust Code</a></li><li class="chapter-item expanded "><a href="chapter_4.html"><strong aria-hidden="true">4.</strong> Markup Reference</a></li><li class="chapter-item expanded "><a href="chapter_5.html"><strong aria-hidden="true">5.</strong> Expression Reference</a></li><li class="chapter-item expanded "><a href="chapter_6.html"><strong aria-hidden="true">6.</strong> Statement Reference</a></li><li class="chapter-item expanded "><a href="chapter_7.html"><strong aria-hidden="true">7.</strong> Breaking Spaces</a></li><li class="chapter-item expanded "><a href="chapter_8.html"><strong aria-hidden="true">8.</strong> xrender</a></li><li class="chapter-item expanded "><a href="chapter_9.html" class="active"><strong aria-hidden="true">9.</strong> xtype</a></li></ol>
             </div>
             <div id="sidebar-resize-handle" class="sidebar-resize-handle"></div>
         </nav>
@@ -147,53 +147,39 @@
 
                 <div id="content" class="content">
                     <main>
-                        <h1><a class="header" href="#expression-reference" id="expression-reference">Expression Reference</a></h1>
-<p>All interpolated Rust code is interpreted as an expression
-provided that</p>
-<ol>
-<li>The snippet does not start with a reserved statement keyword</li>
-<li>The snippet does not end with a semicolon</li>
-</ol>
-<p>The statement keywords are: if, let, for, while, and loop.</p>
-<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
+                        <h1><a class="header" href="#xtype" id="xtype">xtype</a></h1>
+<p>The xtype! macro defines an XML-like struct. An XML-like struct
+has zero or more attributes, possibly having default values, and
+zero or more possible children types.</p>
+<p>Attributes that do not supply a default value must have a type
+which implements the std::default::Default trait. This is
+an implementation quirk, so it is notable, although undesirable.</p>
+<p>Children can have any type, which may be defined inline as another
+tag, or reference an existing type. A boxed Display type is
+available by using the ? tag, which is a handy way to include
+miscellaneous content which does not require special rendering
+logic.</p>
+<pre><pre class="playpen"><code class="language-rust">
+<span class="boring">#![allow(unused_variables)]
+</span><span class="boring">fn main() {
+</span>extern crate rdxl;
 
-fn main() {
-   let a_flag = true;
-   println!(&quot;{}&quot;, rdxl::xhtml!(
-      {{ if a_flag {{ this is a statement }} }}
-      {{ (if a_flag { &quot;this is&quot; } else { &quot;an expression&quot; }) }}
-   ));
-}
-</code></pre></pre>
-<p>Aside from these reservations, all Rust code may be used as
-expressions as long as they return a value that implements the
-Display trait.</p>
-<pre><pre class="playpen"><code class="language-rust">extern crate rdxl;
-
-fn main() {
-   println!(&quot;{}&quot;, rdxl::xhtml!(
-     {{ &quot;ab&quot; }}
-     {{ 'c' }}
-     {{ format!(&quot;{} {}&quot;, 2, 3) }}
-     {{ true }}
-   ));
-}
-</code></pre></pre>
+xtype!(&lt;!MyTag a:u64={{32}} b:String&gt;
+  &lt;?&gt;
+&lt;/MyTag&gt;);
+<span class="boring">}
+</span></code></pre></pre>
 
                     </main>
 
                     <nav class="nav-wrapper" aria-label="Page navigation">
                         <!-- Mobile navigation buttons -->
                         
-                            <a rel="prev" href="chapter_4.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                            <a rel="prev" href="chapter_8.html" class="mobile-nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                                 <i class="fa fa-angle-left"></i>
                             </a>
                         
 
-                        
-                            <a rel="next" href="chapter_6.html" class="mobile-nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                                <i class="fa fa-angle-right"></i>
-                            </a>
                         
 
                         <div style="clear: both"></div>
@@ -203,15 +189,11 @@ fn main() {
 
             <nav class="nav-wide-wrapper" aria-label="Page navigation">
                 
-                    <a rel="prev" href="chapter_4.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
+                    <a rel="prev" href="chapter_8.html" class="nav-chapters previous" title="Previous chapter" aria-label="Previous chapter" aria-keyshortcuts="Left">
                         <i class="fa fa-angle-left"></i>
                     </a>
                 
 
-                
-                    <a rel="next" href="chapter_6.html" class="nav-chapters next" title="Next chapter" aria-label="Next chapter" aria-keyshortcuts="Right">
-                        <i class="fa fa-angle-right"></i>
-                    </a>
                 
             </nav>
 
