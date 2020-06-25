@@ -558,11 +558,6 @@ impl ToTokens for XhtmlTag {
                   (quote_spanned!{self.outer_span=>
                      stream.push_str(#l);
                   }).to_tokens(tokens);
-               }, (XhtmlAttrKey::G(e,k),None) => {
-                  let l = Literal::string(&format!(" {}", k));
-                  (quote_spanned!{self.outer_span=>
-                     if #e { stream.push_str(#l); }
-                  }).to_tokens(tokens);
                }, (XhtmlAttrKey::S(k),Some(XhtmlAttr::S(s))) => {
                   let l = Literal::string(&format!(" {}={}", k, s));
                   (quote_spanned!{self.outer_span=>
@@ -592,7 +587,44 @@ impl ToTokens for XhtmlTag {
                      });
                      stream.push_str("\""); 
                   }).to_tokens(tokens);
-               }, _ => {
+               }, (XhtmlAttrKey::G(g,k),None) => {
+                  let l = Literal::string(&format!(" {}", k));
+                  (quote_spanned!{self.outer_span=>
+                     if #g { stream.push_str(#l); }
+                  }).to_tokens(tokens);
+               }, (XhtmlAttrKey::G(g,k),Some(XhtmlAttr::S(s))) => {
+                  let l = Literal::string(&format!(" {}={}", k, s));
+                  (quote_spanned!{self.outer_span=>
+                     if #g { stream.push_str(#l); }
+                  }).to_tokens(tokens);
+               }, (XhtmlAttrKey::G(g,k),Some(XhtmlAttr::F(f))) => {
+                  let l = Literal::string(&format!(" {}=", k));
+                  (quote_spanned!{self.outer_span=>
+                     if #g {
+                        stream.push_str(#l);
+                        stream.push_str("\""); 
+                        stream.push_str(&{
+                          let mut stream = String::new();
+                          #f
+                          stream.replace("\"", "\\\"")
+                        });
+                        stream.push_str("\""); 
+                     }
+                  }).to_tokens(tokens);
+               }, (XhtmlAttrKey::G(g,k),Some(XhtmlAttr::E(e))) => {
+                  let l = Literal::string(&format!(" {}=", k));
+                  (quote_spanned!{self.outer_span=>
+                     if #g {
+                        stream.push_str(#l);
+                        stream.push_str("\""); 
+                        stream.push_str(&{
+                          let mut stream = String::new();
+                          #e
+                          stream.replace("\"", "\\\"")
+                        });
+                        stream.push_str("\""); 
+                     }
+                  }).to_tokens(tokens);
                }
             }
         }
@@ -689,7 +721,12 @@ impl Parse for XhtmlTag {
                let _brace4: Brace = braced!(content4 in content3);
                let key = if content4.peek(LitStr) { let s:LitStr = content4.parse()?; s.value()
                          } else { let key: Ident = content4.parse()?; key.to_string() };
-               attrs.push(( XhtmlAttrKey::G(expr,key), None ));
+               let v = if content4.peek(Token![=]) {
+                  let _eq: Token![=] = content4.parse()?;
+                  let attr_expr: XhtmlAttr = XhtmlAttr::parse(&content4, key.clone())?;
+                  Some(attr_expr)
+               } else { None };
+               attrs.push(( XhtmlAttrKey::G(expr,key), v ));
             } else {
                let key = if input.peek(Token![as]) { let _:Token![as] = input.parse()?; "as".to_string()
                } else if input.peek(Token![break]) { let _:Token![break] = input.parse()?; "break".to_string()
