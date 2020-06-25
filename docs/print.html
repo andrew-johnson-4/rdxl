@@ -439,9 +439,44 @@ logic.</p>
 </span><span class="boring">fn main() {
 </span>extern crate rdxl;
 
-xtype!(&lt;!MyTag a:u64={{32}} b:String&gt;
+rdxl::xtype!(&lt;!MyTag a:u64={{32}} b:String&gt;
   &lt;?&gt;
 &lt;/MyTag&gt;);
+<span class="boring">}
+</span></code></pre></pre>
+<p>the above code generates the following items</p>
+<pre><pre class="playpen"><code class="language-rust">
+<span class="boring">#![allow(unused_variables)]
+</span><span class="boring">fn main() {
+</span>struct MyTag {
+   a: u64,
+   b: String,
+   children: Vec&lt;MyTagChildren&gt;
+}
+enum MyTagChildren {
+   Display(Box&lt;dyn std::fmt::Display&gt;)
+}
+
+impl MyTag {
+   pub fn new() -&gt; MyTag {
+      MyTag {
+         a: 32,
+         b: std::default::Default::default()
+      }
+   }
+   pub fn set_a(mut self, v: u64) -&gt; MyTag {
+      self.a = v;
+      self
+   }
+   pub fn set_b(mut self, v: String) -&gt; MyTag {
+      self.b = v;
+      self
+   }
+   pub fn set_children(mut self, v: Vec&lt;MyTagChildren&gt;) -&gt; MyTag {
+      self.children = v;
+      self
+   }
+}
 <span class="boring">}
 </span></code></pre></pre>
 
