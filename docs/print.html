@@ -461,7 +461,8 @@ impl MyTag {
    pub fn new() -&gt; MyTag {
       MyTag {
          a: 32,
-         b: std::default::Default::default()
+         b: std::default::Default::default(),
+         children: Vec::new(),
       }
    }
    pub fn set_a(mut self, v: u64) -&gt; MyTag {
