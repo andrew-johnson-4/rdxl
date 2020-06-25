@@ -3,11 +3,11 @@ use rdxl::xhtml;
 
 #[test]
 fn misc1(){
-   let mut x = 5;
+   let x = 5;
    assert_eq!(xhtml!(
-      <script {{ if x>2 {{ "async" }} }} {{ if x<3 {{ defer }} else {{ src="abc" }} }}>
+      <script {{if x>2 {{ "async" }}}} defer>
          a b c
       </script>
    ),
-   r#"<script async src="abc"> a b c </script>"#);
+   r#"<script async defer> a b c </script>"#);
 }
