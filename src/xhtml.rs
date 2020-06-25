@@ -531,9 +531,14 @@ impl Parse for XhtmlClass {
     }
 }
 
+pub enum XhtmlAttrKey {
+   S(String),
+   G(Expr,String)
+}
+
 pub struct XhtmlTag {
    tag: String,
-   attrs: Vec<(String,XhtmlAttr)>,
+   attrs: Vec<(XhtmlAttrKey,Option<XhtmlAttr>)>,
    inner: Xhtml,
    outer_span: Span,
    inner_span_start: Span,
@@ -547,20 +552,26 @@ impl ToTokens for XhtmlTag {
         }).to_tokens(tokens);
 
         for (k,v) in self.attrs.iter() {
-            (quote_spanned!{self.outer_span=>
-               stream.push_str
-            }).to_tokens(tokens);
-
-            match v {
-               XhtmlAttr::S(s) => {
+            match (k,v) {
+               (XhtmlAttrKey::S(k),None) => {
+                  let l = Literal::string(&format!(" {}", k));
+                  (quote_spanned!{self.outer_span=>
+                     stream.push_str(#l);
+                  }).to_tokens(tokens);
+               }, (XhtmlAttrKey::G(e,k),None) => {
+                  let l = Literal::string(&format!(" {}", k));
+                  (quote_spanned!{self.outer_span=>
+                     if #e { stream.push_str(#l); }
+                  }).to_tokens(tokens);
+               }, (XhtmlAttrKey::S(k),Some(XhtmlAttr::S(s))) => {
                   let l = Literal::string(&format!(" {}={}", k, s));
                   (quote_spanned!{self.outer_span=>
-                     (#l);
+                     stream.push_str(#l);
                   }).to_tokens(tokens);
-               }, XhtmlAttr::F(f) => {
+               }, (XhtmlAttrKey::S(k),Some(XhtmlAttr::F(f))) => {
                   let l = Literal::string(&format!(" {}=", k));
                   (quote_spanned!{self.outer_span=>
-                     (#l);
+                     stream.push_str(#l);
                      stream.push_str("\""); 
                      stream.push_str(&{
                        let mut stream = String::new();
@@ -569,10 +580,10 @@ impl ToTokens for XhtmlTag {
                      });
                      stream.push_str("\""); 
                   }).to_tokens(tokens);
-               }, XhtmlAttr::E(e) => {
+               }, (XhtmlAttrKey::S(k),Some(XhtmlAttr::E(e))) => {
                   let l = Literal::string(&format!(" {}=", k));
                   (quote_spanned!{self.outer_span=>
-                     (#l);
+                     stream.push_str(#l);
                      stream.push_str("\""); 
                      stream.push_str(&{
                        let mut stream = String::new();
@@ -581,6 +592,7 @@ impl ToTokens for XhtmlTag {
                      });
                      stream.push_str("\""); 
                   }).to_tokens(tokens);
+               }, _ => {
                }
             }
         }
@@ -626,7 +638,7 @@ impl Parse for XhtmlTag {
         let l1: Token![<] = input.parse()?;
         let t: Ident = input.parse()?;
 
-        let mut attrs: Vec<(String,XhtmlAttr)> = Vec::new();
+        let mut attrs: Vec<(XhtmlAttrKey,Option<XhtmlAttr>)> = Vec::new();
         while input.peek(Ident) ||
               input.peek(LitStr) ||
               input.peek(Token![as]) ||
@@ -661,45 +673,66 @@ impl Parse for XhtmlTag {
               input.peek(Token![unsafe]) ||
               input.peek(Token![use]) ||
               input.peek(Token![where]) ||
-              input.peek(Token![while]) {
-            let key = if input.peek(Token![as]) { let _:Token![as] = input.parse()?; "as".to_string()
-            } else if input.peek(Token![break]) { let _:Token![break] = input.parse()?; "break".to_string()
-            } else if input.peek(Token![const]) { let _:Token![const] = input.parse()?; "const".to_string()
-            } else if input.peek(Token![continue]) { let _:Token![continue] = input.parse()?; "continue".to_string()
-            } else if input.peek(Token![crate]) { let _:Token![crate] = input.parse()?; "crate".to_string()
-            } else if input.peek(Token![else]) { let _:Token![else] = input.parse()?; "else".to_string()
-            } else if input.peek(Token![enum]) { let _:Token![enum] = input.parse()?; "enum".to_string()
-            } else if input.peek(Token![extern]) { let _:Token![extern] = input.parse()?; "extern".to_string()
-            } else if input.peek(Token![fn]) { let _:Token![fn] = input.parse()?; "fn".to_string()
-            } else if input.peek(Token![for]) { let _:Token![for] = input.parse()?; "for".to_string()
-            } else if input.peek(Token![if]) { let _:Token![if] = input.parse()?; "if".to_string()
-            } else if input.peek(Token![impl]) { let _:Token![impl] = input.parse()?; "impl".to_string()
-            } else if input.peek(Token![in]) { let _:Token![in] = input.parse()?; "in".to_string()
-            } else if input.peek(Token![let]) { let _:Token![let] = input.parse()?; "let".to_string()
-            } else if input.peek(Token![loop]) { let _:Token![loop] = input.parse()?; "loop".to_string()
-            } else if input.peek(Token![match]) { let _:Token![match] = input.parse()?; "match".to_string()
-            } else if input.peek(Token![mod]) { let _:Token![mod] = input.parse()?; "mod".to_string()
-            } else if input.peek(Token![move]) { let _:Token![move] = input.parse()?; "move".to_string()
-            } else if input.peek(Token![mut]) { let _:Token![mut] = input.parse()?; "mut".to_string()
-            } else if input.peek(Token![pub]) { let _:Token![pub] = input.parse()?; "pub".to_string()
-            } else if input.peek(Token![ref]) { let _:Token![ref] = input.parse()?; "ref".to_string()
-            } else if input.peek(Token![return]) { let _:Token![return] = input.parse()?; "return".to_string()
-            } else if input.peek(Token![self]) { let _:Token![self] = input.parse()?; "self".to_string()
-            } else if input.peek(Token![Self]) { let _:Token![Self] = input.parse()?; "Self".to_string()
-            } else if input.peek(Token![static]) { let _:Token![static] = input.parse()?; "static".to_string()
-            } else if input.peek(Token![struct]) { let _:Token![struct] = input.parse()?; "struct".to_string()
-            } else if input.peek(Token![super]) { let _:Token![super] = input.parse()?; "super".to_string()
-            } else if input.peek(Token![trait]) { let _:Token![trait] = input.parse()?; "trait".to_string()
-            } else if input.peek(Token![type]) { let _:Token![type] = input.parse()?; "type".to_string()
-            } else if input.peek(Token![unsafe]) { let _:Token![unsafe] = input.parse()?; "unsafe".to_string()
-            } else if input.peek(Token![use]) { let _:Token![use] = input.parse()?; "use".to_string()
-            } else if input.peek(Token![where]) { let _:Token![where] = input.parse()?; "where".to_string()
-            } else if input.peek(Token![while]) { let _:Token![while] = input.parse()?; "while".to_string()
-            } else if input.peek(LitStr) { let s:LitStr = input.parse()?; s.value()
-            } else { let key: Ident = input.parse()?; key.to_string() };
-            let _eq: Token![=] = input.parse()?;
-            let attr_expr: XhtmlAttr = XhtmlAttr::parse(input, key.clone())?;
-            attrs.push(( key, attr_expr ));
+              input.peek(Token![while]) ||
+              input.peek(Brace) {
+            if input.peek(Brace) {
+               let content1;
+               let content2;
+               let _brace1: Brace = braced!(content1 in input);
+               let _brace2: Brace = braced!(content2 in content1);
+               let _if: Token![if] = content2.parse()?;
+               let expr: Expr = content2.parse()?;
+
+               let content3;
+               let content4;
+               let _brace3: Brace = braced!(content3 in content2);
+               let _brace4: Brace = braced!(content4 in content3);
+               let key = if content4.peek(LitStr) { let s:LitStr = content4.parse()?; s.value()
+                         } else { let key: Ident = content4.parse()?; key.to_string() };
+               attrs.push(( XhtmlAttrKey::G(expr,key), None ));
+            } else {
+               let key = if input.peek(Token![as]) { let _:Token![as] = input.parse()?; "as".to_string()
+               } else if input.peek(Token![break]) { let _:Token![break] = input.parse()?; "break".to_string()
+               } else if input.peek(Token![const]) { let _:Token![const] = input.parse()?; "const".to_string()
+               } else if input.peek(Token![continue]) { let _:Token![continue] = input.parse()?; "continue".to_string()
+               } else if input.peek(Token![crate]) { let _:Token![crate] = input.parse()?; "crate".to_string()
+               } else if input.peek(Token![else]) { let _:Token![else] = input.parse()?; "else".to_string()
+               } else if input.peek(Token![enum]) { let _:Token![enum] = input.parse()?; "enum".to_string()
+               } else if input.peek(Token![extern]) { let _:Token![extern] = input.parse()?; "extern".to_string()
+               } else if input.peek(Token![fn]) { let _:Token![fn] = input.parse()?; "fn".to_string()
+               } else if input.peek(Token![for]) { let _:Token![for] = input.parse()?; "for".to_string()
+               } else if input.peek(Token![if]) { let _:Token![if] = input.parse()?; "if".to_string()
+               } else if input.peek(Token![impl]) { let _:Token![impl] = input.parse()?; "impl".to_string()
+               } else if input.peek(Token![in]) { let _:Token![in] = input.parse()?; "in".to_string()
+               } else if input.peek(Token![let]) { let _:Token![let] = input.parse()?; "let".to_string()
+               } else if input.peek(Token![loop]) { let _:Token![loop] = input.parse()?; "loop".to_string()
+               } else if input.peek(Token![match]) { let _:Token![match] = input.parse()?; "match".to_string()
+               } else if input.peek(Token![mod]) { let _:Token![mod] = input.parse()?; "mod".to_string()
+               } else if input.peek(Token![move]) { let _:Token![move] = input.parse()?; "move".to_string()
+               } else if input.peek(Token![mut]) { let _:Token![mut] = input.parse()?; "mut".to_string()
+               } else if input.peek(Token![pub]) { let _:Token![pub] = input.parse()?; "pub".to_string()
+               } else if input.peek(Token![ref]) { let _:Token![ref] = input.parse()?; "ref".to_string()
+               } else if input.peek(Token![return]) { let _:Token![return] = input.parse()?; "return".to_string()
+               } else if input.peek(Token![self]) { let _:Token![self] = input.parse()?; "self".to_string()
+               } else if input.peek(Token![Self]) { let _:Token![Self] = input.parse()?; "Self".to_string()
+               } else if input.peek(Token![static]) { let _:Token![static] = input.parse()?; "static".to_string()
+               } else if input.peek(Token![struct]) { let _:Token![struct] = input.parse()?; "struct".to_string()
+               } else if input.peek(Token![super]) { let _:Token![super] = input.parse()?; "super".to_string()
+               } else if input.peek(Token![trait]) { let _:Token![trait] = input.parse()?; "trait".to_string()
+               } else if input.peek(Token![type]) { let _:Token![type] = input.parse()?; "type".to_string()
+               } else if input.peek(Token![unsafe]) { let _:Token![unsafe] = input.parse()?; "unsafe".to_string()
+               } else if input.peek(Token![use]) { let _:Token![use] = input.parse()?; "use".to_string()
+               } else if input.peek(Token![where]) { let _:Token![where] = input.parse()?; "where".to_string()
+               } else if input.peek(Token![while]) { let _:Token![while] = input.parse()?; "while".to_string()
+               } else if input.peek(LitStr) { let s:LitStr = input.parse()?; s.value()
+               } else { let key: Ident = input.parse()?; key.to_string() };
+               let v = if input.peek(Token![=]) {
+                  let _eq: Token![=] = input.parse()?;
+                  let attr_expr: XhtmlAttr = XhtmlAttr::parse(input, key.clone())?;
+                  Some(attr_expr)
+               } else { None };
+               attrs.push(( XhtmlAttrKey::S(key), v ));
+           }
         }
 
         if input.peek(Token![/]) {
