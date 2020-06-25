@@ -689,7 +689,12 @@ impl Parse for XhtmlTag {
                let _brace4: Brace = braced!(content4 in content3);
                let key = if content4.peek(LitStr) { let s:LitStr = content4.parse()?; s.value()
                          } else { let key: Ident = content4.parse()?; key.to_string() };
-               attrs.push(( XhtmlAttrKey::G(expr,key), None ));
+               let v = if content4.peek(Token![=]) {
+                  let _eq: Token![=] = content4.parse()?;
+                  let attr_expr: XhtmlAttr = XhtmlAttr::parse(&content4, key.clone())?;
+                  Some(attr_expr)
+               } else { None };
+               attrs.push(( XhtmlAttrKey::G(expr,key), v ));
             } else {
                let key = if input.peek(Token![as]) { let _:Token![as] = input.parse()?; "as".to_string()
                } else if input.peek(Token![break]) { let _:Token![break] = input.parse()?; "break".to_string()
