@@ -43,7 +43,7 @@ xrender!(MyList, <ul>
 </ul>);
 ```
 
-Foreign syntaxes, like Javascript, may be quoted inline or inserted as CDATA.
+Foreign syntaxes, like Javascript, may be quoted inline with cooked or raw strings.
 
 ```rust
 xrender!(BarGraph,
