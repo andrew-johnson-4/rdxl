@@ -5,15 +5,8 @@ fn bs(s: String) -> String {
    s.split_whitespace().collect::<Vec<&str>>().join(" ")
 }
 
-xtype!(<!MyAttr field:u64><!MyAttrChild field:u64/></MyAttr>);
-impl std::default::Default for MyAttr {
-   fn default() -> MyAttr {
-      MyAttr {
-         field:0,
-         children:Vec::new()
-      }
-   }
-}
+xtype!(#[derive(Default)] <!MyAttr field:u64><!MyAttrChild field:u64/></MyAttr>);
+
 xtype!(<!MyType attr:MyAttr/>);
 xrender!(MyType, <ul>
   {{ for MyAttrChildren::MyAttrChild(c) in self.attr.children.iter() {{
