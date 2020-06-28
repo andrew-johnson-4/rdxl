@@ -642,7 +642,7 @@ impl ToTokens for XhtmlTag {
               stream.push_str(#l);
            }).to_tokens(tokens);
 
-           if self.inner.gen_span().start() != self.inner_span_start.end() {
+           if self.inner.crumbs.len()>0 && self.inner.gen_span().start() != self.inner_span_start.end() {
               let l = Literal::string(" ");
               (quote_spanned!{self.outer_span=>
                  stream.push_str(#l);
@@ -651,7 +651,7 @@ impl ToTokens for XhtmlTag {
 
            self.inner.to_tokens(tokens);
 
-           if self.inner.gen_span().end() != self.inner_span_end.start() {
+           if self.inner.crumbs.len()>0 && self.inner.gen_span().end() != self.inner_span_end.start() {
               let l = Literal::string(" ");
               (quote_spanned!{self.outer_span=>
                  stream.push_str(#l);

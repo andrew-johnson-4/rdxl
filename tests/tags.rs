@@ -33,10 +33,18 @@ fn tag4() {
    );
 }
 
+#[test]
+fn tag5() {
+   assert_eq!(
+      xhtml!(<script async/>),
+      "<script async></script>".to_string()
+   );
+}
+
 /* panics during compilation, not test; so I don't know how to unit test this
 #[test]
 #[should_panic]
-fn tag5() {
+fn tag6() {
    assert_eq!(
       xhtml!(<a></b>),
       "<a></b>".to_string()
