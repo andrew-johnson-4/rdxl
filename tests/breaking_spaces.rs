@@ -55,3 +55,19 @@ fn breaking_if() {
       "<ul> <li>1</li> <li>2</li> <li>3</li> </ul>"
    );
 }
+
+#[test]
+fn nonbreaking_lex1() {
+   assert_eq!(
+     xhtml!(::),
+     "::"
+   );
+}
+
+#[test]
+fn nonbreaking_lex2() {
+   assert_eq!(
+     xhtml!(macro),
+     "macro"
+   );
+}
