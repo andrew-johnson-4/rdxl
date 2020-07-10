@@ -743,6 +743,7 @@ impl Parse for XhtmlTag {
                } else if input.peek(Token![in]) { let _:Token![in] = input.parse()?; "in".to_string()
                } else if input.peek(Token![let]) { let _:Token![let] = input.parse()?; "let".to_string()
                } else if input.peek(Token![loop]) { let _:Token![loop] = input.parse()?; "loop".to_string()
+               } else if input.peek(Token![macro]) { let _:Token![macro] = input.parse()?; "macro".to_string()
                } else if input.peek(Token![match]) { let _:Token![match] = input.parse()?; "match".to_string()
                } else if input.peek(Token![mod]) { let _:Token![mod] = input.parse()?; "mod".to_string()
                } else if input.peek(Token![move]) { let _:Token![move] = input.parse()?; "move".to_string()
@@ -864,6 +865,7 @@ impl XhtmlCrumb {
               input.peek(Token![in]) ||
               input.peek(Token![let]) ||
               input.peek(Token![loop]) ||
+              input.peek(Token![macro]) ||
               input.peek(Token![match]) ||
               input.peek(Token![mod]) ||
               input.peek(Token![move]) ||
@@ -1038,6 +1040,9 @@ impl Parse for XhtmlCrumb {
         } else if input.peek(Token![loop]) {
            let id: Token![loop] = input.parse()?;
            Ok(XhtmlCrumb::S("loop".to_string(), id.span.clone()))
+        } else if input.peek(Token![macro]) {
+           let id: Token![macro] = input.parse()?;
+           Ok(XhtmlCrumb::S("macro".to_string(), id.span.clone()))
         } else if input.peek(Token![match]) {
            let id: Token![match] = input.parse()?;
            Ok(XhtmlCrumb::S("match".to_string(), id.span.clone()))
