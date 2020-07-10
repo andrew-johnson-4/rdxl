@@ -57,14 +57,6 @@ fn breaking_if() {
 }
 
 #[test]
-fn nonbreaking_lex1() {
-   assert_eq!(
-     xhtml!(::),
-     "::"
-   );
-}
-
-#[test]
 fn nonbreaking_lex2() {
    assert_eq!(
      xhtml!(macro),
