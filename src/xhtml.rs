@@ -642,7 +642,7 @@ impl ToTokens for XhtmlTag {
               stream.push_str(#l);
            }).to_tokens(tokens);
 
-           if self.inner.crumbs.len()>0 && self.inner.gen_span().start() != self.inner_span_start.end() {
+           if self.inner.crumbs.len()>0 && self.inner.gen_span().start() > self.inner_span_start.end() {
               let l = Literal::string(" ");
               (quote_spanned!{self.outer_span=>
                  stream.push_str(#l);
@@ -651,7 +651,7 @@ impl ToTokens for XhtmlTag {
 
            self.inner.to_tokens(tokens);
 
-           if self.inner.crumbs.len()>0 && self.inner.gen_span().end() != self.inner_span_end.start() {
+           if self.inner.crumbs.len()>0 && self.inner.gen_span().end() < self.inner_span_end.start() {
               let l = Literal::string(" ");
               (quote_spanned!{self.outer_span=>
                  stream.push_str(#l);
@@ -783,7 +783,7 @@ impl Parse for XhtmlTag {
               inner: Xhtml { crumbs: vec!() },
               outer_span: l1.span.join(r2.span).unwrap_or(l1.span),
               inner_span_start: r1.span.clone(),
-              inner_span_end: r2.span.clone(),
+              inner_span_end: l1.span.clone(),
            })
         } else {
            let l2: Token![>] = input.parse()?;
@@ -1144,7 +1144,7 @@ impl Xhtml {
     fn gen_span(&self) -> Span {
        if self.crumbs.len() > 0 {
           let mut span = self.crumbs[0].span();
-          for c in self.crumbs.iter() {
+          for c in self.crumbs[1..].iter() {
              span = span.join(c.span()).unwrap_or(c.span());
           }
           span
@@ -1159,11 +1159,11 @@ impl ToTokens for Xhtml {
         for c in self.crumbs.iter() {
             let span = c.span();
             if let Some(sp) = prev {
-            if c.does_emit() && sp.end() != span.start() {
+            if c.does_emit() && span.start() > sp.end() {
                (quote_spanned!{span.clone()=>
                   stream.push_str(" ");
                }).to_tokens(tokens);
-            }}   
+            }}
 
             prev = Some(span.clone());
             c.to_tokens(tokens);
