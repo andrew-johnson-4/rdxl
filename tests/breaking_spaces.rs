@@ -56,7 +56,6 @@ fn breaking_if() {
    );
 }
 
-/*
 #[test]
 fn nonbreaking_lex1() {
    assert_eq!(
@@ -64,7 +63,6 @@ fn nonbreaking_lex1() {
      "::"
    );
 }
-*/
 
 #[test]
 fn nonbreaking_lex2() {
