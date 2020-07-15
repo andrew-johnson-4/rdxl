@@ -729,13 +729,18 @@ impl Parse for XhtmlTag {
                attrs.push(( XhtmlAttrKey::G(expr,key), v ));
             } else {
                let key = if input.peek(Token![as]) { let _:Token![as] = input.parse()?; "as".to_string()
+               } else if input.peek(Token![abstract]) { let _:Token![abstract] = input.parse()?; "abstract".to_string()
+               } else if input.peek(Token![become]) { let _:Token![become] = input.parse()?; "become".to_string()
+               } else if input.peek(Token![box]) { let _:Token![box] = input.parse()?; "box".to_string()
                } else if input.peek(Token![break]) { let _:Token![break] = input.parse()?; "break".to_string()
                } else if input.peek(Token![const]) { let _:Token![const] = input.parse()?; "const".to_string()
                } else if input.peek(Token![continue]) { let _:Token![continue] = input.parse()?; "continue".to_string()
                } else if input.peek(Token![crate]) { let _:Token![crate] = input.parse()?; "crate".to_string()
+               } else if input.peek(Token![do]) { let _:Token![do] = input.parse()?; "do".to_string()
                } else if input.peek(Token![else]) { let _:Token![else] = input.parse()?; "else".to_string()
                } else if input.peek(Token![enum]) { let _:Token![enum] = input.parse()?; "enum".to_string()
                } else if input.peek(Token![extern]) { let _:Token![extern] = input.parse()?; "extern".to_string()
+               } else if input.peek(Token![final]) { let _:Token![final] = input.parse()?; "final".to_string()
                } else if input.peek(Token![fn]) { let _:Token![fn] = input.parse()?; "fn".to_string()
                } else if input.peek(Token![for]) { let _:Token![for] = input.parse()?; "for".to_string()
                } else if input.peek(Token![if]) { let _:Token![if] = input.parse()?; "if".to_string()
@@ -748,6 +753,8 @@ impl Parse for XhtmlTag {
                } else if input.peek(Token![mod]) { let _:Token![mod] = input.parse()?; "mod".to_string()
                } else if input.peek(Token![move]) { let _:Token![move] = input.parse()?; "move".to_string()
                } else if input.peek(Token![mut]) { let _:Token![mut] = input.parse()?; "mut".to_string()
+               } else if input.peek(Token![override]) { let _:Token![override] = input.parse()?; "override".to_string()
+               } else if input.peek(Token![priv]) { let _:Token![priv] = input.parse()?; "priv".to_string()
                } else if input.peek(Token![pub]) { let _:Token![pub] = input.parse()?; "pub".to_string()
                } else if input.peek(Token![ref]) { let _:Token![ref] = input.parse()?; "ref".to_string()
                } else if input.peek(Token![return]) { let _:Token![return] = input.parse()?; "return".to_string()
@@ -758,10 +765,14 @@ impl Parse for XhtmlTag {
                } else if input.peek(Token![super]) { let _:Token![super] = input.parse()?; "super".to_string()
                } else if input.peek(Token![trait]) { let _:Token![trait] = input.parse()?; "trait".to_string()
                } else if input.peek(Token![type]) { let _:Token![type] = input.parse()?; "type".to_string()
+               } else if input.peek(Token![typeof]) { let _:Token![typeof] = input.parse()?; "typeof".to_string()
                } else if input.peek(Token![unsafe]) { let _:Token![unsafe] = input.parse()?; "unsafe".to_string()
+               } else if input.peek(Token![unsized]) { let _:Token![unsized] = input.parse()?; "unsized".to_string()
                } else if input.peek(Token![use]) { let _:Token![use] = input.parse()?; "use".to_string()
+               } else if input.peek(Token![virtual]) { let _:Token![virtual] = input.parse()?; "virtual".to_string()
                } else if input.peek(Token![where]) { let _:Token![where] = input.parse()?; "where".to_string()
                } else if input.peek(Token![while]) { let _:Token![while] = input.parse()?; "while".to_string()
+               } else if input.peek(Token![yield]) { let _:Token![yield] = input.parse()?; "yield".to_string()
                } else if input.peek(LitStr) { let s:LitStr = input.parse()?; s.value()
                } else { let key: Ident = input.parse()?; key.to_string() };
                let v = if input.peek(Token![=]) {
@@ -850,14 +861,19 @@ impl XhtmlCrumb {
               input.peek(LitStr) ||
               input.peek(Brace) ||
               input.peek(Bracket) ||
+              input.peek(Token![abstract]) ||
               input.peek(Token![as]) ||
+              input.peek(Token![become]) ||
+              input.peek(Token![box]) ||
               input.peek(Token![break]) ||
               input.peek(Token![const]) ||
               input.peek(Token![continue]) ||
               input.peek(Token![crate]) ||
+              input.peek(Token![do]) ||
               input.peek(Token![else]) ||
               input.peek(Token![enum]) ||
               input.peek(Token![extern]) ||
+              input.peek(Token![final]) ||
               input.peek(Token![fn]) ||
               input.peek(Token![for]) ||
               input.peek(Token![if]) ||
@@ -870,6 +886,8 @@ impl XhtmlCrumb {
               input.peek(Token![mod]) ||
               input.peek(Token![move]) ||
               input.peek(Token![mut]) ||
+              input.peek(Token![override]) ||
+              input.peek(Token![priv]) ||
               input.peek(Token![pub]) ||
               input.peek(Token![ref]) ||
               input.peek(Token![return]) ||
@@ -880,10 +898,14 @@ impl XhtmlCrumb {
               input.peek(Token![super]) ||
               input.peek(Token![trait]) ||
               input.peek(Token![type]) ||
+              input.peek(Token![typeof]) ||
               input.peek(Token![unsafe]) ||
+              input.peek(Token![unsized]) ||
               input.peek(Token![use]) ||
+              input.peek(Token![virtual]) ||
               input.peek(Token![where]) ||
               input.peek(Token![while]) ||
+              input.peek(Token![yield]) ||
               input.peek(Token![~]) ||
               input.peek(Token![!]) ||
               input.peek(Token![@]) ||
@@ -995,9 +1017,18 @@ impl Parse for XhtmlCrumb {
         } else if input.peek(Token![~]) {
            let id: Token![~] = input.parse()?;
            Ok(XhtmlCrumb::S("~".to_string(), id.span.clone()))
+        } else if input.peek(Token![abstract]) {
+           let id: Token![abstract] = input.parse()?;
+           Ok(XhtmlCrumb::S("abstract".to_string(), id.span.clone()))
         } else if input.peek(Token![as]) {
            let id: Token![as] = input.parse()?;
            Ok(XhtmlCrumb::S("as".to_string(), id.span.clone()))
+        } else if input.peek(Token![become]) {
+           let id: Token![become] = input.parse()?;
+           Ok(XhtmlCrumb::S("become".to_string(), id.span.clone()))
+        } else if input.peek(Token![box]) {
+           let id: Token![box] = input.parse()?;
+           Ok(XhtmlCrumb::S("box".to_string(), id.span.clone()))
         } else if input.peek(Token![break]) {
            let id: Token![break] = input.parse()?;
            Ok(XhtmlCrumb::S("break".to_string(), id.span.clone()))
@@ -1010,6 +1041,9 @@ impl Parse for XhtmlCrumb {
         } else if input.peek(Token![crate]) {
            let id: Token![crate] = input.parse()?;
            Ok(XhtmlCrumb::S("crate".to_string(), id.span.clone()))
+        } else if input.peek(Token![do]) {
+           let id: Token![do] = input.parse()?;
+           Ok(XhtmlCrumb::S("do".to_string(), id.span.clone()))
         } else if input.peek(Token![else]) {
            let id: Token![else] = input.parse()?;
            Ok(XhtmlCrumb::S("else".to_string(), id.span.clone()))
@@ -1019,6 +1053,9 @@ impl Parse for XhtmlCrumb {
         } else if input.peek(Token![extern]) {
            let id: Token![extern] = input.parse()?;
            Ok(XhtmlCrumb::S("extern".to_string(), id.span.clone()))
+        } else if input.peek(Token![final]) {
+           let id: Token![final] = input.parse()?;
+           Ok(XhtmlCrumb::S("final".to_string(), id.span.clone()))
         } else if input.peek(Token![fn]) {
            let id: Token![fn] = input.parse()?;
            Ok(XhtmlCrumb::S("fn".to_string(), id.span.clone()))
@@ -1055,6 +1092,12 @@ impl Parse for XhtmlCrumb {
         } else if input.peek(Token![mut]) {
            let id: Token![mut] = input.parse()?;
            Ok(XhtmlCrumb::S("mut".to_string(), id.span.clone()))
+        } else if input.peek(Token![override]) {
+           let id: Token![override] = input.parse()?;
+           Ok(XhtmlCrumb::S("override".to_string(), id.span.clone()))
+        } else if input.peek(Token![priv]) {
+           let id: Token![priv] = input.parse()?;
+           Ok(XhtmlCrumb::S("priv".to_string(), id.span.clone()))
         } else if input.peek(Token![pub]) {
            let id: Token![pub] = input.parse()?;
            Ok(XhtmlCrumb::S("pub".to_string(), id.span.clone()))
@@ -1085,18 +1128,30 @@ impl Parse for XhtmlCrumb {
         } else if input.peek(Token![type]) {
            let id: Token![type] = input.parse()?;
            Ok(XhtmlCrumb::S("type".to_string(), id.span.clone()))
+        } else if input.peek(Token![typeof]) {
+           let id: Token![typeof] = input.parse()?;
+           Ok(XhtmlCrumb::S("typeof".to_string(), id.span.clone()))
         } else if input.peek(Token![unsafe]) {
            let id: Token![unsafe] = input.parse()?;
            Ok(XhtmlCrumb::S("unsafe".to_string(), id.span.clone()))
+        } else if input.peek(Token![unsized]) {
+           let id: Token![unsized] = input.parse()?;
+           Ok(XhtmlCrumb::S("unsized".to_string(), id.span.clone()))
         } else if input.peek(Token![use]) {
            let id: Token![use] = input.parse()?;
            Ok(XhtmlCrumb::S("use".to_string(), id.span.clone()))
+        } else if input.peek(Token![virtual]) {
+           let id: Token![virtual] = input.parse()?;
+           Ok(XhtmlCrumb::S("virtual".to_string(), id.span.clone()))
         } else if input.peek(Token![where]) {
            let id: Token![where] = input.parse()?;
            Ok(XhtmlCrumb::S("where".to_string(), id.span.clone()))
         } else if input.peek(Token![while]) {
            let id: Token![while] = input.parse()?;
            Ok(XhtmlCrumb::S("while".to_string(), id.span.clone()))
+        } else if input.peek(Token![yield]) {
+           let id: Token![yield] = input.parse()?;
+           Ok(XhtmlCrumb::S("yield".to_string(), id.span.clone()))
         } else {
            let id: Ident = input.parse()?;
            Ok(XhtmlCrumb::S(id.to_string(), id.span().clone()))
