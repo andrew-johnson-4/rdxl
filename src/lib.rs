@@ -122,7 +122,7 @@ use quote::{quote};
 /// ```
 #[proc_macro]
 pub fn xhtml(input: TokenStream) -> TokenStream {
-    let xhtmls = parse_macro_input!(input as xhtml::Xhtml);
+    let xhtmls = parse_macro_input!(input as rdxl_internals::xhtml::Xhtml);
 
     let expanded = quote! {
         {
