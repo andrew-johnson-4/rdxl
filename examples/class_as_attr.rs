@@ -1,4 +1,3 @@
-#![feature(proc_macro_hygiene)]
 use rdxl::{xhtml,xtype,xrender};
 
 xtype!(#[derive(Default)] <!MyAttr field:u64><!MyAttrChild field:u64/></MyAttr>);

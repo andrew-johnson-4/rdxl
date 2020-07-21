@@ -1,4 +1,3 @@
-#![feature(proc_macro_hygiene)]
 use rdxl::{xhtml,xtype,xrender};
 
 fn bs(s: String) -> String {

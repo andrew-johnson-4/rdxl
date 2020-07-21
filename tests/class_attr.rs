@@ -1,4 +1,3 @@
-#![feature(proc_macro_hygiene)]
 use rdxl::{xhtml,xtype,xrender};
 
 xtype!(<!MyType field1:MyField field2:MyField2/>);
