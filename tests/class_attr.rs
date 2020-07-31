@@ -1,8 +1,8 @@
 use rdxl::{xhtml,xtype,xrender};
 
 xtype!(<!MyType field1:MyField field2:MyField2/>);
-xtype!(#[derive(Default)] <!MyField x:u64/>);
-xtype!(#[derive(Default)] <!MyField2 x:String/>);
+xtype!(<!MyField x:u64/>);
+xtype!(<!MyField2 x:String/>);
 
 impl MyField {
    fn to_field2(&self) -> MyField2 {

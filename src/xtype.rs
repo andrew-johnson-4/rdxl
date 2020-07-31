@@ -89,7 +89,9 @@ impl ToTokens for XType {
 
        (quote_spanned! {span=> {#ts}}).to_tokens(tokens);
 
-       (quote_spanned! {span=> pub enum #child_type}).to_tokens(tokens);
+       (quote_spanned! {span=>
+          pub enum #child_type
+       }).to_tokens(tokens);
 
        let mut ts = proc_macro2::TokenStream::new();
        for child in self.tag_children.iter() {
@@ -105,13 +107,6 @@ impl ToTokens for XType {
        tokens.append(gr);
 
        let mut ds = proc_macro2::TokenStream::new();
-       let mut ss = proc_macro2::TokenStream::new();
-       (quote_spanned! {span=>
-          pub fn set_children(mut self, v: Vec<#child_type>) -> #tag_name {
-             self.children = v;
-             self
-          }
-       }).to_tokens(&mut ss);
        for XTypeAttr { attr_name, attr_type, attr_expr, .. } in self.tag_attrs.iter() {
           let span = attr_name.span().join(attr_type.span()).unwrap_or(attr_name.span());
 
@@ -125,26 +120,16 @@ impl ToTokens for XType {
                 #attr_name : std::default::Default::default(),
              }).to_tokens(&mut ds);
           }
-
-          let setter = format_ident!("set_{}", attr_name, span=span);
-          (quote_spanned! {span=>
-             pub fn #setter(mut self, v: #attr_type) -> #tag_name {
-                self.#attr_name = v;
-                self
-             }
-          }).to_tokens(&mut ss);
        }
 
-
        (quote_spanned! {span=>
-          impl #tag_name {
-             pub fn new() -> #tag_name {
+          impl std::default::Default for #tag_name {
+             fn default() -> Self {
                 #tag_name {
                    #ds
                    children: Vec::new()
                 }
              }
-             #ss
           }
        }).to_tokens(tokens);
 
