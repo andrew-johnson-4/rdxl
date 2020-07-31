@@ -4,7 +4,7 @@ fn bs(s: String) -> String {
    s.split_whitespace().collect::<Vec<&str>>().join(" ")
 }
 
-xtype!(#[derive(Default)] <!MyAttr field:u64><!MyAttrChild field:u64/></MyAttr>);
+xtype!(<!MyAttr field:u64><!MyAttrChild field:u64/></MyAttr>);
 
 xtype!(<!MyType attr:MyAttr/>);
 xrender!(MyType, <ul>
