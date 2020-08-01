@@ -1,13 +1,13 @@
 [package]
 name = "rdxl"
-version = "0.5.12"
+version = "0.5.13"
 authors = ["Andrew <andrew@subarctic.org>"]
 license = "MIT OR Apache-2.0"
 description = "Macros for HTML Templating"
 edition = "2018"
 readme = "README.md"
 repository = "https://github.com/andrew-johnson-4/rdxl"
-documentation = "https://andrew-johnson-4.github.io/rdxl/"
+documentation = "https://www.subarctic.org/rdxl/chapter_1.html"
 keywords = ["xml","html","templating","library"]
 
 [lib]
