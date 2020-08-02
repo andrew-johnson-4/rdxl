@@ -1,6 +1,6 @@
 [package]
 name = "rdxl"
-version = "0.5.13"
+version = "0.5.14"
 authors = ["Andrew <andrew@subarctic.org>"]
 license = "MIT OR Apache-2.0"
 description = "Macros for HTML Templating"
