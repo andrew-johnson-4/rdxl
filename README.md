@@ -2,7 +2,7 @@ Rusty Domain Extensible Language
 ================================
 
 [![Crates.IO](https://img.shields.io/crates/v/rdxl.svg)](https://crates.rs/crates/rdxl)
-[![Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://andrew-johnson-4.github.io/rdxl/)
+[![Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://www.subarctic.org/rdxl/chapter_1.html)
 [![Build Nightly](https://github.com/andrew-johnson-4/rdxl/workflows/BuildNightly/badge.svg)](https://github.com/andrew-johnson-4/rdxl)
 [![Build](https://github.com/andrew-johnson-4/rdxl/workflows/Build/badge.svg)](https://github.com/andrew-johnson-4/rdxl)
 
