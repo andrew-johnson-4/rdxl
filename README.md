@@ -5,6 +5,7 @@ Rusty Domain Extensible Language
 [![Documentation](https://img.shields.io/badge/api-rustdoc-blue.svg)](https://www.subarctic.org/rdxl/chapter_1.html)
 [![Build Nightly](https://github.com/andrew-johnson-4/rdxl/workflows/BuildNightly/badge.svg)](https://github.com/andrew-johnson-4/rdxl)
 [![Build](https://github.com/andrew-johnson-4/rdxl/workflows/Build/badge.svg)](https://github.com/andrew-johnson-4/rdxl)
+[![Donate using Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/andrew-johnson-4/donate)
 
 Domain specific language macros for Rust to generate xhtml. (pronounced "Rad Axle")
 
