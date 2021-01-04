@@ -135,6 +135,55 @@ pub fn xhtml(input: TokenStream) -> TokenStream {
     TokenStream::from(expanded)
 }
 
+/// The [xtext!](https://andrew-johnson-4.github.io/rdxl) macro is the primary mechanism for templating in rdxl
+///
+/// <b>xtext!</b> consumes mixed Rust code and XML markup as input and emits rendered xhtml to a string buffer.
+/// Rust code is usually delimited by {{double braces}} or [[double brackets]]. The <b>syn</b> module is used to
+/// allow most Rust expressions to be used inside the correct delimited contexts. Control flow structures
+/// such as if/else blocks, loops, and let statements may be used inline as well.
+///
+/// Aside from standard XML syntax, custom types may be defined with <b>xtext!</b> and <b>xrender!</b> facilities. This
+/// encourages typesafe modular templates to be created and shared.
+///
+/// Use of <b>xtext!</b> usually looks something like this:
+/// ```
+/// # #![feature(proc_macro_hygiene)]
+/// # use rdxl::xtext;
+/// # fn main() {
+/// let mut x = 5;
+///
+/// println!("{}",xtext!(<div>
+///    {{ x }},
+///    {{ x = 3; }}
+///    {{ x }},
+///    {{ x = 7; }}
+///    {{ x }},
+///    {{ let mut y = 2 }}
+///    {{ y }},
+///    {{ y = 1; }}
+///    {{ y }}
+///    {{ for i in (0..x) {{
+///       <span>{{i}}</span>
+///    }} }}
+/// </div>));
+/// # }
+/// ```
+#[proc_macro]
+pub fn xtext(input: TokenStream) -> TokenStream {
+    panic!("xtext unimplemented");
+    let xhtmls = parse_macro_input!(input as rdxl_internals::xhtml::Xhtml);
+
+    let expanded = quote! {
+        {
+            let mut stream = String::new();
+            #xhtmls
+            stream
+        }
+    };
+
+    TokenStream::from(expanded)
+}
+
 /// The [xtype!](https://andrew-johnson-4.github.io/rdxl) macro defines an xml element and subelements
 ///
 /// <b>xtype!</b> removes some of the redundancy of defining types having many attribute fields
