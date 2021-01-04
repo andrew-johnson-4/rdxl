@@ -170,13 +170,12 @@ pub fn xhtml(input: TokenStream) -> TokenStream {
 /// ```
 #[proc_macro]
 pub fn xtext(input: TokenStream) -> TokenStream {
-    panic!("xtext unimplemented");
-    let xhtmls = parse_macro_input!(input as rdxl_internals::xhtml::Xhtml);
+    let xtexts = parse_macro_input!(input as rdxl_internals::xtext::Xtext);
 
     let expanded = quote! {
         {
             let mut stream = String::new();
-            #xhtmls
+            #xtexts
             stream
         }
     };
