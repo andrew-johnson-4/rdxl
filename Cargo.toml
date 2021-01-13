@@ -1,14 +1,14 @@
 [package]
 name = "rdxl"
-version = "0.5.23"
+version = "0.5.24"
 authors = ["Andrew <andrew@subarctic.org>"]
 license = "MIT OR Apache-2.0"
-description = "Macros for HTML Templating"
+description = "Macros and Component System for HTML Templating"
 edition = "2018"
 readme = "README.md"
 repository = "https://github.com/andrew-johnson-4/rdxl"
-documentation = "https://www.subarctic.org/rdxl/chapter_1.html"
-keywords = ["xml","html","templating","library"]
+documentation = "https://docs.rs/rdxl/"
+keywords = ["xml","html","templating","library","web-components"]
 
 [lib]
 proc-macro = true

@@ -7,7 +7,7 @@ Rusty Domain Extensible Language
 [![Build](https://github.com/andrew-johnson-4/rdxl/workflows/Build/badge.svg)](https://github.com/andrew-johnson-4/rdxl)
 [![Donate using Liberapay](https://liberapay.com/assets/widgets/donate.svg)](https://liberapay.com/andrew-johnson-4/donate)
 
-Domain specific language macros for Rust to generate xhtml. (pronounced "Rad Axle")
+Domain specific language macros and component system for Rust to generate xhtml. (pronounced "Rad Axle")
 
 ```rust
 let my_int = 3;
@@ -57,9 +57,6 @@ xrender!(BarGraph,
   </script>
 );
 ```
-
-Sites built with rdxl:
-- [My Blog](https://www.subarctic.org)
 
 ## Contribution
 Unless you explicitly state otherwise, any contribution intentionally submitted for inclusion in rdxl by you,
