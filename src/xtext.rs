@@ -1,1 +1,1 @@
-pub use rdxl_internals::xhtml::*;
+pub use rdxl_internals::xtext::*;

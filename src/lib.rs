@@ -80,8 +80,10 @@
 #![crate_type = "proc-macro"]
 
 mod xhtml;
+mod xtext;
 mod xtype;
 mod xrender;
+mod xtextrender;
 
 use proc_macro::{TokenStream};
 use syn::{parse_macro_input};
@@ -271,6 +273,58 @@ pub fn xrender(input: TokenStream) -> TokenStream {
           fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
               let mut stream = String::new();
               #xxhtml
+     
+              //buffering to a String is faster than many writes to the Formatter
+              f.write_str(&stream)
+          }
+       }
+    };
+
+    TokenStream::from(expanded)
+}
+
+/// The [xtextrender!](https://andrew-johnson-4.github.io/rdxl) macro defines a Display implementation for a type
+///
+/// <b>xtextrender!</b> implements the <b>Display</b> property for XHtml-like types.
+/// The type definition is separate from the display logic for in the case that
+/// a separate backend is desired
+///
+/// A typical invocation would look like this:
+/// ```
+/// # #![feature(proc_macro_hygiene)]
+/// # use rdxl::{xtype,xtextrender};
+/// # pub struct MyPredefinedType {}
+/// # xtype!(<!MyList my_string:String my_int:u64>
+/// #   <!MyItem my_bool:bool/>
+/// #   <!MyOtherItem my_char:char/>
+/// #   <?MyPredefinedType/>
+/// # </MyList>);
+/// xtextrender!(MyList, <ul>
+///   <li>{{ self.my_string }}</li>
+///   <li>{{ self.my_int }}</li>
+///   {{ for i in self.children.iter() {{
+///     {{ if let MyListChildren::MyItem(my_item) = i {{
+///       <li>MyItem: {{ my_item.my_bool }}</li>
+///     }} else if let MyListChildren::MyOtherItem(my_other_item) = i {{
+///       <li>MyOtherItem: {{ my_other_item.my_char }}</li>
+///     }} }}
+///   }} }}
+/// </ul>);
+/// # fn main() {}
+/// ```
+
+#[proc_macro]
+pub fn xtextrender(input: TokenStream) -> TokenStream {
+    let xtextrender = parse_macro_input!(input as xtextrender::XtextRender);
+
+    let xname = xtextrender.name;
+    let xxtext = xtextrender.xtext;
+
+    let expanded = quote! {
+       impl std::fmt::Display for #xname {
+          fn fmt(&self, f: &mut std::fmt::Formatter) -> std::fmt::Result {
+              let mut stream = String::new();
+              #xxtext
      
               //buffering to a String is faster than many writes to the Formatter
               f.write_str(&stream)

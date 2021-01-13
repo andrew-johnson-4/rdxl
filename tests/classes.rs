@@ -1,4 +1,4 @@
-use rdxl::{xhtml,xtype,xrender};
+use rdxl::{xhtml,xtype,xrender,xtextrender};
 
 fn bs(s: String) -> String {
    s.split_whitespace().collect::<Vec<&str>>().join(" ")
@@ -10,6 +10,7 @@ xtype!(<!MyList my_string:String my_int:u64>
    <!MyOtherItem my_char:char/>
    <?MyPredefinedType/>
 </MyList>);
+xtype!(<!MyTextType/>);
 
 xrender!(MyList, <ul>
   <li>{{ self.my_string }}</li>
@@ -25,6 +26,7 @@ xrender!(MyList, <ul>
 
 xrender!(MyItem, <span>my_bool: {{ self.my_bool }}</span>);
 xrender!(MyOtherItem, <span>my_char: {{ self.my_char }}</span>);
+xtextrender!(MyTextType, <span>a: 1</span>);
 
 #[test]
 fn simple_class1() {
@@ -39,6 +41,14 @@ fn simple_class2() {
    assert_eq!(
       bs(xhtml!(<!MyOtherItem my_char='c'></MyOtherItem>)),
       "<span>my_char: c</span>".to_string()
+   );
+}
+
+#[test]
+fn text_class1() {
+   assert_eq!(
+      xhtml!(<!MyTextType/>),
+      "<span>a:1</span>".to_string()
    );
 }
 
