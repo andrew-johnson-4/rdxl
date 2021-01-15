@@ -9,6 +9,9 @@ Rusty Domain Extensible Language
 
 Domain specific language macros and component system for Rust to generate xhtml. (pronounced "Rad Axle")
 
+Rdxl is implemented as procedural macros, so there are no runtime dependencies other than for string
+manipulation. This means that rdxl can be used both for server-side or client-side through web assembly.
+
 ```rust
 let my_int = 3;
 let my_str = "asdf";
