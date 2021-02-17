@@ -5,6 +5,21 @@ fn bs(s: String) -> String {
 }
 
 #[test]
+fn breaking_text1() {
+   assert_eq!(
+      xhtml!(a+b),
+      "a+b"
+   )
+}
+#[test]
+fn breaking_text2() {
+   assert_eq!(
+      xhtml!(a + b),
+      "a + b"
+   )
+}
+
+#[test]
 fn breaking_for() {
    assert_eq!(
       &bs(xhtml!(<ul>
